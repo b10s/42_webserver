@@ -1,6 +1,9 @@
 #ifndef LOCATION_HPP_
 #define LOCATION_HPP_
 
+#include <string>
+#include <vector>
+
 class Location {
  private:
   // parsed

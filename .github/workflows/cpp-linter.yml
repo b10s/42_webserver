@@ -21,7 +21,7 @@ jobs:
           tidy-checks: ''
           files-changed-only: false
           thread-comments: false
-          extra-args: '-Wall -Werror -Wextra -std=c++98'
+          extra-args: '-Wall -Werror -Wextra -std=c++98 -Iincludes'
           ignore: '*.test.cpp'
 
       - name: Fail fast?!
