@@ -1,9 +1,8 @@
-#include "../include/config.hpp"
+#include "config.hpp"
 
-// Parses the entire configuration file and builds the server configuration objects.
-Config::Config(const std::string &filename) {
-    (void)filename;
-}
+// Parses the entire configuration file and builds the server configuration
+// objects.
+Config::Config(const std::string& filename) { (void)filename; }
 
 // void Config::parse() {
 // }
@@ -11,7 +10,7 @@ Config::Config(const std::string &filename) {
 // Extracts the next token (word or symbol) from the configuration file content.
 // Parameters: content: The entire configuration file as a string
 // Returns: The next token string
-std::string Config::tokenize(const std::string &content) {
+std::string Config::tokenize(const std::string& content) {
   static size_t pos = 0;
   size_t start = pos;
 

@@ -5,8 +5,9 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "location.hpp"
+
 #include "enums.hpp"
+#include "location.hpp"
 
 #define WIHTESPACE " \t\n"
 #define SPECIAL_LETTERS "{};"
@@ -19,7 +20,7 @@ class ServerConfig {
   int maxBodySize_;
   std::map<HttpStatus, std::string> errors_;
   std::vector<Location> locations_;
-  
+
  public:
   ServerConfig();
 };
@@ -32,14 +33,13 @@ class Config {
   std::vector<ServerConfig> serverConfigs_;
 
  public:
-  Config(const std::string &filename);
-  std::string tokenize(const std::string &content);
+  Config(const std::string& filename);
+  std::string tokenize(const std::string& content);
 };
 
 #endif  // CONFIG_HPP_
 
 // array of array of string and int
-
 
 // [
 //   {127.0.0.1, 8080},
@@ -51,4 +51,3 @@ class Config {
 
 // test_conf.host_ == "asdsad"
 // test_conf.port_ == "8080"
-
