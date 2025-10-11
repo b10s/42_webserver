@@ -5,8 +5,7 @@ SRCS	= $(notdir $(wildcard $(SRCDIR)/*.cpp))
 OBJDIR  = objs
 OBJS    = $(addprefix $(OBJDIR)/, $(SRCS:.cpp=.o))
 CC		= c++
-CFLAGS	= -Wall -Werror -Wextra -I$(INCDIR)
-CSTD	= -std=c++98
+CFLAGS	= -Wall -Werror -Wextra -std=c++98 -I$(INCDIR)
 
 .DEFAULT:	all
 all: $(NAME)
@@ -28,4 +27,7 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+format:
+        find includes srcs tests -name *.cpp -o -name *.h -o -name *.hpp | xargs clang-format -i -style=google --verbose
+
+.PHONY: all clean fclean re format
