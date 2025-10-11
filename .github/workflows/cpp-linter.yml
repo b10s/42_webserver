@@ -1,0 +1,29 @@
+name: cpp-linter
+
+on:
+  push:
+    branches:
+      - "**"
+    paths: ["**"]
+
+jobs:
+  cpp-linter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: cpp-linter/cpp-linter-action@main
+        id: linter
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          style: 'Google'
+          tidy-checks: ''
+          files-changed-only: false
+          thread-comments: false
+          extra-args: '-Wall -Werror -Wextra -std=c++98'
+          ignore: '*.test.cpp'
+
+      - name: Fail fast?!
+        if: steps.linter.outputs.checks-failed > 0
+        run: exit 1
