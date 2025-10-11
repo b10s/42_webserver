@@ -19,6 +19,7 @@ make test
 
 - Create one test file per source file.
 - Source files are located in the `srcs` directory, and corresponding test files should be placed under the `tests` directory.
+- Name all test files with the `.test.cpp` extension.
 
 ## Code Formatter Usage
 
