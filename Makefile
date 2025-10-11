@@ -1,10 +1,10 @@
 NAME	= webserv
 SRCDIR	= srcs
-INCDIR	= includes
+INCDIR	= include
 SRCS = $(wildcard $(SRCDIR)/**/*.cpp) $(wildcard $(SRCDIR)/*.cpp)
 OBJDIR  = objs
 OBJS    = $(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))
-CC		= c++
+CXX		= c++
 CFLAGS	= -Wall -Werror -Wextra -I$(INCDIR) -g
 CSTD	= -std=c++98
 
@@ -15,13 +15,13 @@ $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(NAME): $(OBJDIR) $(OBJS)
-	$(CC) $(CFLAGS) $(CSTD) -o $(NAME) $(OBJS)
+	$(CXX) $(CFLAGS) $(CSTD) -o $(NAME) $(OBJS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CC) $(CFLAGS) $(CSTD) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CSTD) -c $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/*/%.cpp
-	$(CC) $(CFLAGS) $(CSTD) -c $< -o $@
+	$(CXX) $(CFLAGS) $(CSTD) -c $< -o $@
 
 clean:
 	rm -rf $(OBJDIR)

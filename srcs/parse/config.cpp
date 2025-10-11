@@ -1,4 +1,4 @@
-#include "../../include/config.hpp"
+#include "config.hpp"
 
 // Parses the entire configuration file and builds the server configuration objects.
 Config::Config(const std::string &filename) : currentPos_(0) {

@@ -1,4 +1,4 @@
-#include "../../include/config.hpp"
+#include "config.hpp"
 
 ServerConfig::ServerConfig() : host_(), port_(), serverName_(), maxBodySize_(0) {}
 
