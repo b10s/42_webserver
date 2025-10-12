@@ -31,4 +31,12 @@ fclean: clean
 
 re: fclean all
 
-.PHONY: all clean fclean re
+format:
+	find includes srcs tests -name *.cpp -o -name *.h -o -name *.hpp | xargs clang-format -i -style=google --verbose
+
+test:
+	cmake -S . -B ./build
+	cmake --build ./build
+	cd build && ctest
+
+.PHONY: all clean fclean re format

@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include "location.hpp"
 #include "enums.hpp"
+#include "location.hpp"
 
 #define WIHTESPACE " \t\n"
 #define SPECIAL_LETTERS "{};"
@@ -42,7 +43,7 @@ class ServerConfig {
   int maxBodySize_;
   std::map<HttpStatus, std::string> errors_;
   std::vector<Location> locations_;
-  
+
  public:
   ServerConfig();
   void setHost(const std::string &host);
@@ -79,7 +80,6 @@ class Config {
 
 // array of array of string and int
 
-
 // [
 //   {127.0.0.1, 8080},
 //   {192.168.0.1, 80},
@@ -90,4 +90,3 @@ class Config {
 
 // test_conf.host_ == "asdsad"
 // test_conf.port_ == "8080"
-
