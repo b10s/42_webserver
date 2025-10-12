@@ -3,14 +3,23 @@
 // Parses the entire configuration file and builds the server configuration objects.
 Config::Config(const std::string &filename) : currentPos_(0) {
     std::ifstream file(filename.c_str());
-    if (!file) {
+    if (!file.is_open()) {
         throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    std::string content = buffer.str();
-    this->content_ = content;
+    struct stat s;
+    if (stat(filename.c_str(), &s) == 0) {
+      if (s.st_mode & S_IFDIR) {
+        throw std::runtime_error(filename + " is a directory");
+      }
+    } else {
+      throw std::runtime_error("Failed to get file status: " + filename);
+    }
+
+    this->content_ = std::string(
+      std::istreambuf_iterator<char>(file),
+      std::istreambuf_iterator<char>()
+    );
     this->parse();
 }
 
@@ -38,7 +47,7 @@ void Config::parse() {
   while (true) {
     token = tokenize(content_);
     if (token.empty()) break;
-    if (token == SERVER) {
+    if (token == ConfigTokens::SERVER) {
       this->parseServer();
     } else {
       throw std::runtime_error("Syntax error: " + token);
@@ -55,14 +64,18 @@ void Config::parseServer() {
   ServerConfig serverConfig = ServerConfig();
   while (true) {
     token = tokenize(content_);
-    if (token == HOST)
+    if (token == ConfigTokens::HOST)
       this->parseHost(&serverConfig);
-    else if (token == LISTEN)
+    else if (token == ConfigTokens::LISTEN)
       this->parsePort(&serverConfig);
-    else if (token == SERVER_NAME)
+    else if (token == ConfigTokens::SERVER_NAME)
       this->parseServerName(&serverConfig);
-    else if (token == MAX_BODY)
+    else if (token == ConfigTokens::MAX_BODY)
       this->parseMaxBody(&serverConfig);
+    else if (token == ConfigTokens::ERROR_PAGE)
+      this->parseErrorPage(&serverConfig);
+    else if (token == ConfigTokens::ROOT)
+      ; // this->parseLocation(&serverConfig);
     else
       break;
   }
@@ -124,3 +137,32 @@ void Config::parseMaxBody(ServerConfig *serverConfig) {
   }
 }
 
+void Config::parseErrorPage(ServerConfig *serverConfig) {
+  std::string token = tokenize(content_);
+  if (token.empty()) {
+    throw std::runtime_error("Syntax error : expected error code" + token);
+  }
+  std::string errorCodeStr = token;
+  int errorCode = std::atoi(token.c_str());
+  if (errorCode < 400 || errorCode > 599) {
+    throw std::runtime_error("Invalid error code: " + token);
+  }
+
+  token = tokenize(content_);
+  if (token.empty()) {
+    throw std::runtime_error("Syntax error : expected error page path" + token);
+  }
+  if (token[0] == '.') { // ToDo : research about relative path
+    throw std::runtime_error("Error page path must be absolute: " + token);
+  }
+  if (token.find(UrlConstants::kHttpsPrefix) != 0 &&
+      token.find(UrlConstants::kHttpPrefix) != 0 &&
+      token[0] != '/') {
+    token = "/" + token;
+  }
+  serverConfig->setErrorPage(static_cast<HttpStatus>(errorCode), token);
+  token = tokenize(content_);
+  if (token != ";") {
+    throw std::runtime_error("Syntax error: expected ';' after error_page directive" + token);
+  }
+}

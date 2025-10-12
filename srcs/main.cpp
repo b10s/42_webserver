@@ -36,6 +36,7 @@ int main() {
             std::cout << "  Port: " << servers[i].getPort() << "\n";
             std::cout << "  Server Name: " << servers[i].getServerName() << "\n";
             std::cout << "  Max Body Size: " << servers[i].getMaxBodySize() << "\n";
+            std::cout << "  Error Pages:\n" << servers[i].getErrorPagesString() << "\n";
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;
