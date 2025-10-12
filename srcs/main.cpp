@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include "config.hpp"
 
 // int main() {
 //     // config_sample_files/sample.conf を読み込む例

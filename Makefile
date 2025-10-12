@@ -1,6 +1,6 @@
 NAME	= webserv
 SRCDIR	= srcs
-INCDIR	= include
+INCDIR	= includes
 SRCS = $(wildcard $(SRCDIR)/**/*.cpp) $(wildcard $(SRCDIR)/*.cpp)
 OBJDIR  = objs
 OBJS    = $(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))

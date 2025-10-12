@@ -5,14 +5,12 @@
 #include <map>
 #include <string>
 #include <vector>
-#include <string>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
 #include "location.hpp"
 #include "enums.hpp"
-#include "location.hpp"
 
 #define WIHTESPACE " \t\n"
 #define SPECIAL_LETTERS "{};"
