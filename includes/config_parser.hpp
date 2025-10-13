@@ -1,5 +1,5 @@
-#ifndef CONFIG_HPP_
-#define CONFIG_HPP_
+#ifndef CONFIG_PARSER_HPP_
+#define CONFIG_PARSER_HPP_
 
 #include <cstring>
 #include <map>
@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <cstdlib>
+#include "server_config.hpp"
 #include "location.hpp"
 #include "enums.hpp"
 #include <sys/stat.h>
@@ -21,8 +22,6 @@ namespace ConfigTokens {
   const std::string LOCATION = "location";
   const std::string ERROR_PAGE = "error_page";
   const std::string MAX_BODY = "client_max_body_size";
-  const std::string HOST = "host";
-  const std::string PORT = "port";
   const std::string LISTEN = "listen";
   const std::string SERVER_NAME = "server_name";
   const std::string ROOT = "root";
@@ -39,61 +38,30 @@ namespace UrlConstants {
   const std::string kHttpPrefix = "http://";
 }
 
-class ServerConfig {
- private:
-  std::string host_;
-  std::string port_;
-  std::string serverName_;
-  int maxBodySize_;
-  std::map<HttpStatus, std::string> errors_;
-  std::vector<Location> locations_;
-
- public:
-  ServerConfig();
-  void setHost(const std::string &host);
-  void setPort(const std::string &port);
-  void setServerName(const std::string &serverName);
-  void setMaxBodySize(int size);
-  void setErrorPage(HttpStatus status, const std::string &path) { errors_[status] = path; }
-  const std::string getHost() const { return host_; }
-  const std::string getPort() const { return port_; }
-  const std::string getServerName() const { return serverName_; }
-  int getMaxBodySize() const { return maxBodySize_; }
-  const std::map<HttpStatus, std::string> &getErrorPages() const { return errors_; }
-  std::string getErrorPagesString() const {
-    std::string result;
-    for (std::map<HttpStatus, std::string>::const_iterator it = errors_.begin(); it != errors_.end(); ++it) {
-      std::ostringstream oss;
-      oss << it->first;
-      result += "    " + oss.str() + " -> " + it->second + "\n";
-    }
-    return result;
-  }
-};
-
 // maybe we can merge Config and ServerConfig later
 // but for now, keep them separate for clarity
-class Config {
+class ConfigParser {
  private:
   size_t currentPos_;
   std::string content_;
   std::vector<ServerConfig> serverConfigs_;
 
  public:
-  Config(const std::string &filename);
+  ConfigParser(const std::string &filename);
   std::string tokenize(const std::string &content);
   void parse();
   void parseServer();
-  void parseHost(ServerConfig *serverConfig);
-  void parsePort(ServerConfig *serverConfig);
+  void parseListen(ServerConfig *serverConfig);
   void parseServerName(ServerConfig *serverConfig);
   void parseMaxBody(ServerConfig *serverConfig);
   void parseErrorPage(ServerConfig *serverConfig);
   // void parseLocation(ServerConfig *serverConfig);
   const std::vector<ServerConfig>& getServerConfigs() const { return serverConfigs_; }
+  bool isValidPortNumber(const std::string &port) const;
+  bool isAllDigits(const std::string &str) const;
 };
 
-#endif  // CONFIG_HPP_
+#endif  // CONFIG_PARSER_HPP_
 
 // array of array of string and int
 

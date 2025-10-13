@@ -2,7 +2,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "config.hpp"
+#include "config_parser.hpp"
+#include "server_config.hpp"
 
 // int main() {
 //     // config_sample_files/sample.conf を読み込む例
@@ -28,7 +29,7 @@
 
 int main() {
     try {
-        Config config("sample_config/server_no_location.conf");
+        ConfigParser config("sample_config/server_no_location.conf");
         const std::vector<ServerConfig>& servers = config.getServerConfigs();
         for (size_t i = 0; i < servers.size(); ++i) {
             std::cout << "Server " << i << ":\n";
