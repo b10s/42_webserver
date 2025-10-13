@@ -31,6 +31,7 @@ namespace ConfigTokens {
   const std::string CGI_PATH = "cgi_path";
   const std::string REDIRECT = "return";
   const std::string EXTENSION = "extension";
+  const std::string UPLOAD_PATH = "upload_path";
 }
 
 namespace UrlConstants {
@@ -55,10 +56,21 @@ class ConfigParser {
   void parseServerName(ServerConfig *serverConfig);
   void parseMaxBody(ServerConfig *serverConfig);
   void parseErrorPage(ServerConfig *serverConfig);
-  // void parseLocation(ServerConfig *serverConfig);
+
+  void parseLocation(ServerConfig *serverConfig);
+  void parseMethods(Location *location);
+  void parseRoot(Location *location);
+  void parseAutoIndex(Location *location);
+  void parseIndex(Location *location);
+  void parseExtensions(Location *location);
+  void parseUploadPath(Location *location);
+  void parseRedirect(Location *location);
+  void parseCgiPath(Location *location);
+
   const std::vector<ServerConfig>& getServerConfigs() const { return serverConfigs_; }
   bool isValidPortNumber(const std::string &port) const;
   bool isAllDigits(const std::string &str) const;
+  bool isDirective(const std::string &token) const;
 };
 
 #endif  // CONFIG_PARSER_HPP_

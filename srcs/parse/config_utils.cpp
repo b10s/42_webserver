@@ -34,3 +34,20 @@ bool ConfigParser::isAllDigits(const std::string &str) const {
   }
   return true;
 }
+
+bool ConfigParser::isDirective(const std::string &token) const {
+  return (token == ConfigTokens::SERVER ||
+          token == ConfigTokens::LOCATION ||
+          token == ConfigTokens::ERROR_PAGE ||
+          token == ConfigTokens::MAX_BODY ||
+          token == ConfigTokens::LISTEN ||
+          token == ConfigTokens::SERVER_NAME ||
+          token == ConfigTokens::ROOT ||
+          token == ConfigTokens::INDEX ||
+          token == ConfigTokens::AUTOINDEX ||
+          token == ConfigTokens::ALLOW_METHODS ||
+          token == ConfigTokens::CGI_PATH ||
+          token == ConfigTokens::REDIRECT ||
+          token == ConfigTokens::EXTENSION ||
+          token == ConfigTokens::UPLOAD_PATH);
+}
