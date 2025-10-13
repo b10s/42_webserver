@@ -29,7 +29,7 @@
 
 int main() {
     try {
-        ConfigParser config("sample_config/server_no_location.conf");
+        ConfigParser config("sample_config/server_test_for_parse.conf");
         const std::vector<ServerConfig>& servers = config.getServerConfigs();
         for (size_t i = 0; i < servers.size(); ++i) {
             std::cout << "Server " << i << ":\n";
@@ -38,6 +38,31 @@ int main() {
             std::cout << "  Server Name: " << servers[i].getServerName() << "\n";
             std::cout << "  Max Body Size: " << servers[i].getMaxBodySize() << "\n";
             std::cout << "  Error Pages:\n" << servers[i].getErrorPagesString() << "\n";
+
+            std::cout << "  Locations:\n";
+            const std::vector<Location>& locations = servers[i].getLocations();
+            for (size_t j = 0; j < locations.size(); ++j) {
+                std::cout << "    Location " << j << ":\n";
+                std::cout << "      Name: " << locations[j].getName() << "\n";
+                std::cout << "      Root: " << locations[j].getRoot() << "\n";
+                std::cout << "      Autoindex: " << (locations[j].getAutoIndex() ? "on" : "off") << "\n";
+                std::cout << "      Index Files: ";
+                const std::vector<std::string>& indexFiles = locations[j].getIndexFiles();
+                for (size_t k = 0; k < indexFiles.size(); ++k) {
+                    std::cout << indexFiles[k] << " ";
+                }
+                std::cout << "\n";
+                std::cout << "      Extensions: ";
+                const std::vector<std::string>& extensions = locations[j].getExtensions();
+                for (size_t k = 0; k < extensions.size(); ++k) {
+                    std::cout << extensions[k] << " ";
+                }
+                std::cout << "\n";
+                std::cout << "      Upload Path: " << locations[j].getUploadPath() << "\n";
+                std::cout << "      Redirect: " << locations[j].getRedirect() << "\n";
+                std::cout << "      CGI Path: " << locations[j].getCgiPath() << "\n";
+            }
+            std::cout << "\n";
         }
     } catch (const std::exception& e) {
         std::cerr << "Error: " << e.what() << std::endl;

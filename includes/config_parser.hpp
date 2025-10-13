@@ -44,10 +44,10 @@ namespace UrlConstants {
 class ConfigParser {
  private:
   size_t currentPos_;
-  std::string content_;
   std::vector<ServerConfig> serverConfigs_;
 
  public:
+  std::string content_; // Made public for easier access in parsing functions
   ConfigParser(const std::string &filename);
   std::string tokenize(const std::string &content);
   void parse();
@@ -72,6 +72,19 @@ class ConfigParser {
   bool isAllDigits(const std::string &str) const;
   bool isDirective(const std::string &token) const;
 };
+
+template<typename T, typename Setter>
+void parseSingleValue(ConfigParser* configParser, T* obj, Setter setter, const std::string& errorMsg) {
+    std::string token = configParser->tokenize(configParser->content_);
+    if (token.empty()) {
+        throw std::runtime_error("Syntax error: expected " + errorMsg);
+    }
+    (obj->*setter)(token);
+    token = configParser->tokenize(configParser->content_);
+    if (token != ";") {
+        throw std::runtime_error("Syntax error: expected ';' after " + errorMsg);
+    }
+}
 
 #endif  // CONFIG_PARSER_HPP_
 

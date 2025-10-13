@@ -43,6 +43,8 @@ class ServerConfig {
     }
     return result;
   }
+  void addLocation(const Location &location) { locations_.push_back(location); }
+  const std::vector<Location>& getLocations() const { return locations_; }
 };
 
 #endif 

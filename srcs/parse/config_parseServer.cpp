@@ -30,7 +30,7 @@ void ConfigParser::parseServer() {
     else if (token == ConfigTokens::ERROR_PAGE)
       this->parseErrorPage(&serverConfig);
     else if (token == ConfigTokens::LOCATION)
-      ; // this->parseLocation(&serverConfig);
+      parseLocation(&serverConfig);
     else
       break;
   }

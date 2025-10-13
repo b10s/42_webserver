@@ -34,5 +34,5 @@ void ConfigParser::parseLocation(ServerConfig *server) {
       break;
   }
   if (token != "}") throw std::runtime_error("Syntax error: expected '}' at the end of location block, got: " + token);
-      ; // server->addLocation(location);
+      server->addLocation(location);
 }
