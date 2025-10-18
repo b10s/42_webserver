@@ -1,5 +1,7 @@
 # WEBSERV
 
+[![cpp-linter](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml)
+
 ## How to Run the program
 
 ```bash
