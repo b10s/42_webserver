@@ -14,7 +14,7 @@
 #include "enums.hpp"
 #include <sys/stat.h>
 
-#define WIHTESPACE " \t\n"
+#define WHITESPACE " \t\n"
 #define SPECIAL_LETTERS "{};"
 
 namespace ConfigTokens {
@@ -48,6 +48,7 @@ class ConfigParser {
 
  public:
   std::string content_; // Made public for easier access in parsing functions
+  ConfigParser() : currentPos_(0), serverConfigs_(), content_("") {} // Default constructor for tests
   ConfigParser(const std::string &filename);
   std::string tokenize(const std::string &content);
   void parse();
@@ -74,7 +75,7 @@ class ConfigParser {
 };
 
 template<typename T, typename Setter>
-void parseSingleValue(ConfigParser* configParser, T* obj, Setter setter, const std::string& errorMsg) {
+void parseSimpleDirective(ConfigParser* configParser, T* obj, Setter setter, const std::string& errorMsg) {
     std::string token = configParser->tokenize(configParser->content_);
     if (token.empty()) {
         throw std::runtime_error("Syntax error: expected " + errorMsg);

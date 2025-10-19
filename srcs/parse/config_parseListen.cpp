@@ -39,3 +39,7 @@ void ConfigParser ::parseListen(ServerConfig *serverConfig) {
   }
   return ;
 }
+
+// TODO: We should not allow hostnames like "http;".
+// Introduce a validation function (e.g., isValidHost())
+// to check whether the given hostname is valid (IPv4, localhost, or domain name).

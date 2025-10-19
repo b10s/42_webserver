@@ -7,7 +7,7 @@ std::string ConfigParser::tokenize(const std::string &content) {
   size_t start = currentPos_;
   if (currentPos_ >= content.size()) return "";
 
-  while (currentPos_ < content.size() && strchr(WIHTESPACE, content[currentPos_]))
+  while (currentPos_ < content.size() && strchr(WHITESPACE, content[currentPos_]))
       currentPos_++;
   if (currentPos_ >= content.size()) return "";
   // handle special characters as single character tokens
@@ -16,7 +16,7 @@ std::string ConfigParser::tokenize(const std::string &content) {
   // extract regular token
   start = currentPos_;
   while (content[currentPos_] &&
-         !strchr(WIHTESPACE, content[currentPos_]) &&
+         !strchr(WHITESPACE, content[currentPos_]) &&
          !strchr(SPECIAL_LETTERS, content[currentPos_]))
     currentPos_++;
   return content.substr(start, currentPos_ - start);
