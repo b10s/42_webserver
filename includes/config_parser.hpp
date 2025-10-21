@@ -48,8 +48,11 @@ class ConfigParser {
 
  public:
   std::string content_; // Made public for easier access in parsing functions
-  ConfigParser() : currentPos_(0), serverConfigs_(), content_("") {} // Default constructor for tests
-  ConfigParser(const std::string &filename);
+  ConfigParser(); // Default constructor for tests
+  explicit ConfigParser(const std::string& text);
+  ~ConfigParser();
+  void loadFile(const std::string &filename);
+
   std::string tokenize(const std::string &content);
   void parse();
   void parseServer();

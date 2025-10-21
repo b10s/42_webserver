@@ -29,7 +29,9 @@
 
 int main() {
     try {
-        ConfigParser config("sample_config/server_test_for_parse.conf");
+        ConfigParser config;
+        config.loadFile("sample_config/server_test_for_parse.conf");
+        config.parse();
         const std::vector<ServerConfig>& servers = config.getServerConfigs();
         for (size_t i = 0; i < servers.size(); ++i) {
             std::cout << "Server " << i << ":\n";
@@ -52,11 +54,7 @@ int main() {
                     std::cout << indexFiles[k] << " ";
                 }
                 std::cout << "\n";
-                std::cout << "      Extensions: ";
-                const std::vector<std::string>& extensions = locations[j].getExtensions();
-                for (size_t k = 0; k < extensions.size(); ++k) {
-                    std::cout << extensions[k] << " ";
-                }
+                std::cout << "      Extensions: " << locations[j].getExtensions();
                 std::cout << "\n";
                 std::cout << "      Upload Path: " << locations[j].getUploadPath() << "\n";
                 std::cout << "      Redirect: " << locations[j].getRedirect() << "\n";
