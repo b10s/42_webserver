@@ -1,10 +1,11 @@
-#include "ConfigParser.hpp"
 #include <cctype>
 
+#include "ConfigParser.hpp"
+
 namespace {
-const std::string kWhitespace      = " \t\r\n";
-const std::string kSpecialLetter  = "{};";
-}
+const std::string kWhitespace = " \t\r\n";
+const std::string kSpecialLetter = "{};";
+}  // namespace
 
 namespace {
 std::map<std::string, TokenType> createTokenTable() {
@@ -25,12 +26,11 @@ std::map<std::string, TokenType> createTokenTable() {
   return m;
 }
 const std::map<std::string, TokenType> kTokenTable = createTokenTable();
-}
+}  // namespace
 
 TokenType ConfigParser::toTokenType(const std::string& token) const {
   std::map<std::string, TokenType>::const_iterator it = kTokenTable.find(token);
-  if (it != kTokenTable.end())
-    return it->second;
+  if (it != kTokenTable.end()) return it->second;
   return TOKEN_UNKNOWN;
 }
 

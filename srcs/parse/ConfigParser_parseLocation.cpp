@@ -18,14 +18,30 @@ void ConfigParser::parseLocation(ServerConfig* server) {
     token = tokenize(content_);
     if (token == "}") break;
     switch (toTokenType(token)) {
-      case TOKEN_ALLOW_METHODS: parseMethods(&location); break;
-      case TOKEN_ROOT: parseRoot(&location); break;
-      case TOKEN_AUTOINDEX: parseAutoIndex(&location); break;
-      case TOKEN_INDEX: parseIndex(&location); break;
-      case TOKEN_EXTENSION: parseExtensions(&location); break;
-      case TOKEN_UPLOAD_PATH: parseUploadPath(&location); break;
-      case TOKEN_REDIRECT: parseRedirect(&location); break;
-      case TOKEN_CGI_PATH: parseCgiPath(&location); break;
+      case TOKEN_ALLOW_METHODS:
+        parseMethods(&location);
+        break;
+      case TOKEN_ROOT:
+        parseRoot(&location);
+        break;
+      case TOKEN_AUTOINDEX:
+        parseAutoIndex(&location);
+        break;
+      case TOKEN_INDEX:
+        parseIndex(&location);
+        break;
+      case TOKEN_EXTENSION:
+        parseExtensions(&location);
+        break;
+      case TOKEN_UPLOAD_PATH:
+        parseUploadPath(&location);
+        break;
+      case TOKEN_REDIRECT:
+        parseRedirect(&location);
+        break;
+      case TOKEN_CGI_PATH:
+        parseCgiPath(&location);
+        break;
       default:
         throw std::runtime_error("Unknown directive in location: " + token);
     }

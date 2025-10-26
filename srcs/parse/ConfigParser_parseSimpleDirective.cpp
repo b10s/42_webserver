@@ -1,8 +1,7 @@
 #include "ConfigParser.hpp"
 
 void ConfigParser::parseRoot(Location* location) {
-  parseSimpleDirective(location, &Location::setRoot,
-                       "root directory path");
+  parseSimpleDirective(location, &Location::setRoot, "root directory path");
 }
 
 void ConfigParser::parseCgiPath(Location* location) {
@@ -10,13 +9,11 @@ void ConfigParser::parseCgiPath(Location* location) {
 }
 
 void ConfigParser::parseUploadPath(Location* location) {
-  parseSimpleDirective(location, &Location::setUploadPath,
-                       "upload_path value");
+  parseSimpleDirective(location, &Location::setUploadPath, "upload_path value");
 }
 
 void ConfigParser::parseRedirect(Location* location) {
-  parseSimpleDirective(location, &Location::setRedirect,
-                       "redirect value");
+  parseSimpleDirective(location, &Location::setRedirect, "redirect value");
 }
 
 void ConfigParser::parseServerName(ServerConfig* serverConfig) {
