@@ -1,8 +1,8 @@
 #include "config_parser.hpp"
 
 // Extracts the next token (word or symbol) from the configuration file content.
-void ConfigParser::parseLocation(ServerConfig *server) {
-  (void) server;
+void ConfigParser::parseLocation(ServerConfig* server) {
+  (void)server;
   std::string token;
   Location location = Location();
 
@@ -11,7 +11,9 @@ void ConfigParser::parseLocation(ServerConfig *server) {
     throw std::runtime_error("Invalid location name: " + token);
   location.setName(token);
   token = tokenize(content_);
-  if (token != "{") throw std::runtime_error("Syntax error: expected '{' after location name, got: " + token);
+  if (token != "{")
+    throw std::runtime_error(
+        "Syntax error: expected '{' after location name, got: " + token);
   while (true) {
     token = tokenize(content_);
     if (token == ConfigTokens::ALLOW_METHODS)
@@ -33,6 +35,9 @@ void ConfigParser::parseLocation(ServerConfig *server) {
     else
       break;
   }
-  if (token != "}") throw std::runtime_error("Syntax error: expected '}' at the end of location block, got: " + token);
-      server->addLocation(location);
+  if (token != "}")
+    throw std::runtime_error(
+        "Syntax error: expected '}' at the end of location block, got: " +
+        token);
+  server->addLocation(location);
 }
