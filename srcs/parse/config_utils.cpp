@@ -4,7 +4,6 @@
 // Parameters: content: The entire configuration file as a string
 // Returns: The next token string
 std::string ConfigParser::tokenize(const std::string& content) {
-  size_t start = currentPos_;
   if (currentPos_ >= content.size()) return "";
 
   while (currentPos_ < content.size() &&
@@ -15,7 +14,7 @@ std::string ConfigParser::tokenize(const std::string& content) {
   if (strchr(SPECIAL_LETTERS, content[currentPos_]))
     return std::string(1, content[currentPos_++]);
   // extract regular token
-  start = currentPos_;
+  size_t start = currentPos_;
   while (content[currentPos_] && !strchr(WHITESPACE, content[currentPos_]) &&
          !strchr(SPECIAL_LETTERS, content[currentPos_]))
     currentPos_++;
