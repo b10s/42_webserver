@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 ConfigParser::ConfigParser() : currentPos_(0), serverConfigs_(), content_("") {}
 ConfigParser::ConfigParser(const std::string& text)
@@ -10,9 +10,7 @@ void ConfigParser::loadFile(const std::string& filename) {
   if (stat(filename.c_str(), &s) != 0) {
     throw std::runtime_error("File does not exist: " + filename);
   }
-  if (!(s.st_mode & S_IFDIR)) {
-    ;  // it's a file
-  } else {
+  if (S_ISDIR(s.st_mode)) {
     throw std::runtime_error(filename + " is a directory");
   }
   std::ifstream file(filename.c_str());

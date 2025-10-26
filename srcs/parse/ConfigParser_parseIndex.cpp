@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 void ConfigParser::parseIndex(Location* location) {
   std::string token = tokenize(content_);

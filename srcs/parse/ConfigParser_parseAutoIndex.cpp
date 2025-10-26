@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 // autoindex is off by default (see Location constructor)
 void ConfigParser::parseAutoIndex(Location* location) {

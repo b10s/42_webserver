@@ -3,36 +3,75 @@
 #include <stdexcept>
 #include <string>
 
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
-static void callParseAutoIndex(const std::string& input, Location* loc) {
-  ConfigParser
-      parser;  // call default constructor to initialize currentPos_ to 0
-  parser.content_ = input;  // parseAutoIndex は content_ から tokenize する想定
-  parser.parseAutoIndex(loc);
-}
+// custom macro to check exception message contains substring
+#define EXPECT_THROW_WHAT_CONTAINS(stmt, ex_type, substr)                 \
+  do {                                                                     \
+    try {                                                                  \
+      stmt;                                                                \
+      FAIL() << "Expected " #ex_type;                                      \
+    } catch (const ex_type& e) {                                           \
+      std::string _msg_(e.what());                                         \
+      EXPECT_NE(_msg_.find(substr), std::string::npos)                     \
+          << "expected substring: [" << substr << "], actual: [" << _msg_ << "]"; \
+    } catch (...) {                                                        \
+      FAIL() << "Expected " #ex_type ", but got different exception type"; \
+    }                                                                      \
+  } while (0)
 
-TEST(ConfigParser, ParseAutoIndex_On_SetsTrue) {
-  Location loc;  // autoindex is false by default
-  EXPECT_NO_THROW(callParseAutoIndex("on;", &loc));
+// test fixture
+class ConfigParserTest : public ::testing::Test {
+protected:
+  ConfigParser parser;
+  Location     loc;
+
+  virtual void SetUp() {
+    parser.content_.clear();
+  }
+
+  // boilerplate to call parseAutoIndex
+  void CallParseAutoIndex(const std::string& input) {
+    parser.content_ = input;     // tokenize は content_ から読む想定
+    parser.parseAutoIndex(&loc); // ここで例外が出たらテスト側で検証
+  }
+};
+
+TEST_F(ConfigParserTest, ParseAutoIndex_On_SetsTrue) {
+  EXPECT_NO_THROW(CallParseAutoIndex("on;"));
   EXPECT_TRUE(loc.getAutoIndex());
 }
 
-TEST(ConfigParser, ParseAutoIndex_Off_StaysFalse) {
-  Location loc;
-  EXPECT_NO_THROW(callParseAutoIndex("off;", &loc));
+TEST_F(ConfigParserTest, ParseAutoIndex_Off_StaysFalse) {
+  EXPECT_NO_THROW(CallParseAutoIndex("off;"));
   EXPECT_FALSE(loc.getAutoIndex());
 }
 
-TEST(ConfigParser, ParseAutoIndex_MissingValue_Throws) {
-  Location loc;
-  EXPECT_THROW(callParseAutoIndex(";", &loc), std::runtime_error);
-  EXPECT_THROW(callParseAutoIndex("", &loc), std::runtime_error);
+TEST_F(ConfigParserTest, ParseAutoIndex_MissingValue_Throws) {
+  EXPECT_THROW(CallParseAutoIndex(";"),  std::runtime_error);
+  EXPECT_THROW(CallParseAutoIndex(""),   std::runtime_error);
 }
 
-TEST(ConfigParser, ParseAutoIndex_MissingSemicolon_Throws) {
-  Location loc;
-  EXPECT_THROW(callParseAutoIndex("on", &loc), std::runtime_error);
-  EXPECT_THROW(callParseAutoIndex("off", &loc), std::runtime_error);
+TEST_F(ConfigParserTest, ParseAutoIndex_MissingSemicolon_Throws) {
+  EXPECT_THROW(CallParseAutoIndex("on"),  std::runtime_error);
+  EXPECT_THROW(CallParseAutoIndex("off"), std::runtime_error);
+}
+
+// Error message tests
+TEST_F(ConfigParserTest, ErrorMessage_InvalidValue_Semicolon) {
+  EXPECT_THROW_WHAT_CONTAINS(CallParseAutoIndex(";"),
+                             std::runtime_error,
+                             "Invalid autoindex value");
+}
+
+TEST_F(ConfigParserTest, ErrorMessage_MissingSemicolon_On) {
+  EXPECT_THROW_WHAT_CONTAINS(CallParseAutoIndex("on"),
+                             std::runtime_error,
+                             "expected ';' after autoindex value");
+}
+
+TEST_F(ConfigParserTest, ErrorMessage_MissingValue_EmptyInput) {
+  EXPECT_THROW_WHAT_CONTAINS(CallParseAutoIndex(""),
+                             std::runtime_error,
+                             "expected autoindex value");
 }

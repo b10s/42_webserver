@@ -3,8 +3,8 @@
 #include <sstream>
 #include <string>
 
-#include "config_parser.hpp"
-#include "server_config.hpp"
+#include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
 
 // int main() {
 //     // config_sample_files/sample.conf を読み込む例

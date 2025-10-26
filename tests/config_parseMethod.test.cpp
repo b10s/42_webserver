@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 // set up a helper to call parseAutoIndex
 static void callparseMethods(const std::string& input, Location* loc) {

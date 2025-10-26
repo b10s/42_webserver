@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 /*
 Internal URI (e.g., /404.html, /error/default.html)

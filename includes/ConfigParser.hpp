@@ -13,11 +13,8 @@
 #include <vector>
 
 #include "enums.hpp"
-#include "location.hpp"
-#include "server_config.hpp"
-
-#define WHITESPACE " \t\n"
-#define SPECIAL_LETTERS "{};"
+#include "Location.hpp"
+#include "ServerConfig.hpp"
 
 namespace ConfigTokens {
 const std::string SERVER = "server";
@@ -41,12 +38,16 @@ const std::string kHttpsPrefix = "https://";
 const std::string kHttpPrefix = "http://";
 }  // namespace UrlConstants
 
-// maybe we can merge Config and ServerConfig later
-// but for now, keep them separate for clarity
+
 class ConfigParser {
  private:
   size_t currentPos_;
   std::vector<ServerConfig> serverConfigs_;
+  bool isValidPortNumber(const std::string& port) const;
+  bool isAllDigits(const std::string& str) const;
+  bool isDirective(const std::string& token) const;
+  TokenType toTokenType(const std::string& token) const;
+  std::string tokenize(const std::string& content);
 
  public:
   std::string content_;  // Made public for easier access in parsing functions
@@ -55,7 +56,6 @@ class ConfigParser {
   ~ConfigParser();
   void loadFile(const std::string& filename);
 
-  std::string tokenize(const std::string& content);
   void parse();
   void parseServer();
   void parseListen(ServerConfig* serverConfig);
@@ -72,24 +72,23 @@ class ConfigParser {
   void parseUploadPath(Location* location);
   void parseRedirect(Location* location);
   void parseCgiPath(Location* location);
+  template <typename T, typename Setter>
+  void parseSimpleDirective(T* obj, Setter setter, const std::string& errorMsg);
 
   const std::vector<ServerConfig>& getServerConfigs() const {
     return serverConfigs_;
   }
-  bool isValidPortNumber(const std::string& port) const;
-  bool isAllDigits(const std::string& str) const;
-  bool isDirective(const std::string& token) const;
 };
 
 template <typename T, typename Setter>
-void parseSimpleDirective(ConfigParser* configParser, T* obj, Setter setter,
+void ConfigParser::parseSimpleDirective(T* obj, Setter setter,
                           const std::string& errorMsg) {
-  std::string token = configParser->tokenize(configParser->content_);
+  std::string token = tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error: expected " + errorMsg);
   }
   (obj->*setter)(token);
-  token = configParser->tokenize(configParser->content_);
+  token = tokenize(content_);
   if (token != ";") {
     throw std::runtime_error("Syntax error: expected ';' after " + errorMsg);
   }

@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 static void expectErrorPageEq(const ServerConfig& sc, int code,
                               const std::string& expected) {

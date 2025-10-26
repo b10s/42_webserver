@@ -13,7 +13,7 @@
 #include <vector>
 
 #include "enums.hpp"
-#include "location.hpp"
+#include "Location.hpp"
 
 class ServerConfig {
  private:

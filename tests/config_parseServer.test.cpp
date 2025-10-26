@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 // ==================== happy path ====================
 TEST(ConfigParser, Server_MinimalEmptyBlock_AddsServerConfig) {

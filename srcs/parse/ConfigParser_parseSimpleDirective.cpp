@@ -1,25 +1,25 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 void ConfigParser::parseRoot(Location* location) {
-  parseSimpleDirective(this, location, &Location::setRoot,
+  parseSimpleDirective(location, &Location::setRoot,
                        "root directory path");
 }
 
 void ConfigParser::parseCgiPath(Location* location) {
-  parseSimpleDirective(this, location, &Location::setCgiPath, "cgi_path value");
+  parseSimpleDirective(location, &Location::setCgiPath, "cgi_path value");
 }
 
 void ConfigParser::parseUploadPath(Location* location) {
-  parseSimpleDirective(this, location, &Location::setUploadPath,
+  parseSimpleDirective(location, &Location::setUploadPath,
                        "upload_path value");
 }
 
 void ConfigParser::parseRedirect(Location* location) {
-  parseSimpleDirective(this, location, &Location::setRedirect,
+  parseSimpleDirective(location, &Location::setRedirect,
                        "redirect value");
 }
 
 void ConfigParser::parseServerName(ServerConfig* serverConfig) {
-  parseSimpleDirective(this, serverConfig, &ServerConfig::setServerName,
+  parseSimpleDirective(serverConfig, &ServerConfig::setServerName,
                        "server_name value");
 }

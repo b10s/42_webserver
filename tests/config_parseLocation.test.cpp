@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <string>
 
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 static void callParseLocation(const std::string& input, ServerConfig* sc) {
   ConfigParser p;

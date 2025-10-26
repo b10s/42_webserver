@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 /*
 "host:port" must be written without spaces (e.g., "127.0.0.1:8080").

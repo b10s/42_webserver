@@ -1,4 +1,4 @@
-#include "config_parser.hpp"
+#include "ConfigParser.hpp"
 
 void ConfigParser::parseExtensions(Location* location) {
   std::string token;
