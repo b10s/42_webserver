@@ -1,0 +1,36 @@
+###############################################
+# ① Simple GET request (normal case)
+###############################################
+GET /index.html?user=shoko&id=42 HTTP/1.1\r\n
+Host: localhost:8080\r\n
+Connection: keep-alive\r\n
+\r\n
+\r\n
+
+
+###############################################
+# ② POST request with Content-Length
+###############################################
+POST /submit HTTP/1.1\r\n
+Host: 127.0.0.1\r\n
+Content-Type: application/x-www-form-urlencoded\r\n
+Content-Length: 27\r\n
+Connection: close\r\n
+\r\n
+name=Alice&message=Hello+World\r\n
+
+
+###############################################
+# ③ POST request with chunked Transfer-Encoding
+###############################################
+POST /upload HTTP/1.1\r\n
+Host: example.com\r\n
+Transfer-Encoding: chunked\r\n
+Connection: keep-alive\r\n
+\r\n
+5\r\n
+Hello\r\n
+6\r\n
+ World\r\n
+0\r\n
+\r\n
