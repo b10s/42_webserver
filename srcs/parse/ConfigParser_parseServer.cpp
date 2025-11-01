@@ -23,11 +23,21 @@ void ConfigParser::parseServer() {
     token = tokenize(content_);
     if (token == "}") break;
     switch (toTokenType(token)) {
-      case TOKEN_LISTEN:       parseListen(&serverConfig); break;
-      case TOKEN_SERVER_NAME:  parseServerName(&serverConfig); break;
-      case TOKEN_MAX_BODY:     parseMaxBody(&serverConfig); break;
-      case TOKEN_ERROR_PAGE:   parseErrorPage(&serverConfig); break;
-      case TOKEN_LOCATION:     parseLocation(&serverConfig); break;
+      case TOKEN_LISTEN:
+        parseListen(&serverConfig);
+        break;
+      case TOKEN_SERVER_NAME:
+        parseServerName(&serverConfig);
+        break;
+      case TOKEN_MAX_BODY:
+        parseMaxBody(&serverConfig);
+        break;
+      case TOKEN_ERROR_PAGE:
+        parseErrorPage(&serverConfig);
+        break;
+      case TOKEN_LOCATION:
+        parseLocation(&serverConfig);
+        break;
       default:
         throw std::runtime_error("Unknown directive: " + token);
     }

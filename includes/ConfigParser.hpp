@@ -12,9 +12,9 @@
 #include <string>
 #include <vector>
 
-#include "enums.hpp"
 #include "Location.hpp"
 #include "ServerConfig.hpp"
+#include "enums.hpp"
 
 namespace ConfigTokens {
 const std::string SERVER = "server";
@@ -37,7 +37,6 @@ namespace UrlConstants {
 const std::string kHttpsPrefix = "https://";
 const std::string kHttpPrefix = "http://";
 }  // namespace UrlConstants
-
 
 class ConfigParser {
  private:
@@ -82,7 +81,7 @@ class ConfigParser {
 
 template <typename T, typename Setter>
 void ConfigParser::parseSimpleDirective(T* obj, Setter setter,
-                          const std::string& errorMsg) {
+                                        const std::string& errorMsg) {
   std::string token = tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error: expected " + errorMsg);

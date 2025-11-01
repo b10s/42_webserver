@@ -12,8 +12,8 @@
 #include <string>
 #include <vector>
 
-#include "enums.hpp"
 #include "Location.hpp"
+#include "enums.hpp"
 
 class ServerConfig {
  private:
