@@ -36,12 +36,6 @@ enum HttpStatus {
   BAD_GATEWAY = 502
 };
 
-enum RequestMethod {
-  NONE,
-  GET,
-  HEAD,
-  POST,
-  DELETE
-};
+enum RequestMethod { NONE, GET, HEAD, POST, DELETE };
 
 #endif
