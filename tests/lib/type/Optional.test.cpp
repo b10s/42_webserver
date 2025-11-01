@@ -1,7 +1,8 @@
 #include "lib/type/Optional.hpp"
-#include "lib/exception/bad_optional_access.hpp"
 
 #include <gtest/gtest.h>
+
+#include "lib/exception/bad_optional_access.hpp"
 
 TEST(OptionalTest, ValueMethodReturnsValue) {
   lib::type::Optional<int> test1 = 1;
@@ -16,7 +17,6 @@ TEST(OptionalTest, ValueMethodThrowsException) {
 
   EXPECT_THROW(test.value(), lib::exception::bad_optional_access);
 }
-
 
 TEST(OptionalTest, OperatorOverload) {
   lib::type::Optional<int> test1 = 1;
