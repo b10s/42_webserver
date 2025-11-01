@@ -37,11 +37,13 @@ enum HttpStatus {
 };
 
 enum RequestMethod {
-  NONE,
+  NONE = 0,
   GET,
   HEAD,
   POST,
-  DELETE,
+  DELETE_,
 };
+// Bitmask for allowed methods
+// DELETE is a reserved keyword in C++, so we use DELETE_ instead
 
 #endif
