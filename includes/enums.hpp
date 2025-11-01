@@ -33,7 +33,7 @@ enum HttpStatus {
   METHOD_NOT_ALLOWED = 405,
   INTERNAL_SERVER_ERROR = 500,
   NOT_IMPLEMENTED = 501,
-  BAD_GATEWAY = 502,
+  BAD_GATEWAY = 502
 };
 
 enum RequestMethod {
@@ -41,7 +41,7 @@ enum RequestMethod {
   GET,
   HEAD,
   POST,
-  DELETE,
+  DELETE
 };
 
 #endif
