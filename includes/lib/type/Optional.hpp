@@ -13,13 +13,19 @@ class Optional {
 
  public:
   // Constructor
-  Optional() : has_value_(false) {}
-  Optional(const T& v) : value_(v), has_value_(true) {}
+  Optional() : has_value_(false) {
+  }
+
+  Optional(const T& v) : value_(v), has_value_(true) {
+  }
+
   Optional(const Optional& other)
-      : value_(other.value_), has_value_(other.has_value_) {}
+      : value_(other.value_), has_value_(other.has_value_) {
+  }
 
   // Destructor
-  ~Optional() {}
+  ~Optional() {
+  }
 
   // Copy assignment operator overload
   Optional<T>& operator=(const Optional& rhs) {
@@ -40,9 +46,13 @@ class Optional {
     return def;
   }
 
-  bool has_value() const { return has_value_; }
+  bool has_value() const {
+    return has_value_;
+  }
 
-  void reset() { has_value_ = false; }
+  void reset() {
+    has_value_ = false;
+  }
 };
 
 }  // namespace type

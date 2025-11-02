@@ -30,16 +30,31 @@ class ServerConfig {
   void setPort(const std::string& port);
   void setServerName(const std::string& serverName);
   void setMaxBodySize(int size);
+
   void setErrorPage(HttpStatus status, const std::string& path) {
     errors_[status] = path;
   }
-  const std::string getHost() const { return host_; }
-  const std::string getPort() const { return port_; }
-  const std::string getServerName() const { return serverName_; }
-  int getMaxBodySize() const { return maxBodySize_; }
+
+  const std::string getHost() const {
+    return host_;
+  }
+
+  const std::string getPort() const {
+    return port_;
+  }
+
+  const std::string getServerName() const {
+    return serverName_;
+  }
+
+  int getMaxBodySize() const {
+    return maxBodySize_;
+  }
+
   const std::map<HttpStatus, std::string>& getErrorPages() const {
     return errors_;
   }
+
   std::string getErrorPagesString() const {
     std::string result;
     for (std::map<HttpStatus, std::string>::const_iterator it = errors_.begin();
@@ -50,8 +65,14 @@ class ServerConfig {
     }
     return result;
   }
-  void addLocation(const Location& location) { locations_.push_back(location); }
-  const std::vector<Location>& getLocations() const { return locations_; }
+
+  void addLocation(const Location& location) {
+    locations_.push_back(location);
+  }
+
+  const std::vector<Location>& getLocations() const {
+    return locations_;
+  }
 };
 
 #endif

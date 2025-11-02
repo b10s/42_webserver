@@ -9,5 +9,6 @@ Location::Location()
       extensions_(),
       uploadPath_(),
       redirect_(),
-      cgiPath_() {}
+      cgiPath_() {
+}
 

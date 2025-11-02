@@ -33,7 +33,7 @@ fclean: clean
 re: fclean all
 
 format:
-	find includes srcs tests -name *.cpp -o -name *.h -o -name *.hpp | xargs clang-format -i -style=google --verbose
+	find includes srcs tests -name *.cpp -o -name *.h -o -name *.hpp | xargs clang-format -i -style=file --verbose
 
 test:
 	cmake -S . -B ./build
