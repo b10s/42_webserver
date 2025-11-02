@@ -1,4 +1,4 @@
-name: run-tests
+name: make
 
 on:
   push:
@@ -12,6 +12,6 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - name: Run make test
+      - name: Run make
         run: |
-          make test
+          make
