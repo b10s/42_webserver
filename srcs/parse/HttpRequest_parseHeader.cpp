@@ -5,39 +5,30 @@
 // ごく簡単な parseHeader: "Key: Value\r\n" を雑に読む
 const char* HttpRequest::parseHeader(const char* req) {
   const char* p = req;
-
   headers_.clear();
-
   while (*p) {
     // 空行なら終了（\r\n\r\n）
     if (*p == '\r' && *(p + 1) == '\n') {
       p += 2;
       break;
     }
-
     // key を読む（':'まで）
     const char* keyStart = p;
     while (*p && *p != ':') ++p;
     if (*p != ':') break;  // 不正でも終了してOK（単純化）
-
     std::string key(keyStart, p - keyStart);
     ++p;  // skip ':'
-
     // skip 1つのスペース（あってもなくてもOK）
     if (*p == ' ') ++p;
-
     // value を読む（\rまで）
     const char* valStart = p;
     while (*p && *p != '\r') ++p;
     std::string val(valStart, p - valStart);
-
     // CRLF スキップ
     if (*p == '\r' && *(p + 1) == '\n') p += 2;
-
     // map に追加（小文字化せずそのまま）
     headers_[key] = val;
   }
-
   // Content-Length ヘッダを確認（単純な整数）
   dict::iterator itCL = headers_.find("Content-Length");
   if (itCL != headers_.end()) {
@@ -45,7 +36,6 @@ const char* HttpRequest::parseHeader(const char* req) {
   } else {
     contentLength_ = 0;  // 無ければ 0 とみなす
   }
-
   // Host ヘッダ（あれば記録）
   dict::iterator itH = headers_.find("Host");
   if (itH != headers_.end()) {
@@ -53,9 +43,7 @@ const char* HttpRequest::parseHeader(const char* req) {
   } else {
     hostName_ = "localhost";
   }
-
   keepAlive = true;  // とりあえず固定
-
   return p;
 }
 

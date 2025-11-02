@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-// --- 最小 parseUri: 次のスペースまでを URI として採用（上限チェックは後回し） ---
+// --- 最小 parseUri: 次のスペースまでを URI として採用（上限チェックなし） ---
 const char* HttpRequest::parseUri(const char* req) {
   const char* p = req;
   while (*p && *p != ' ' && *p != '\r' && *p != '\n') ++p;

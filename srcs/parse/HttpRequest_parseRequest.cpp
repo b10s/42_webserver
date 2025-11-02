@@ -83,7 +83,7 @@ bool HttpRequest::consumeHeader() {
   if (endOfHeader == std::string::npos) {
     return false; // need more data
   }
-  std::string headerSection = buffer_.substr(0, endOfHeader - 4); // maybe unnecessary
+  std::string headerSection = buffer_.substr(0, endOfHeader - 4); // maybe unnecessary...?
   try {
     const char* cur = headerSection.c_str();
     cur = this->parseMethod(cur);
