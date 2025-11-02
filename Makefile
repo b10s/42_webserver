@@ -5,23 +5,23 @@ SRCS = $(wildcard $(SRCDIR)/**/*.cpp) $(wildcard $(SRCDIR)/*.cpp)
 OBJDIR  = objs
 OBJS    = $(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))
 CXX		= c++
-CFLAGS	= -Wall -Werror -Wextra -I$(INCDIR) -g
-CSTD	= -std=c++98
+CFLAGS	= -Wall -Werror -Wextra -I$(INCDIR) -g -std=c++98 -pedantic
 
 .DEFAULT:	all
+
 all: $(NAME)
 
 $(OBJDIR):
 	mkdir -p $(OBJDIR)
 
 $(NAME): $(OBJDIR) $(OBJS)
-	$(CXX) $(CFLAGS) $(CSTD) -o $(NAME) $(OBJS)
+	$(CXX) $(CFLAGS) -o $(NAME) $(OBJS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CFLAGS) $(CSTD) -c $< -o $@
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: $(SRCDIR)/*/%.cpp
-	$(CXX) $(CFLAGS) $(CSTD) -c $< -o $@
+	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(OBJDIR)
@@ -40,4 +40,4 @@ test:
 	cmake --build ./build
 	cd build && ctest
 
-.PHONY: all clean fclean re format
+.PHONY: all clean fclean re format test
