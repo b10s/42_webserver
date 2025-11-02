@@ -11,7 +11,7 @@ void ConfigParser::parseMethods(Location* location) {
     else if (token == "POST")
       location->addMethod(POST);
     else if (token == "DELETE")
-      location->addMethod(DELETE);
+      location->addMethod(DELETE_);
     else
       throw std::runtime_error("Invalid method in allow_methods: " + token);
   }

@@ -1,7 +1,11 @@
 #include "HttpRequest.hpp"
 
 // \r\n\r\n indicates the end of the header section
-static size_t is_end_of_header(const std::string& payload)
+
+// size_t を返すなら「見つかったときはインデックス
+// 無いときは std::string::npos」など契約をコメントで明示。
+// 戻り値型は std::string::size_type が自然です。
+std::string::size_type HttpRequest::find_end_of_header(const std::string& payload)
 {
   const std::string delimiter = "\r\n\r\n";
   const size_t len = payload.size();
@@ -12,7 +16,7 @@ static size_t is_end_of_header(const std::string& payload)
       return i + delimiter.size(); // position after the delimiter
     }
   }
-  return 0; // not found yet
+  return std::string::npos; // not found
 }
 
 /**
@@ -75,12 +79,13 @@ void HttpRequest::parseRequest(const char* payload) {
  *  - progress が BODY に更新される（ヘッダー完了時）
  */
 bool HttpRequest::consumeHeader() {
-  size_t endOfHeader = is_end_of_header(buffer_);
-  if (!endOfHeader) {
+  std::string::size_type endOfHeader = find_end_of_header(buffer_);
+  if (endOfHeader == std::string::npos) {
     return false; // need more data
   }
+  std::string headerSection = buffer_.substr(0, endOfHeader - 4); // maybe unnecessary
   try {
-    const char* cur = buffer_.c_str();
+    const char* cur = headerSection.c_str();
     cur = this->parseMethod(cur);
     cur = this->parseUri(cur);
     cur = this->parseVersion(cur);
@@ -146,10 +151,21 @@ bool HttpRequest::consumeBody() {
     it += 2; // CRLF
     // if chunk size is zero, we're done. no trailing headers are handled here.
     if (chunkSize == 0) {
+      // consume trailing CRLF after last chunk
+      // 実装では trailer 未対応：直後に CRLF が来る想定（"0\r\n\r\n"）
+      if (static_cast<size_t>(buffer_.end() - it) < 2) return false;
+      if (*it != '\r' || *(it + 1) != '\n') throw http::responseStatusException(BAD_REQUEST);
+      it += 2;
+      // ここまで処理したぶんを buffer_ から取り除く
+      const std::string::size_type consumed =
+      static_cast<std::string::size_type>(it - buffer_.begin());
+      buffer_.erase(0, consumed);
       progress = DONE;
       return true;
     }
-    if (static_cast<size_t>(std::distance(it, buffer_.end())) < chunkSize + 2) {
+    std::string::const_iterator it = buffer_.begin();
+    std::string::const_iterator end = buffer_.end();
+    if (static_cast<size_t>(end - it) < chunkSize + 2) {
       return false; // not enough data for chunk + CRLF
     }
     // add chunk to body
