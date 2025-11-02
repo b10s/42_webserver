@@ -19,6 +19,7 @@ TEST(ConfigParser, ParseIndex_SingleIndex) {
   ASSERT_EQ(indexes.size(), 1);
   EXPECT_EQ(indexes[0], "index.html");
 }
+
 TEST(ConfigParser, ParseIndex_MultipleIndexes) {
   Location loc;
   EXPECT_NO_THROW(callParseIndex("index.html index.htm index.php;", &loc));
@@ -28,6 +29,7 @@ TEST(ConfigParser, ParseIndex_MultipleIndexes) {
   EXPECT_EQ(indexes[1], "index.htm");
   EXPECT_EQ(indexes[2], "index.php");
 }
+
 TEST(ConfigParser, ParseIndex_MissingSemicolon_Throws) {
   Location loc;
   EXPECT_THROW(callParseIndex("index.html index.htm index.php", &loc),

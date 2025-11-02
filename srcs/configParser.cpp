@@ -1,9 +1,14 @@
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser() : currentPos_(0), serverConfigs_(), content_("") {}
+ConfigParser::ConfigParser() : currentPos_(0), serverConfigs_(), content_("") {
+}
+
 ConfigParser::ConfigParser(const std::string& text)
-    : currentPos_(0), serverConfigs_(), content_(text) {}
-ConfigParser::~ConfigParser() {}
+    : currentPos_(0), serverConfigs_(), content_(text) {
+}
+
+ConfigParser::~ConfigParser() {
+}
 
 void ConfigParser::loadFile(const std::string& filename) {
   struct stat s;

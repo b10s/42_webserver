@@ -25,6 +25,7 @@ std::map<std::string, TokenType> createTokenTable() {
   m.insert(std::make_pair(ConfigTokens::CGI_PATH, TOKEN_CGI_PATH));
   return m;
 }
+
 const std::map<std::string, TokenType> kTokenTable = createTokenTable();
 }  // namespace
 

@@ -9,7 +9,8 @@ Location::Location()
       extensions_(),
       uploadPath_(),
       redirect_(),
-      cgiPath_() {}
+      cgiPath_() {
+}
 
 // Remove this function from location.cpp and implement it in the correct class
 // header and source files, for example:

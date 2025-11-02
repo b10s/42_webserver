@@ -27,7 +27,9 @@ class ConfigParserTest : public ::testing::Test {
   ConfigParser parser;
   Location loc;
 
-  virtual void SetUp() { parser.content_.clear(); }
+  virtual void SetUp() {
+    parser.content_.clear();
+  }
 
   // boilerplate to call parseAutoIndex
   void CallParseAutoIndex(const std::string& input) {
