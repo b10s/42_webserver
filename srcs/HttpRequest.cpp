@@ -5,7 +5,7 @@ const size_t HttpRequest::kMaxHeaderSize;
 const size_t HttpRequest::kMaxPayloadSize;
 const size_t HttpRequest::kMaxUriSize;
 
-HttpRequest::HttpRequest() 
+HttpRequest::HttpRequest()
     : progress(HEADER),
       buffer_(),
       method_(UNKNOWN_METHOD),
@@ -15,14 +15,16 @@ HttpRequest::HttpRequest()
       version_(),
       headers_(),
       body_(),
-      contentLength_(-1), // default: unknown length, chunked possible
-      keepAlive(false) {}
+      contentLength_(-1),  // default: unknown length, chunked possible
+      keepAlive(false) {
+}
 
-HttpRequest::HttpRequest(const HttpRequest &src) { *this = src; }
-HttpRequest &HttpRequest::operator=(const HttpRequest &src)
-{
-  if (this != &src)
-  {
+HttpRequest::HttpRequest(const HttpRequest& src) {
+  *this = src;
+}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
+  if (this != &src) {
     buffer_ = src.buffer_;
     method_ = src.method_;
     uri_ = src.uri_;
@@ -37,25 +39,44 @@ HttpRequest &HttpRequest::operator=(const HttpRequest &src)
   }
   return *this;
 }
-HttpRequest::~HttpRequest() {}
-RequestMethod HttpRequest::getMethod() const { return method_; }
-const std::string &HttpRequest::getUri() const { return uri_; }
-const std::string &HttpRequest::getHostName() const { return hostName_; }
-const std::string &HttpRequest::getHostPort() const { return hostPort_; }
-const std::string &HttpRequest::getVersion() const { return version_; }
-const dict &HttpRequest::getHeader() const { return headers_; }
-const std::string &HttpRequest::getHeader(const std::string &key) const
-{
+
+HttpRequest::~HttpRequest() {
+}
+
+RequestMethod HttpRequest::getMethod() const {
+  return method_;
+}
+
+const std::string& HttpRequest::getUri() const {
+  return uri_;
+}
+
+const std::string& HttpRequest::getHostName() const {
+  return hostName_;
+}
+
+const std::string& HttpRequest::getHostPort() const {
+  return hostPort_;
+}
+
+const std::string& HttpRequest::getVersion() const {
+  return version_;
+}
+
+const dict& HttpRequest::getHeader() const {
+  return headers_;
+}
+
+const std::string& HttpRequest::getHeader(const std::string& key) const {
   dict::const_iterator it = headers_.find(key);
-  if (it != headers_.end())
-  {
+  if (it != headers_.end()) {
     return it->second;
-  }
-  else
-  {
+  } else {
     static const std::string e;
     return e;
   }
 }
-const std::string &HttpRequest::getBody() const { return body_; }
 
+const std::string& HttpRequest::getBody() const {
+  return body_;
+}

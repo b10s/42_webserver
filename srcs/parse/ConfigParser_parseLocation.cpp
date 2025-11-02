@@ -19,7 +19,7 @@ void ConfigParser::parseLocation(ServerConfig* server) {
     if (token == "}") break;
     switch (toTokenType(token)) {
       case TOKEN_ALLOW_METHODS:
-        parseMethods(&location);
+        consumeMethods(&location);
         break;
       case TOKEN_ROOT:
         parseRoot(&location);

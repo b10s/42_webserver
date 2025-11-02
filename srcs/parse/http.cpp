@@ -9,7 +9,7 @@ std::string statusToString(HttpStatus status) {
       return "Created";
     case ACCEPTED:
       return "Accepted";
-    case NO_CONTENT: 
+    case NO_CONTENT:
       return "No Content";
     case RESET_CONTENT:
       return "Reset Content";
@@ -32,17 +32,19 @@ std::string statusToString(HttpStatus status) {
     case NOT_IMPLEMENTED:
       return "Not Implemented";
     case BAD_GATEWAY:
-      return "Bad Gateway";    
+      return "Bad Gateway";
     default:
       return "I'm a teapot";
   }
 }
 
 responseStatusException::responseStatusException(HttpStatus status)
-    : std::runtime_error(statusToString(status)),
-      status_(status) {}
+    : std::runtime_error(statusToString(status)), status_(status) {
+}
 
-HttpStatus responseStatusException::getStatus() const { return this->status_; }
+HttpStatus responseStatusException::getStatus() const {
+  return this->status_;
+}
 
 std::string methodToString(RequestMethod method) {
   switch (method) {
@@ -54,6 +56,8 @@ std::string methodToString(RequestMethod method) {
       return "POST";
     case DELETE_:
       return "DELETE";
+    case UNKNOWN_METHOD:
+      return "UNKNOWN_METHOD";
     default:
       return "NONE";
   }

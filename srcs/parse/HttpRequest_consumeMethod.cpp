@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-const char* HttpRequest::parseMethod(const char* req) {
+const char* HttpRequest::consumeMethod(const char* req) {
   switch (req[0]) {
     case 'G':
       if (std::strncmp(req, "GET ", 4) == 0) {
@@ -31,4 +31,3 @@ const char* HttpRequest::parseMethod(const char* req) {
   }
   throw http::responseStatusException(NOT_IMPLEMENTED);
 }
-
