@@ -35,11 +35,9 @@ class HttpRequest {
   } progress;    // progress is initially HEADER
 
   std::string buffer_;
-  static const size_t kMaxHeaderSize = 8192;
-  static const size_t kMaxPayloadSize = 16384;
-  static const size_t kMaxUriSize = 1024;
   RequestMethod method_;
   std::string uri_;
+  dict query_;
   std::string hostName_;
   std::string hostPort_;
   std::string version_;
@@ -50,7 +48,6 @@ class HttpRequest {
   bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
   static std::string::size_type find_end_of_header(const std::string& payload);
-  const char* parseUri(const char* req);
   const char* parseHeader(const char* req);
   static std::string toLowerCopy(const std::string& s);
   static void bumpLenOrThrow(size_t& acc, size_t add, size_t limit);
@@ -62,6 +59,9 @@ class HttpRequest {
       const std::string& host);  // hostName_ / hostPort_ を決める
 
  public:
+  static const size_t kMaxHeaderSize = 8192;
+  static const size_t kMaxPayloadSize = 16384;
+  static const size_t kMaxUriSize = 1024;
   bool keepAlive;
 
   HttpRequest();
@@ -72,6 +72,8 @@ class HttpRequest {
   void parseRequest(const char* payload);
   const char* consumeMethod(const char* req);
   const char* consumeVersion(const char* req);
+  const char* consumeUri(const char* req);
+  const char* consumeQuery(const char* req, std::size_t& len);
   RequestMethod getMethod() const;
   const std::string& getUri() const;
   const std::string& getHostName() const;
@@ -79,6 +81,7 @@ class HttpRequest {
   const std::string& getVersion() const;
   const dict& getHeader() const;
   const std::string& getHeader(const std::string& key) const;
+  const dict& getQuery() const;
   const std::string& getBody() const;
 
   bool isDone() const {
