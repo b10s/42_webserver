@@ -41,12 +41,12 @@ TEST_F(HttpRequestParse, consumeMethod_POST_SetsAndAdvances) {
   EXPECT_EQ(s.c_str() + 5, p);  // "POST "
 }
 
-TEST_F(HttpRequestParse, consumeMethod_DELETE_SetsAndAdvances) {
+TEST_F(HttpRequestParse, consumeMethod_DELETESetsAndAdvances) {
   std::string s = "DELETE /x HTTP/1.1\r\n";
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.consumeMethod(s.c_str()));
-  EXPECT_EQ(RequestMethod::DELETE_, req.getMethod());
+  EXPECT_EQ(RequestMethod::DELETE, req.getMethod());
   EXPECT_EQ(s.c_str() + 7, p);  // "DELETE "
 }
 

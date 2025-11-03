@@ -22,7 +22,7 @@ const char* HttpRequest::consumeMethod(const char* req) {
       break;
     case 'D':
       if (std::strncmp(req, "DELETE ", 7) == 0) {
-        method_ = DELETE_;
+        method_ = DELETE;
         return req + 7;
       }
       break;

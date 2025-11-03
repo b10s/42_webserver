@@ -30,7 +30,7 @@ TEST(ConfigParser, consumeMethods_State_Set) {
   const std::set<RequestMethod>& methods = loc.getMethods();
   EXPECT_EQ(methods.count(GET), 1u);
   EXPECT_EQ(methods.count(POST), 1u);
-  EXPECT_EQ(methods.count(DELETE_), 1u);
+  EXPECT_EQ(methods.count(DELETE), 1u);
   EXPECT_EQ(methods.size(), 3u);
 }
 

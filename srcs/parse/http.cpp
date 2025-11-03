@@ -54,7 +54,7 @@ std::string methodToString(RequestMethod method) {
       return "HEAD";
     case POST:
       return "POST";
-    case DELETE_:
+    case DELETE:
       return "DELETE";
     case UNKNOWN_METHOD:
       return "UNKNOWN_METHOD";
