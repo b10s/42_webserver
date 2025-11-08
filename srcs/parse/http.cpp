@@ -33,6 +33,8 @@ std::string statusToString(HttpStatus status) {
       return "Not Implemented";
     case BAD_GATEWAY:
       return "Bad Gateway";
+    case REQUEST_HEADER_FIELDS_TOO_LARGE:
+      return "Request Header Fields Too Large";
     default:
       return "I'm a teapot";
   }

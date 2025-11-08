@@ -47,19 +47,21 @@ class HttpRequest {
   std::string body_;
   long contentLength_;
 
-  bool consumeHeader();  // returns false if more data needed
+  // bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
   static std::string::size_type find_end_of_header(const std::string& payload);
   const char* parseUri(const char* req);
   const char* parseHeader(const char* req);
-  static std::string toLowerCopy(const std::string& s);
-  static void bumpLenOrThrow(size_t& acc, size_t add, size_t limit);
-  static const char* parseHeaderLine(const char* req, size_t& accLen,
-                                     std::string& outKey,
-                                     std::string& outValue);
-  void validateAndApplyHeaders();  // Host / CL / TE / Connection の事後処理
-  void parseHostHeader(
-      const std::string& host);  // hostName_ / hostPort_ を決める
+  bool isCRLF(const char* p) const;  
+  static std::string toLowerAscii(const std::string s);
+  void bumpLenOrThrow(size_t& total, size_t inc) const;
+  const char* readHeaderLine(const char* req, std::string& key, std::string& value, size_t& total_len);
+  void storeHeader(const std::string& rawKey, const std::string& value);
+  void validateAndExtractHost();
+  void validateBodyHeaders();
+  void parseContentLength(const std::string& s);
+  void parseTransferEncoding(const std::string& s);
+  void parseConnectionDirective();
 
  public:
   bool keepAlive;
@@ -72,6 +74,7 @@ class HttpRequest {
   void parseRequest(const char* payload);
   const char* consumeMethod(const char* req);
   const char* consumeVersion(const char* req);
+  const char* consumeHeader(const char* req);
   RequestMethod getMethod() const;
   const std::string& getUri() const;
   const std::string& getHostName() const;
