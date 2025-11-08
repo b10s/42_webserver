@@ -5,7 +5,7 @@ const size_t HttpRequest::kMaxHeaderSize;
 const size_t HttpRequest::kMaxPayloadSize;
 const size_t HttpRequest::kMaxUriSize;
 
-HttpRequest::HttpRequest() 
+HttpRequest::HttpRequest()
     : progress(HEADER),
       buffer_(),
       method_(UNKNOWN_METHOD),
@@ -15,73 +15,68 @@ HttpRequest::HttpRequest()
       version_(),
       headers_(),
       body_(),
-      contentLength_(-1), // default: unknown length, chunked possible
-      keepAlive(false) {}
+      contentLength_(-1),  // default: unknown length, chunked possible
+      keepAlive(false) {
+}
 
-HttpRequest::HttpRequest(const HttpRequest &src) { *this = src; }
-HttpRequest &HttpRequest::operator=(const HttpRequest &src)
-{
-  if (this != &src)
-  {
-    this->buffer_ = src.buffer_;
-    this->method_ = src.method_;
-    this->uri_ = src.uri_;
-    // this->query_ = src.query_;
-    this->hostName_ = src.hostName_;
-    this->hostPort_ = src.hostPort_;
-    this->version_ = src.version_;
-    this->headers_ = src.headers_;
-    this->body_ = src.body_;
-    this->contentLength_ = src.contentLength_;
-    this->keepAlive = src.keepAlive;
-    this->progress = src.progress;
+HttpRequest::HttpRequest(const HttpRequest& src) {
+  *this = src;
+}
+
+HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
+  if (this != &src) {
+    buffer_ = src.buffer_;
+    method_ = src.method_;
+    uri_ = src.uri_;
+    hostName_ = src.hostName_;
+    hostPort_ = src.hostPort_;
+    version_ = src.version_;
+    headers_ = src.headers_;
+    body_ = src.body_;
+    contentLength_ = src.contentLength_;
+    keepAlive = src.keepAlive;
+    progress = src.progress;
   }
   return *this;
 }
-HttpRequest::~HttpRequest() {}
 
-// const size_t HttpRequest::kMaxHeaderSize = 8192;
-// const size_t HttpRequest::kMaxPayloadSize = 16384;
-// const size_t HttpRequest::kMaxUriSize = 1024;
+HttpRequest::~HttpRequest() {
+}
 
-RequestMethod HttpRequest::getMethod() const { return this->method_; }
-const std::string &HttpRequest::getUri() const { return this->uri_; }
-// const dict &HttpRequest::getQuery() const { return this->query_; }
-// const std::string &HttpRequest::getQuery(const std::string &key) const
-// {
-//   return this->query_.at(key);
-// }
-// const std::string &HttpRequest::getQueryAsStr() const
-// {
-//   static std::string query;
-//   query.clear();
-//   for (dict::const_iterator it = this->query_.begin(); it != this->query_.end();
-//        it++)
-//   {
-//     query += it->first + "=" + it->second + "&";
-//   }
-//   if (!query.empty())
-//   {
-//     query.erase(query.end() - 1);
-//   }
-//   return query;
-// }
-const std::string &HttpRequest::getHostName() const { return this->hostName_; }
-const std::string &HttpRequest::getHostPort() const { return this->hostPort_; }
-const std::string &HttpRequest::getVersion() const { return this->version_; }
-const dict &HttpRequest::getHeader() const { return this->headers_; }
-const std::string &HttpRequest::getHeader(const std::string &key) const
-{
-  dict::const_iterator it = this->headers_.find(key);
-  if (it != this->headers_.end())
-  {
+RequestMethod HttpRequest::getMethod() const {
+  return method_;
+}
+
+const std::string& HttpRequest::getUri() const {
+  return uri_;
+}
+
+const std::string& HttpRequest::getHostName() const {
+  return hostName_;
+}
+
+const std::string& HttpRequest::getHostPort() const {
+  return hostPort_;
+}
+
+const std::string& HttpRequest::getVersion() const {
+  return version_;
+}
+
+const dict& HttpRequest::getHeader() const {
+  return headers_;
+}
+
+const std::string& HttpRequest::getHeader(const std::string& key) const {
+  dict::const_iterator it = headers_.find(key);
+  if (it != headers_.end()) {
     return it->second;
-  }
-  else
-  {
+  } else {
     static const std::string e;
     return e;
   }
 }
-const std::string &HttpRequest::getBody() const { return this->body_; }
 
+const std::string& HttpRequest::getBody() const {
+  return body_;
+}

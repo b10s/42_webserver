@@ -63,7 +63,7 @@ class ConfigParser {
   void parseErrorPage(ServerConfig* serverConfig);
 
   void parseLocation(ServerConfig* serverConfig);
-  void parseMethods(Location* location);
+  void consumeMethods(Location* location);
   void parseRoot(Location* location);
   void parseAutoIndex(Location* location);
   void parseIndex(Location* location);

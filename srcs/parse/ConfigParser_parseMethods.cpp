@@ -1,6 +1,6 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parseMethods(Location* location) {
+void ConfigParser::consumeMethods(Location* location) {
   std::string token;
 
   while (true) {
