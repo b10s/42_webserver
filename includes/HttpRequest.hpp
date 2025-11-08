@@ -35,9 +35,6 @@ class HttpRequest {
   } progress;    // progress is initially HEADER
 
   std::string buffer_;
-  static const size_t kMaxHeaderSize = 8192;
-  static const size_t kMaxPayloadSize = 16384;
-  static const size_t kMaxUriSize = 1024;
   RequestMethod method_;
   std::string uri_;
   std::string hostName_;
@@ -64,6 +61,9 @@ class HttpRequest {
   void parseConnectionDirective();
 
  public:
+  static const size_t kMaxHeaderSize = 8192;
+  static const size_t kMaxPayloadSize = 16384;
+  static const size_t kMaxUriSize = 1024;
   bool keepAlive;
 
   HttpRequest();
