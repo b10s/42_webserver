@@ -59,8 +59,11 @@ class HttpRequest {
       const std::string& host);  // hostName_ / hostPort_ を決める
 
  public:
+  // there is no upper limit for header count in RFCs, but we set a 8192 bytes (8KB) for simplicity
   static const size_t kMaxHeaderSize = 8192;
+  // the maximum size of request payload is usually 1MB or more in real servers, but we set 16KB for simplicity
   static const size_t kMaxPayloadSize = 16384;
+  // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
   bool keepAlive;
 
