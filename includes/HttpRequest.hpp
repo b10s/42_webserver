@@ -43,6 +43,7 @@ class HttpRequest {
   dict headers_;
   std::string body_;
   long contentLength_;
+  bool keepAlive;
 
   // bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
@@ -64,7 +65,6 @@ class HttpRequest {
   static const size_t kMaxHeaderSize = 8192;
   static const size_t kMaxPayloadSize = 16384;
   static const size_t kMaxUriSize = 1024;
-  bool keepAlive;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);
@@ -83,6 +83,10 @@ class HttpRequest {
   const dict& getHeader() const;
   const std::string& getHeader(const std::string& key) const;
   const std::string& getBody() const;
+  long getContentLength() const { return contentLength_; }
+  bool isKeepAlive() const { return keepAlive; }
+
+
 
   bool isDone() const {
     return progress == DONE;
