@@ -67,35 +67,44 @@ TEST_F(HttpRequestParseUri, EmptyValueAllowed) {
 
 TEST_F(HttpRequestParseUri, EmptyPath_ThrowsBadRequest) {
   std::string s = " HTTP/1.1";
-  EXPECT_THROW({
-      try { req.consumeUri(s.c_str()); }
-      catch (const http::responseStatusException& e) {
-        EXPECT_EQ(BAD_REQUEST, e.getStatus());
-        throw;
-      }
-    }, http::responseStatusException);
+  EXPECT_THROW(
+      {
+        try {
+          req.consumeUri(s.c_str());
+        } catch (const http::responseStatusException& e) {
+          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          throw;
+        }
+      },
+      http::responseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
   std::string s = "/aHTTP/1.1";
-  EXPECT_THROW({
-      try { req.consumeUri(s.c_str()); }
-      catch (const http::responseStatusException& e) {
-        EXPECT_EQ(BAD_REQUEST, e.getStatus());
-        throw;
-      }
-    }, http::responseStatusException);
+  EXPECT_THROW(
+      {
+        try {
+          req.consumeUri(s.c_str());
+        } catch (const http::responseStatusException& e) {
+          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          throw;
+        }
+      },
+      http::responseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
   std::string s = "/a\x01b HTTP/1.1";
-  EXPECT_THROW({
-      try { req.consumeUri(s.c_str()); }
-      catch (const http::responseStatusException& e) {
-        EXPECT_EQ(BAD_REQUEST, e.getStatus());
-        throw;
-      }
-    }, http::responseStatusException);
+  EXPECT_THROW(
+      {
+        try {
+          req.consumeUri(s.c_str());
+        } catch (const http::responseStatusException& e) {
+          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          throw;
+        }
+      },
+      http::responseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
@@ -115,13 +124,16 @@ TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
 // origin-form has to start with '/'
 TEST_F(HttpRequestParseUri, PathMustStartWithSlash_ThrowsBadRequest) {
   std::string s = "foo HTTP/1.1";
-  EXPECT_THROW({
-      try { req.consumeUri(s.c_str()); }
-      catch (const http::responseStatusException& e) {
-        EXPECT_EQ(BAD_REQUEST, e.getStatus());
-        throw;
-      }
-    }, http::responseStatusException);
+  EXPECT_THROW(
+      {
+        try {
+          req.consumeUri(s.c_str());
+        } catch (const http::responseStatusException& e) {
+          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          throw;
+        }
+      },
+      http::responseStatusException);
 }
 
 // =============== Length boundary (kMaxUriSize) ===============
@@ -151,13 +163,15 @@ TEST_F(HttpRequestParseUri, UriTooLong_Throws414_WhenReachesLimitExactly) {
 
 TEST_F(HttpRequestParseUri, UriMaxMinusOne_OK_ButMax_EXACT_Throws) {
   const std::size_t N = HttpRequest::kMaxUriSize;
-  std::string acceptable = "/" + makeN('a', N - 3); // -2 for initial '/' and ' ' and at least one char after space
+  std::string acceptable =
+      "/" + makeN('a', N - 3);  // -2 for initial '/' and ' ' and at least one
+                                // char after space
   std::string s = acceptable + " HTTP/1.1";
 
   const char* p = NULL;
   ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
   EXPECT_EQ(acceptable, req.getUri());
-  EXPECT_EQ(s.c_str() + (acceptable.size() + 1), p); // URI + ' '
+  EXPECT_EQ(s.c_str() + (acceptable.size() + 1), p);  // URI + ' '
 }
 
 // =============== Query corner cases ===============
@@ -176,13 +190,17 @@ TEST_F(HttpRequestParseUri, QueryOnlyKeys_NoValues) {
 }
 
 // we don't allow trailing '&' that implies empty key
-TEST_F(HttpRequestParseUri, QueryWithTrailingAmpersand_TreatAsErrorOrEmptyNextKey) {
+TEST_F(HttpRequestParseUri,
+       QueryWithTrailingAmpersand_TreatAsErrorOrEmptyNextKey) {
   std::string s = "/p?a=1& HTTP/1.1";
-  EXPECT_THROW({
-      try { req.consumeUri(s.c_str()); }
-      catch (const http::responseStatusException& e) {
-        EXPECT_EQ(BAD_REQUEST, e.getStatus());
-        throw;
-      }
-    }, http::responseStatusException);
+  EXPECT_THROW(
+      {
+        try {
+          req.consumeUri(s.c_str());
+        } catch (const http::responseStatusException& e) {
+          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          throw;
+        }
+      },
+      http::responseStatusException);
 }
