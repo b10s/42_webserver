@@ -35,11 +35,9 @@ class HttpRequest {
   } progress;    // progress is initially HEADER
 
   std::string buffer_;
-  static const size_t kMaxHeaderSize = 8192;
-  static const size_t kMaxPayloadSize = 16384;
-  static const size_t kMaxUriSize = 1024;
   RequestMethod method_;
   std::string uri_;
+  dict query_;
   std::string hostName_;
   std::string hostPort_;
   std::string version_;
@@ -47,21 +45,31 @@ class HttpRequest {
   std::string body_;
   long contentLength_;
 
-  bool consumeHeader();  // returns false if more data needed
+  // bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
   static std::string::size_type find_end_of_header(const std::string& payload);
-  const char* parseUri(const char* req);
   const char* parseHeader(const char* req);
-  static std::string toLowerCopy(const std::string& s);
-  static void bumpLenOrThrow(size_t& acc, size_t add, size_t limit);
-  static const char* parseHeaderLine(const char* req, size_t& accLen,
-                                     std::string& outKey,
-                                     std::string& outValue);
-  void validateAndApplyHeaders();  // Host / CL / TE / Connection の事後処理
-  void parseHostHeader(
-      const std::string& host);  // hostName_ / hostPort_ を決める
+  bool isCRLF(const char* p) const;  
+  static std::string toLowerAscii(const std::string s);
+  void bumpLenOrThrow(size_t& total, size_t inc) const;
+  const char* readHeaderLine(const char* req, std::string& key, std::string& value, size_t& total_len);
+  void storeHeader(const std::string& rawKey, const std::string& value);
+  void validateAndExtractHost();
+  void validateBodyHeaders();
+  void parseContentLength(const std::string& s);
+  void parseTransferEncoding(const std::string& s);
+  void parseConnectionDirective();
 
  public:
+  // there is no upper limit for header count in RFCs, but we set a 8192 bytes
+  // (8KB) for simplicity
+  static const size_t kMaxHeaderSize = 8192;
+  // the maximum size of request payload is usually 1MB or more in real servers,
+  // but we set 16KB for simplicity
+  static const size_t kMaxPayloadSize = 16384;
+  // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
+  // smaller limit (1KB) for simplicity
+  static const size_t kMaxUriSize = 1024;
   bool keepAlive;
 
   HttpRequest();
@@ -72,14 +80,21 @@ class HttpRequest {
   void parseRequest(const char* payload);
   const char* consumeMethod(const char* req);
   const char* consumeVersion(const char* req);
+  const char* consumeUri(const char* req);
+  const char* consumeQuery(const char* req, std::size_t& len);
+  const char* consumeHeader(const char* req);
   RequestMethod getMethod() const;
+  void setMethod(RequestMethod method) { method_ = method; } // for test purposes
   const std::string& getUri() const;
   const std::string& getHostName() const;
   const std::string& getHostPort() const;
   const std::string& getVersion() const;
   const dict& getHeader() const;
   const std::string& getHeader(const std::string& key) const;
+  const dict& getQuery() const;
   const std::string& getBody() const;
+  long getContentLength() const { return contentLength_; }
+  bool isKeepAlive() const { return keepAlive; }
 
   bool isDone() const {
     return progress == DONE;

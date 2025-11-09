@@ -51,6 +51,10 @@ const std::string& HttpRequest::getUri() const {
   return uri_;
 }
 
+const dict& HttpRequest::getQuery() const {
+  return query_;
+}
+
 const std::string& HttpRequest::getHostName() const {
   return hostName_;
 }

@@ -45,7 +45,8 @@ TEST_F(HttpRequestParse, consumeVersion_UnsupportedVersion20_ThrowsBadRequest) {
       http::responseStatusException);
 }
 
-TEST_F(HttpRequestParse, consumeVersion_UnsupportedVersion111_ThrowsBadRequest) {
+TEST_F(HttpRequestParse,
+       consumeVersion_UnsupportedVersion111_ThrowsBadRequest) {
   std::string s = "HTTP/1.11\r\n";
   EXPECT_THROW(
       {
