@@ -7,12 +7,11 @@
 #include "HttpRequest.hpp"
 #include "enums.hpp"
 
-// ==========================
-// ヘッダー先頭ポインタ生成ヘルパ
-// ==========================
+// ============== HeaderStart struct and helper ==============
 struct HeaderStart {
-  std::string reqbuf;    // 開始行 + ヘッダー + ボディ
-  const char* p_headers; // ヘッダー先頭ポインタ
+  std::string reqbuf;    //　start line (request line) + headers + body
+  const char* p_headers; // points to the beginning of headers in reqbuf
+  RequestMethod method;
 };
 
 static HeaderStart makeHeaderStart(const std::string& method,
@@ -22,11 +21,16 @@ static HeaderStart makeHeaderStart(const std::string& method,
   HeaderStart hs;
   std::string startLine = method + " " + uri + " " + version + "\r\n";
   hs.reqbuf = startLine + headers_and_after;
-  hs.p_headers = hs.reqbuf.c_str() + startLine.size(); // CRLFの直後
+  hs.p_headers = hs.reqbuf.c_str() + startLine.size();
+  if (method == "GET") hs.method = GET;
+  else if (method == "HEAD") hs.method = HEAD;
+  else if (method == "POST") hs.method = POST;
+  else if (method == "DELETE") hs.method = DELETE;
+  else hs.method = UNKNOWN_METHOD;
   return hs;
 }
 
-class HttpRequestconsumeHeader : public ::testing::Test {
+class HttpRequestconsumeHeader : public ::testing::Test { // fixture class for google test
  protected:
   HttpRequest req;
 };
@@ -133,11 +137,13 @@ TEST_F(HttpRequestconsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
       http::responseStatusException);
 }
 
+// if method is POST and neither Content-Length nor Transfer-Encoding is present, throw LENGTH_REQUIRED
 TEST_F(HttpRequestconsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "\r\n";
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
+  req.setMethod(hs.method);
 
   EXPECT_THROW(
       {
@@ -281,7 +287,7 @@ TEST_F(HttpRequestconsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
       http::responseStatusException);
 }
 
-// =============== ヘッダー構文エラー ===============
+// =============== Bad requests ===============
 TEST_F(HttpRequestconsumeHeader, MissingColon_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host example.com\r\n"
@@ -336,7 +342,6 @@ TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
       http::responseStatusException);
 }
 
-// =============== 最大ヘッダー長超過 ===============
 TEST_F(HttpRequestconsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTooLarge) {
   std::string bigValue(HttpRequest::kMaxHeaderSize, 'a');
   std::string headers_and_after =

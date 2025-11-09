@@ -44,7 +44,6 @@ class HttpRequest {
   dict headers_;
   std::string body_;
   long contentLength_;
-  bool keepAlive;
 
   // bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
@@ -83,7 +82,9 @@ class HttpRequest {
   const char* consumeVersion(const char* req);
   const char* consumeUri(const char* req);
   const char* consumeQuery(const char* req, std::size_t& len);
+  const char* consumeHeader(const char* req);
   RequestMethod getMethod() const;
+  void setMethod(RequestMethod method) { method_ = method; } // for test purposes
   const std::string& getUri() const;
   const std::string& getHostName() const;
   const std::string& getHostPort() const;
