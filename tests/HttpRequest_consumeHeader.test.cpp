@@ -9,7 +9,7 @@
 
 // ============== HeaderStart struct and helper ==============
 struct HeaderStart {
-  std::string reqbuf;    //　start line (request line) + headers + body
+  std::string reqbuf;    // start line (request line) + headers + body
   const char* p_headers; // points to the beginning of headers in reqbuf
   RequestMethod method;
 };
@@ -46,9 +46,9 @@ TEST_F(HttpRequestconsumeHeader, Basic_HostOnly_NoBody_ParsesAndAdvances) {
   const char* ret = NULL;
   ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
   EXPECT_EQ("example.com", req.getHostName());
-  EXPECT_EQ(DEFAULT_PORT, req.getHostPort());
+  EXPECT_EQ(HttpRequest::kDefaultPort, req.getHostPort());
   EXPECT_EQ(0, req.getContentLength());
-  EXPECT_STREQ("ABC", std::string(ret).c_str());
+  EXPECT_STREQ("ABC", ret);
 }
 
 TEST_F(HttpRequestconsumeHeader, HostWithPort_ParsesHostnameAndPort) {

@@ -5,7 +5,7 @@
 
 // ============== utils ===============
 bool HttpRequest::isCRLF(const char* p) const {
-  return p[0] == '\r' && p[1] == '\n';
+  return p != NULL && p[0] == '\r' && p[1] == '\n';
 }
 
 std::string HttpRequest::toLowerAscii(const std::string& s) {
@@ -31,7 +31,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key, std::
     bumpLenOrThrow(totalLen, 1);
     ++i;
   }
-  if (req[i] != ':' || req[i + 1] != ' ') {
+  if (req[i] == '\0' || req[i] != ':' || req[i + 1] != ' ') { // must be ": ", not ":" or end of string
     throw http::responseStatusException(BAD_REQUEST);
   }
   key.assign(req, i);
@@ -55,7 +55,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key, std::
 // ============ ヘッダー表へ格納（キーは小文字化） ============
 void HttpRequest::storeHeader(const std::string& rawKey, const std::string& value) {
   std::string k = toLowerAscii(rawKey);
-  this->headers_[k] = value;      // // ヘッダーキーは小文字化して格納。元のキー名のまま保持したい場合があるか確認する。
+  this->headers_[k] = value; // Store header key in lowercase. TODO: Consider whether to keep the original key name.
 }
 
 void HttpRequest::validateAndExtractHost() {
@@ -70,12 +70,14 @@ void HttpRequest::validateAndExtractHost() {
   if (i == 0) throw http::responseStatusException(BAD_REQUEST);
   this->hostName_ = hostValue.substr(0, i);
   if (i == hostValue.size()) {
-    this->hostPort_ = DEFAULT_PORT;
+    this->hostPort_ = kDefaultPort;
   } else {
     this->hostPort_ = hostValue.substr(i + 1);
   }
 }
 
+// This line checks for both 'Transfer-Encoding' and 'transfer-encoding', 
+// but since headers are normalized to lowercase, only 'transfer-encoding' should be accessed?
 void HttpRequest::validateBodyHeaders() {
   bool hasCL = headers_.count("Content-Length") || headers_.count("content-length");
   bool hasTE = headers_.count("Transfer-Encoding") || headers_.count("transfer-encoding");
@@ -113,6 +115,8 @@ void HttpRequest::parseTransferEncoding(const std::string& s) {
   }
 }
 
+// TODO: Since headers are normalized to lowercase, checking for both 'Connection' and 'connection' is redundant?
+// Only 'connection' should be checked?
 void HttpRequest::parseConnectionDirective() {
   if (headers_.count("Connection") || headers_.count("connection")) {
     const std::string& v = headers_.count("Connection") ? headers_["Connection"] : headers_["connection"];

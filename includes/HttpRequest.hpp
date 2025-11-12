@@ -4,10 +4,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
-
 #include "enums.hpp"
-
-#define DEFAULT_PORT "8080"
 
 // http
 namespace http {
@@ -70,6 +67,7 @@ class HttpRequest {
   // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
+  static const std::string kDefaultPort; 
   bool keepAlive;
 
   HttpRequest();
