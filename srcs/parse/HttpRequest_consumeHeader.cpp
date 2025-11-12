@@ -8,11 +8,12 @@ bool HttpRequest::isCRLF(const char* p) const {
   return p[0] == '\r' && p[1] == '\n';
 }
 
-std::string HttpRequest::toLowerAscii(std::string s) {
-  for (size_t i = 0; i < s.size(); ++i) {
-    s[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(s[i])));
+std::string HttpRequest::toLowerAscii(const std::string& s) {
+  std::string result = s;
+  for (size_t i = 0; i < result.size(); ++i) {
+    result[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
   }
-  return s;
+  return result;
 }
 
 void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
@@ -54,9 +55,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key, std::
 // ============ ヘッダー表へ格納（キーは小文字化） ============
 void HttpRequest::storeHeader(const std::string& rawKey, const std::string& value) {
   std::string k = toLowerAscii(rawKey);
-  this->headers_[rawKey] = value;      // 元のキー名のまま保持したいならこちら
-  // もし大文字小文字非依存を厳密に行う場合は：
-  // 別マップ (std::map<std::string,std::string> headers_ci_) を小文字キーで持つのも手
+  this->headers_[k] = value;      // // ヘッダーキーは小文字化して格納。元のキー名のまま保持したい場合があるか確認する。
 }
 
 void HttpRequest::validateAndExtractHost() {

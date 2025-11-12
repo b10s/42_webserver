@@ -50,7 +50,7 @@ class HttpRequest {
   static std::string::size_type find_end_of_header(const std::string& payload);
   const char* parseHeader(const char* req);
   bool isCRLF(const char* p) const;  
-  static std::string toLowerAscii(const std::string s);
+  static std::string toLowerAscii(const std::string& s);
   void bumpLenOrThrow(size_t& total, size_t inc) const;
   const char* readHeaderLine(const char* req, std::string& key, std::string& value, size_t& total_len);
   void storeHeader(const std::string& rawKey, const std::string& value);
