@@ -82,7 +82,7 @@ class HttpRequest {
   const char* consumeQuery(const char* req, std::size_t& len);
   const char* consumeHeader(const char* req);
   RequestMethod getMethod() const;
-  void setMethod(RequestMethod method) { method_ = method; } // for test purposes
+  void setMethod(RequestMethod method); // for test purposes
   const std::string& getUri() const;
   const std::string& getHostName() const;
   const std::string& getHostPort() const;

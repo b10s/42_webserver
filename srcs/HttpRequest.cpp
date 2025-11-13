@@ -48,6 +48,10 @@ RequestMethod HttpRequest::getMethod() const {
   return method_;
 }
 
+void HttpRequest::setMethod(RequestMethod method) {
+  method_ = method;
+}
+
 const std::string& HttpRequest::getUri() const {
   return uri_;
 }

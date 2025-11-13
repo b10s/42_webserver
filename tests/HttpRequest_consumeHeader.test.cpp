@@ -6,6 +6,7 @@
 
 #include "HttpRequest.hpp"
 #include "enums.hpp"
+#include "HttpRequest.hpp"
 
 // ============== HeaderStart struct and helper ==============
 struct HeaderStart {
