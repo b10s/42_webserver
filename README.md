@@ -34,3 +34,15 @@ Install **clang-format** using your package manager such as `brew` or `apt`.
 ```bash
 make format
 ```
+
+### Linting Command
+
+```bash
+make tidy
+```
+
+If you want to fix lint errors automatically, use following command.
+
+```bash
+make tidy-fix
+```
