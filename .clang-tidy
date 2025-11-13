@@ -1,0 +1,76 @@
+---
+# In this section, we define which checks we want to run or disable.
+# We enable most checks, including Google style checks, readability,
+# modernize, performance, and so on. Then we explicitly disable
+# certain checks that conflict with our style preferences.
+
+Checks: |
+  clang-diagnostic-*,
+  clang-analyzer-*,
+  google-*,
+  readability-*,
+  modernize-*,
+  performance-*,
+  readability-identifier-naming,
+  -google-runtime-references,
+  -google-readability-todo,
+  -modernize-use-trailing-return-type
+
+# Turn all warnings into errors.
+WarningsAsErrors: "*"
+
+HeaderFilterRegex: ".*"
+
+CheckOptions:
+  # ========================
+  # == Identifier Naming  ==
+  # ========================
+  #
+  # The following keys configure the naming style in line with
+  # a typical Google C++ Style approach, adjusting prefixes, suffixes,
+  # and case for classes, functions, variables, etc.
+
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassAbstractCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumConstantPrefix
+    value: "k"
+  - key: readability-identifier-naming.ConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstantPrefix
+    value: "k"
+  - key: readability-identifier-naming.FunctionCase
+    value: CamelCase
+  - key: readability-identifier-naming.MethodCase
+    value: CamelCase
+  - key: readability-identifier-naming.PrivateMethodCase
+    value: CamelCase
+  - key: readability-identifier-naming.ParameterCase
+    value: lower_case
+  - key: readability-identifier-naming.LocalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: lower_case
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: "g_"
+  - key: readability-identifier-naming.GlobalVariableIgnoredRegexp
+    value: "TAG|IRAM_ATTR"
+  - key: readability-identifier-naming.MemberCase
+    value: lower_case
+  - key: readability-identifier-naming.MemberSuffix
+    value: "_"
+  - key: readability-identifier-naming.ClassConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassConstantPrefix
+    value: "k"
+  - key: readability-identifier-naming.ClassMemberCase
+    value: lower_case
+  - key: readability-identifier-naming.ClassMemberSuffix
+    value: "_"
