@@ -4,6 +4,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+
 #include "enums.hpp"
 
 // http
@@ -46,10 +47,11 @@ class HttpRequest {
   bool consumeBody();
   static std::string::size_type find_end_of_header(const std::string& payload);
   const char* parseHeader(const char* req);
-  bool isCRLF(const char* p) const;  
+  bool isCRLF(const char* p) const;
   static std::string toLowerAscii(const std::string& s);
   void bumpLenOrThrow(size_t& total, size_t inc) const;
-  const char* readHeaderLine(const char* req, std::string& key, std::string& value, size_t& total_len);
+  const char* readHeaderLine(const char* req, std::string& key,
+                             std::string& value, size_t& total_len);
   void storeHeader(const std::string& rawKey, const std::string& value);
   void validateAndExtractHost();
   void validateBodyHeaders();
@@ -67,7 +69,7 @@ class HttpRequest {
   // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
-  static const std::string kDefaultPort; 
+  static const std::string kDefaultPort;
   bool keepAlive;
 
   HttpRequest();
@@ -82,7 +84,7 @@ class HttpRequest {
   const char* consumeQuery(const char* req, std::size_t& len);
   const char* consumeHeader(const char* req);
   RequestMethod getMethod() const;
-  void setMethod(RequestMethod method); // for test purposes
+  void setMethod(RequestMethod method);  // for test purposes
   const std::string& getUri() const;
   const std::string& getHostName() const;
   const std::string& getHostPort() const;
@@ -91,8 +93,14 @@ class HttpRequest {
   const std::string& getHeader(const std::string& key) const;
   const dict& getQuery() const;
   const std::string& getBody() const;
-  long getContentLength() const { return contentLength_; }
-  bool isKeepAlive() const { return keepAlive; }
+
+  long getContentLength() const {
+    return contentLength_;
+  }
+
+  bool isKeepAlive() const {
+    return keepAlive;
+  }
 
   bool isDone() const {
     return progress == DONE;

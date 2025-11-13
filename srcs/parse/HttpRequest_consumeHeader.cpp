@@ -1,7 +1,8 @@
-#include "HttpRequest.hpp"
-#include <cstdlib>  // for atoi
 #include <cctype>   // for std::tolower
+#include <cstdlib>  // for atoi
 #include <sstream>
+
+#include "HttpRequest.hpp"
 
 // ============== utils ===============
 bool HttpRequest::isCRLF(const char* p) const {
@@ -11,7 +12,8 @@ bool HttpRequest::isCRLF(const char* p) const {
 std::string HttpRequest::toLowerAscii(const std::string& s) {
   std::string result = s;
   for (size_t i = 0; i < result.size(); ++i) {
-    result[i] = static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
+    result[i] =
+        static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
   }
   return result;
 }
@@ -25,18 +27,21 @@ void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
 
 // we allow only single space after ":" and require CRLF at end
 // OWS (optional whitespace) is not supported for simplicity
-const char* HttpRequest::readHeaderLine(const char* req, std::string& key, std::string& value, size_t& totalLen) {
+const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
+                                        std::string& value, size_t& totalLen) {
   size_t i = 0;
-  while (req[i] && req[i] != ':' ) {
+  while (req[i] && req[i] != ':') {
     bumpLenOrThrow(totalLen, 1);
     ++i;
   }
-  if (req[i] == '\0' || req[i] != ':' || req[i + 1] != ' ') { // must be ": ", not ":" or end of string
+  if (req[i] == '\0' || req[i] != ':' ||
+      req[i + 1] != ' ') {  // must be ": ", not ":" or end of string
     throw http::responseStatusException(BAD_REQUEST);
   }
   key.assign(req, i);
   // ": " を飛ばす
-  i += 2; bumpLenOrThrow(totalLen, 2);
+  i += 2;
+  bumpLenOrThrow(totalLen, 2);
   req += i;
   // 2) 値は CR まで
   size_t vlen = 0;
@@ -47,22 +52,27 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key, std::
   if (!isCRLF(req + vlen)) {
     throw http::responseStatusException(BAD_REQUEST);
   }
-  value.assign(req, vlen); // value can be empty
-  bumpLenOrThrow(totalLen, 2); // skip CRLF
+  value.assign(req, vlen);      // value can be empty
+  bumpLenOrThrow(totalLen, 2);  // skip CRLF
   return req + vlen + 2;
 }
 
 // ============ ヘッダー表へ格納（キーは小文字化） ============
-void HttpRequest::storeHeader(const std::string& rawKey, const std::string& value) {
+void HttpRequest::storeHeader(const std::string& rawKey,
+                              const std::string& value) {
   std::string k = toLowerAscii(rawKey);
-  this->headers_[k] = value; // Store header key in lowercase. TODO: Consider whether to keep the original key name.
+  this->headers_[k] = value;  // Store header key in lowercase. TODO: Consider
+                              // whether to keep the original key name.
 }
 
 void HttpRequest::validateAndExtractHost() {
   std::string hostValue;
-  if (headers_.count("Host")) hostValue = headers_["Host"];
-  else if (headers_.count("host")) hostValue = headers_["host"];
-  else throw http::responseStatusException(BAD_REQUEST);
+  if (headers_.count("Host"))
+    hostValue = headers_["Host"];
+  else if (headers_.count("host"))
+    hostValue = headers_["host"];
+  else
+    throw http::responseStatusException(BAD_REQUEST);
 
   if (hostValue.empty()) throw http::responseStatusException(BAD_REQUEST);
   size_t i = 0;
@@ -76,19 +86,26 @@ void HttpRequest::validateAndExtractHost() {
   }
 }
 
-// This line checks for both 'Transfer-Encoding' and 'transfer-encoding', 
-// but since headers are normalized to lowercase, only 'transfer-encoding' should be accessed?
+// This line checks for both 'Transfer-Encoding' and 'transfer-encoding',
+// but since headers are normalized to lowercase, only 'transfer-encoding'
+// should be accessed?
 void HttpRequest::validateBodyHeaders() {
-  bool hasCL = headers_.count("Content-Length") || headers_.count("content-length");
-  bool hasTE = headers_.count("Transfer-Encoding") || headers_.count("transfer-encoding");
+  bool hasCL =
+      headers_.count("Content-Length") || headers_.count("content-length");
+  bool hasTE = headers_.count("Transfer-Encoding") ||
+               headers_.count("transfer-encoding");
   if (hasCL && hasTE) {
     throw http::responseStatusException(BAD_REQUEST);
   }
   if (hasCL) {
-    const std::string& s = headers_.count("Content-Length") ? headers_["Content-Length"] : headers_["content-length"];
+    const std::string& s = headers_.count("Content-Length")
+                               ? headers_["Content-Length"]
+                               : headers_["content-length"];
     parseContentLength(s);
   } else if (hasTE) {
-    const std::string& s = headers_.count("Transfer-Encoding") ? headers_["Transfer-Encoding"] : headers_["transfer-encoding"];
+    const std::string& s = headers_.count("Transfer-Encoding")
+                               ? headers_["Transfer-Encoding"]
+                               : headers_["transfer-encoding"];
     parseTransferEncoding(s);
   } else {
     if (method_ == POST) {
@@ -101,7 +118,8 @@ void HttpRequest::validateBodyHeaders() {
 void HttpRequest::parseContentLength(const std::string& s) {
   std::stringstream ss(s);
   ss >> contentLength_;
-  if (ss.fail() || contentLength_ < 0 || static_cast<size_t>(contentLength_) > kMaxPayloadSize) {
+  if (ss.fail() || contentLength_ < 0 ||
+      static_cast<size_t>(contentLength_) > kMaxPayloadSize) {
     throw http::responseStatusException(BAD_REQUEST);
   }
 }
@@ -115,14 +133,20 @@ void HttpRequest::parseTransferEncoding(const std::string& s) {
   }
 }
 
-// TODO: Since headers are normalized to lowercase, checking for both 'Connection' and 'connection' is redundant?
-// Only 'connection' should be checked?
+// TODO: Since headers are normalized to lowercase, checking for both
+// 'Connection' and 'connection' is redundant? Only 'connection' should be
+// checked?
 void HttpRequest::parseConnectionDirective() {
   if (headers_.count("Connection") || headers_.count("connection")) {
-    const std::string& v = headers_.count("Connection") ? headers_["Connection"] : headers_["connection"];
-    if (v == "close") keepAlive = false;
-    else if (v == "keep-alive") keepAlive = true;
-    else throw http::responseStatusException(BAD_REQUEST);
+    const std::string& v = headers_.count("Connection")
+                               ? headers_["Connection"]
+                               : headers_["connection"];
+    if (v == "close")
+      keepAlive = false;
+    else if (v == "keep-alive")
+      keepAlive = true;
+    else
+      throw http::responseStatusException(BAD_REQUEST);
   }
 }
 
@@ -137,7 +161,7 @@ const char* HttpRequest::consumeHeader(const char* req) {
     throw http::responseStatusException(BAD_REQUEST);
   }
   bumpLenOrThrow(totalLen, 2);
-  req += 2; // skip CRLF
+  req += 2;  // skip CRLF
   validateAndExtractHost();
   validateBodyHeaders();
   parseConnectionDirective();
