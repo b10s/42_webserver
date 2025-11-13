@@ -23,7 +23,7 @@ make test
 - Source files are located in the `srcs` directory, and corresponding test files should be placed under the `tests` directory.
 - Name all test files with the `.test.cpp` extension.
 
-## Code Formatter Usage
+## Coding Tools Usage
 
 ### Setup
 
@@ -33,4 +33,16 @@ Install **clang-format** using your package manager such as `brew` or `apt`.
 
 ```bash
 make format
+```
+
+### Linting Command
+
+```bash
+make tidy
+```
+
+If you want to fix lint errors automatically, use following command.
+
+```bash
+make tidy-fix
 ```
