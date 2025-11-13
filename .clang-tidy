@@ -9,12 +9,9 @@ Checks: |
   clang-analyzer-*,
   google-*,
   readability-*,
-  modernize-*,
-  performance-*,
   readability-identifier-naming,
   -google-runtime-references,
-  -google-readability-todo,
-  -modernize-use-trailing-return-type
+  -google-readability-todo
 
 # Turn all warnings into errors.
 WarningsAsErrors: "*"
