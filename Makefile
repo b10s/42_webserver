@@ -32,8 +32,16 @@ fclean: clean
 
 re: fclean all
 
+LLVM_BIN := $(shell brew --prefix llvm)/bin
+
 format:
-	find includes srcs tests -name *.cpp -o -name *.h -o -name *.hpp | xargs clang-format -i -style=file --verbose
+	find includes srcs -name *.cpp -o -name *.h -o -name *.hpp | xargs $(LLVM_BIN)/clang-format -i -style=file --verbose
+
+tidy:
+	find includes srcs -name *.cpp -o -name *.h -o -name *.hpp | xargs -I {} $(LLVM_BIN)/clang-tidy --config-file=.clang-tidy {} -- -Iincludes -std=c++98
+
+tidy-fix:
+	find includes srcs -name *.cpp -o -name *.h -o -name *.hpp | xargs -I {} $(LLVM_BIN)/clang-tidy --config-file=.clang-tidy -fix-errors {} -- -Iincludes -std=c++98
 
 test:
 	cmake -S . -B ./build
