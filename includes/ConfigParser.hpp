@@ -16,22 +16,22 @@
 #include "ServerConfig.hpp"
 #include "enums.hpp"
 
-namespace ConfigTokens {
-const std::string SERVER = "server";
-const std::string LOCATION = "location";
-const std::string ERROR_PAGE = "error_page";
-const std::string MAX_BODY = "client_max_body_size";
-const std::string LISTEN = "listen";
-const std::string SERVER_NAME = "server_name";
-const std::string ROOT = "root";
-const std::string INDEX = "index";
-const std::string AUTOINDEX = "autoindex";
-const std::string ALLOW_METHODS = "allow_methods";
-const std::string CGI_PATH = "cgi_path";
-const std::string REDIRECT = "return";
-const std::string EXTENSION = "extension";
-const std::string UPLOAD_PATH = "upload_path";
-}  // namespace ConfigTokens
+namespace config_tokens {
+const std::string kListen = "listen";
+const std::string kServerName = "server_name";
+const std::string kMaxBody = "client_max_body_size";
+const std::string kErrorPage = "error_page";
+const std::string kLocation = "location";
+const std::string kAllowMethods = "allow_methods";
+const std::string kRoot = "root";
+const std::string kAutoIndex = "autoindex";
+const std::string kIndex = "index";
+const std::string kExtension = "extension";
+const std::string kUploadPath = "upload_path";
+const std::string kServer = "server";
+const std::string kRedirect = "return";
+const std::string kCgiPath = "cgi_path";
+}  // namespace config_tokens
 
 namespace UrlConstants {
 const std::string kHttpsPrefix = "https://";
@@ -40,8 +40,8 @@ const std::string kHttpPrefix = "http://";
 
 class ConfigParser {
  private:
-  size_t currentPos_;
-  std::vector<ServerConfig> serverConfigs_;
+  size_t current_pos_;
+  std::vector<ServerConfig> server_configs_;
   bool isValidPortNumber(const std::string& port) const;
   bool isAllDigits(const std::string& str) const;
   bool isDirective(const std::string& token) const;
@@ -75,7 +75,7 @@ class ConfigParser {
   void parseSimpleDirective(T* obj, Setter setter, const std::string& errorMsg);
 
   const std::vector<ServerConfig>& getServerConfigs() const {
-    return serverConfigs_;
+    return server_configs_;
   }
 };
 

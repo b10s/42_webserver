@@ -10,19 +10,19 @@ const std::string kSpecialLetter = "{};";
 namespace {
 std::map<std::string, TokenType> createTokenTable() {
   std::map<std::string, TokenType> m;
-  m.insert(std::make_pair(ConfigTokens::LISTEN, TOKEN_LISTEN));
-  m.insert(std::make_pair(ConfigTokens::SERVER_NAME, TOKEN_SERVER_NAME));
-  m.insert(std::make_pair(ConfigTokens::MAX_BODY, TOKEN_MAX_BODY));
-  m.insert(std::make_pair(ConfigTokens::ERROR_PAGE, TOKEN_ERROR_PAGE));
-  m.insert(std::make_pair(ConfigTokens::LOCATION, TOKEN_LOCATION));
-  m.insert(std::make_pair(ConfigTokens::ALLOW_METHODS, TOKEN_ALLOW_METHODS));
-  m.insert(std::make_pair(ConfigTokens::ROOT, TOKEN_ROOT));
-  m.insert(std::make_pair(ConfigTokens::AUTOINDEX, TOKEN_AUTOINDEX));
-  m.insert(std::make_pair(ConfigTokens::INDEX, TOKEN_INDEX));
-  m.insert(std::make_pair(ConfigTokens::EXTENSION, TOKEN_EXTENSION));
-  m.insert(std::make_pair(ConfigTokens::UPLOAD_PATH, TOKEN_UPLOAD_PATH));
-  m.insert(std::make_pair(ConfigTokens::REDIRECT, TOKEN_REDIRECT));
-  m.insert(std::make_pair(ConfigTokens::CGI_PATH, TOKEN_CGI_PATH));
+  m.insert(std::make_pair(config_tokens::kListen, TOKEN_LISTEN));
+  m.insert(std::make_pair(config_tokens::kServerName, TOKEN_SERVER_NAME));
+  m.insert(std::make_pair(config_tokens::kMaxBody, TOKEN_MAX_BODY));
+  m.insert(std::make_pair(config_tokens::kErrorPage, TOKEN_ERROR_PAGE));
+  m.insert(std::make_pair(config_tokens::kLocation, TOKEN_LOCATION));
+  m.insert(std::make_pair(config_tokens::kAllowMethods, TOKEN_ALLOW_METHODS));
+  m.insert(std::make_pair(config_tokens::kRoot, TOKEN_ROOT));
+  m.insert(std::make_pair(config_tokens::kAutoIndex, TOKEN_AUTOINDEX));
+  m.insert(std::make_pair(config_tokens::kIndex, TOKEN_INDEX));
+  m.insert(std::make_pair(config_tokens::kExtension, TOKEN_EXTENSION));
+  m.insert(std::make_pair(config_tokens::kUploadPath, TOKEN_UPLOAD_PATH));
+  m.insert(std::make_pair(config_tokens::kRedirect, TOKEN_REDIRECT));
+  m.insert(std::make_pair(config_tokens::kCgiPath, TOKEN_CGI_PATH));
   return m;
 }
 
@@ -39,22 +39,22 @@ TokenType ConfigParser::toTokenType(const std::string& token) const {
 // Parameters: content: The entire configuration file as a string
 // Returns: The next token string
 std::string ConfigParser::tokenize(const std::string& content) {
-  if (currentPos_ >= content.size()) return "";
+  if (current_pos_ >= content.size()) return "";
 
-  while (currentPos_ < content.size() &&
-         kWhitespace.find(content[currentPos_]) != std::string::npos)
-    currentPos_++;
-  if (currentPos_ >= content.size()) return "";
+  while (current_pos_ < content.size() &&
+         kWhitespace.find(content[current_pos_]) != std::string::npos)
+    current_pos_++;
+  if (current_pos_ >= content.size()) return "";
   // handle special characters as single character tokens
-  if (kSpecialLetter.find(content[currentPos_]) != std::string::npos)
-    return std::string(1, content[currentPos_++]);
+  if (kSpecialLetter.find(content[current_pos_]) != std::string::npos)
+    return std::string(1, content[current_pos_++]);
   // extract regular token
-  size_t start = currentPos_;
-  while (currentPos_ < content.size() &&
-         kWhitespace.find(content[currentPos_]) == std::string::npos &&
-         kSpecialLetter.find(content[currentPos_]) == std::string::npos)
-    currentPos_++;
-  return content.substr(start, currentPos_ - start);
+  size_t start = current_pos_;
+  while (current_pos_ < content.size() &&
+         kWhitespace.find(content[current_pos_]) == std::string::npos &&
+         kSpecialLetter.find(content[current_pos_]) == std::string::npos)
+    current_pos_++;
+  return content.substr(start, current_pos_ - start);
 }
 
 bool ConfigParser::isValidPortNumber(const std::string& port) const {
