@@ -52,12 +52,13 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   if (!IsCRLF(req + vlen)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
-  value.assign(req, vlen);      // value can be empty
+  value.assign(req, vlen);       // value can be empty
   bumpLenOrThrow(total_len, 2);  // skip CRLF
   return req + vlen + 2;
 }
 
-// Store header key in lowercase. We are not keeping original case for simplicity.
+// Store header key in lowercase. We are not keeping original case for
+// simplicity.
 void HttpRequest::storeHeader(const std::string& raw_key,
                               const std::string& value) {
   std::string k = ToLowerAscii(raw_key);

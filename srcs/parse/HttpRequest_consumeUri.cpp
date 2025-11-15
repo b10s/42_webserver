@@ -17,7 +17,8 @@ inline const char* ConsumeUntilStopChar(const char* req, std::size_t& len,
     }
     ++len;
     BumpOrThrow(len);
-    if (!http::IsVisibleAscii(*req)) throw http::ResponseStatusException(BAD_REQUEST);
+    if (!http::IsVisibleAscii(*req))
+      throw http::ResponseStatusException(BAD_REQUEST);
     ++req;
   }
   return req;

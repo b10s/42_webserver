@@ -11,6 +11,7 @@
 namespace http {
 std::string StatusToString(HttpStatus status);
 std::string MethodToString(RequestMethod method);
+
 inline bool IsVisibleAscii(char c) {
   return c >= '!' && c <= '~';
 }

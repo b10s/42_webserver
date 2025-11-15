@@ -1,6 +1,7 @@
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser() : current_pos_(0), server_configs_(), content_("") {
+ConfigParser::ConfigParser()
+    : current_pos_(0), server_configs_(), content_("") {
 }
 
 ConfigParser::ConfigParser(const std::string& text)
