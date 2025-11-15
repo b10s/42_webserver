@@ -91,12 +91,12 @@ TEST_F(HttpRequestconsumeHeader, MissingHost_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestconsumeHeader, EmptyHost_ThrowsBadRequest) {
@@ -109,12 +109,12 @@ TEST_F(HttpRequestconsumeHeader, EmptyHost_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Content-Length / Transfer-Encoding ===============
@@ -130,12 +130,12 @@ TEST_F(HttpRequestconsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // if method is POST and neither Content-Length nor Transfer-Encoding is present, throw LENGTH_REQUIRED
@@ -150,12 +150,12 @@ TEST_F(HttpRequestconsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(LENGTH_REQUIRED, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Content-Length の検証 ===============
@@ -184,12 +184,12 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestconsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
@@ -205,12 +205,12 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Transfer-Encoding ===============
@@ -237,12 +237,12 @@ TEST_F(HttpRequestconsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) 
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(NOT_IMPLEMENTED, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Connection ===============
@@ -280,12 +280,12 @@ TEST_F(HttpRequestconsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Bad requests ===============
@@ -299,12 +299,12 @@ TEST_F(HttpRequestconsumeHeader, MissingColon_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestconsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
@@ -317,12 +317,12 @@ TEST_F(HttpRequestconsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
@@ -335,12 +335,12 @@ TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestconsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTooLarge) {
@@ -355,10 +355,10 @@ TEST_F(HttpRequestconsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTo
       {
         try {
           req.consumeHeader(hs.p_headers);
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(REQUEST_HEADER_FIELDS_TOO_LARGE, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }

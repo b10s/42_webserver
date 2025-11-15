@@ -20,7 +20,7 @@ std::string HttpRequest::toLowerAscii(const std::string& s) {
 
 void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
   if (inc > kMaxHeaderSize - total) {
-    throw http::responseStatusException(REQUEST_HEADER_FIELDS_TOO_LARGE);
+    throw http::ResponseStatusException(REQUEST_HEADER_FIELDS_TOO_LARGE);
   }
   total += inc;
 }
@@ -36,7 +36,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
   }
   if (req[i] == '\0' || req[i] != ':' ||
       req[i + 1] != ' ') {  // must be ": ", not ":" or end of string
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   key.assign(req, i);
   // ": " を飛ばす
@@ -50,7 +50,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
     ++vlen;
   }
   if (!isCRLF(req + vlen)) {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   value.assign(req, vlen);      // value can be empty
   bumpLenOrThrow(totalLen, 2);  // skip CRLF
@@ -69,12 +69,12 @@ void HttpRequest::validateAndExtractHost() {
   if (headers_.count("host"))
     hostValue = headers_["host"];
   else
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
 
-  if (hostValue.empty()) throw http::responseStatusException(BAD_REQUEST);
+  if (hostValue.empty()) throw http::ResponseStatusException(BAD_REQUEST);
   size_t i = 0;
   while (i < hostValue.size() && hostValue[i] != ':') ++i;
-  if (i == 0) throw http::responseStatusException(BAD_REQUEST);
+  if (i == 0) throw http::ResponseStatusException(BAD_REQUEST);
   this->hostName_ = hostValue.substr(0, i);
   if (i == hostValue.size()) {
     this->hostPort_ = kDefaultPort;
@@ -90,7 +90,7 @@ void HttpRequest::validateBodyHeaders() {
   bool hasCL = headers_.count("content-length");
   bool hasTE = headers_.count("transfer-encoding");
   if (hasCL && hasTE) {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   if (hasCL) {
     const std::string& s = headers_["content-length"];
@@ -100,7 +100,7 @@ void HttpRequest::validateBodyHeaders() {
     parseTransferEncoding(s);
   } else {
     if (method_ == POST) {
-      throw http::responseStatusException(LENGTH_REQUIRED);
+      throw http::ResponseStatusException(LENGTH_REQUIRED);
     }
     contentLength_ = 0;
   }
@@ -111,7 +111,7 @@ void HttpRequest::parseContentLength(const std::string& s) {
   ss >> contentLength_;
   if (ss.fail() || contentLength_ < 0 ||
       static_cast<size_t>(contentLength_) > kMaxPayloadSize) {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
 }
 
@@ -120,7 +120,7 @@ void HttpRequest::parseTransferEncoding(const std::string& s) {
   if (s == "chunked") {
     contentLength_ = -1;
   } else {
-    throw http::responseStatusException(NOT_IMPLEMENTED);
+    throw http::ResponseStatusException(NOT_IMPLEMENTED);
   }
 }
 
@@ -136,7 +136,7 @@ void HttpRequest::parseConnectionDirective() {
     else if (v == "keep-alive")
       keepAlive = true;
     else
-      throw http::responseStatusException(BAD_REQUEST);
+      throw http::ResponseStatusException(BAD_REQUEST);
     return;
   }
   // HTTP/1.1 default is keep-alive
@@ -151,7 +151,7 @@ const char* HttpRequest::consumeHeader(const char* req) {
     storeHeader(key, value);
   }
   if (!isCRLF(req)) {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   bumpLenOrThrow(totalLen, 2);
   req += 2;  // skip CRLF

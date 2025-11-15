@@ -9,15 +9,18 @@
 
 // http
 namespace http {
-std::string statusToString(HttpStatus status);
-std::string methodToString(RequestMethod method);
+std::string StatusToString(HttpStatus status);
+std::string MethodToString(RequestMethod method);
+inline bool IsVisibleAscii(char c) {
+  return c >= '!' && c <= '~';
+}
 
-class responseStatusException : public std::runtime_error {
+class ResponseStatusException : public std::runtime_error {
  private:
   HttpStatus status_;
 
  public:
-  responseStatusException(HttpStatus status);
+  ResponseStatusException(HttpStatus status);
   HttpStatus getStatus() const;
 };
 }  // namespace http

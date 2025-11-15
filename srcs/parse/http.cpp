@@ -1,7 +1,7 @@
 #include "HttpRequest.hpp"
 
 namespace http {
-std::string statusToString(HttpStatus status) {
+std::string StatusToString(HttpStatus status) {
   switch (status) {
     case OK:
       return "OK";
@@ -42,15 +42,15 @@ std::string statusToString(HttpStatus status) {
   }
 }
 
-responseStatusException::responseStatusException(HttpStatus status)
-    : std::runtime_error(statusToString(status)), status_(status) {
+ResponseStatusException::ResponseStatusException(HttpStatus status)
+    : std::runtime_error(StatusToString(status)), status_(status) {
 }
 
-HttpStatus responseStatusException::getStatus() const {
+HttpStatus ResponseStatusException::getStatus() const {
   return this->status_;
 }
 
-std::string methodToString(RequestMethod method) {
+std::string MethodToString(RequestMethod method) {
   switch (method) {
     case GET:
       return "GET";

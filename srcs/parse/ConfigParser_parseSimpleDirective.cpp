@@ -16,7 +16,7 @@ void ConfigParser::parseRedirect(Location* location) {
   parseSimpleDirective(location, &Location::setRedirect, "redirect value");
 }
 
-void ConfigParser::parseServerName(ServerConfig* serverConfig) {
-  parseSimpleDirective(serverConfig, &ServerConfig::setServerName,
+void ConfigParser::parseServerName(ServerConfig* server_config) {
+  parseSimpleDirective(server_config, &ServerConfig::setServerName,
                        "server_name value");
 }

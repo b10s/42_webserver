@@ -71,12 +71,12 @@ TEST_F(HttpRequestParseUri, EmptyPath_ThrowsBadRequest) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
@@ -85,12 +85,12 @@ TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
@@ -99,12 +99,12 @@ TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
@@ -113,12 +113,12 @@ TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // origin-form has to start with '/'
@@ -128,12 +128,12 @@ TEST_F(HttpRequestParseUri, PathMustStartWithSlash_ThrowsBadRequest) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Length boundary (kMaxUriSize) ===============
@@ -153,12 +153,12 @@ TEST_F(HttpRequestParseUri, UriTooLong_Throws414_WhenReachesLimitExactly) {
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(URI_TOO_LONG, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, UriMaxMinusOne_OK_ButMax_EXACT_Throws) {
@@ -197,10 +197,10 @@ TEST_F(HttpRequestParseUri,
       {
         try {
           req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
+        } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.getStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }

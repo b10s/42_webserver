@@ -1,13 +1,8 @@
 #include "HttpRequest.hpp"
 
-namespace {
-inline bool isVisibleAscii(char c) {
-  return c >= '!' && c <= '~';
-}
-
 inline void bumpOrThrow(std::size_t& len) {
   if (len >= HttpRequest::kMaxUriSize) {
-    throw http::responseStatusException(URI_TOO_LONG);
+    throw http::ResponseStatusException(URI_TOO_LONG);
   }
 }
 
@@ -15,19 +10,18 @@ inline void bumpOrThrow(std::size_t& len) {
 // we are not implementing pct-encoding (%HH) here for simplicity
 // query = *( pchar / "/" / "?" )  ... "/" and "?" are allowed in query
 inline const char* consumeUntilStopChar(const char* req, std::size_t& len,
-                                        const char* stopChar) {
-  while (*req && std::strchr(stopChar, *req) == 0) {
+                                        const char* stop_char) {
+  while (*req && std::strchr(stop_char, *req) == 0) {
     if (*req == '#') {  // fragment not allowed in HTTP request URI
-      throw http::responseStatusException(BAD_REQUEST);
+      throw http::ResponseStatusException(BAD_REQUEST);
     }
     ++len;
     bumpOrThrow(len);
-    if (!isVisibleAscii(*req)) throw http::responseStatusException(BAD_REQUEST);
+    if (!http::IsVisibleAscii(*req)) throw http::ResponseStatusException(BAD_REQUEST);
     ++req;
   }
   return req;
 }
-}  // namespace
 
 // read query--- req points to the next char after '?'
 // len is the length of the URI part read so far (including '?')
@@ -37,7 +31,7 @@ const char* HttpRequest::consumeQuery(const char* req, std::size_t& len) {
     const char* key_end = consumeUntilStopChar(req, len, " =&");
     std::string key(key_begin, key_end - key_begin);  // key should not be empty
     req = key_end;
-    if (key.empty()) throw http::responseStatusException(BAD_REQUEST);
+    if (key.empty()) throw http::ResponseStatusException(BAD_REQUEST);
     std::string val;  // val can be empty so initialize as empty
     if (*req == '=') {
       ++req;  // skip '='
@@ -64,13 +58,13 @@ const char* HttpRequest::consumeQuery(const char* req, std::size_t& len) {
 const char* HttpRequest::consumeUri(const char* req) {
   std::size_t len = 0;
   if (*req != '/') {  // origin-form must start with '/'
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
 
   const char* path_stop = consumeUntilStopChar(req, len, " ?");
   uri_.assign(req, path_stop - req);
   if (uri_.empty() || (*path_stop != ' ' && *path_stop != '?')) {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   req = path_stop;
   if (*req == '?') {
@@ -80,7 +74,7 @@ const char* HttpRequest::consumeUri(const char* req) {
     req = consumeQuery(req, len);
   }
   if (*req != ' ') {
-    throw http::responseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(BAD_REQUEST);
   }
   return req + 1;  // skip space after URI and move to consume version
 }

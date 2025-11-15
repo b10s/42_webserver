@@ -29,5 +29,5 @@ const char* HttpRequest::consumeMethod(const char* req) {
     default:
       break;
   }
-  throw http::responseStatusException(NOT_IMPLEMENTED);
+  throw http::ResponseStatusException(NOT_IMPLEMENTED);
 }

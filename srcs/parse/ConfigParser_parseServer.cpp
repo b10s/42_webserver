@@ -18,29 +18,29 @@ void ConfigParser::parseServer() {
   if (token != "{") {
     throw std::runtime_error("Syntax error: " + token);
   }
-  ServerConfig serverConfig = ServerConfig();
+  ServerConfig server_config = ServerConfig();
   while (true) {
     token = tokenize(content_);
     if (token == "}") break;
     switch (toTokenType(token)) {
       case TOKEN_LISTEN:
-        parseListen(&serverConfig);
+        parseListen(&server_config);
         break;
       case TOKEN_SERVER_NAME:
-        parseServerName(&serverConfig);
+        parseServerName(&server_config);
         break;
       case TOKEN_MAX_BODY:
-        parseMaxBody(&serverConfig);
+        parseMaxBody(&server_config);
         break;
       case TOKEN_ERROR_PAGE:
-        parseErrorPage(&serverConfig);
+        parseErrorPage(&server_config);
         break;
       case TOKEN_LOCATION:
-        parseLocation(&serverConfig);
+        parseLocation(&server_config);
         break;
       default:
         throw std::runtime_error("Unknown directive: " + token);
     }
   }
-  this->server_configs_.push_back(serverConfig);
+  this->server_configs_.push_back(server_config);
 }

@@ -57,12 +57,12 @@ class ConfigParser {
 
   void parse();
   void parseServer();
-  void parseListen(ServerConfig* serverConfig);
-  void parseServerName(ServerConfig* serverConfig);
-  void parseMaxBody(ServerConfig* serverConfig);
-  void parseErrorPage(ServerConfig* serverConfig);
+  void parseListen(ServerConfig* server_config);
+  void parseServerName(ServerConfig* server_config);
+  void parseMaxBody(ServerConfig* server_config);
+  void parseErrorPage(ServerConfig* server_config);
 
-  void parseLocation(ServerConfig* serverConfig);
+  void parseLocation(ServerConfig* server_config);
   void consumeMethods(Location* location);
   void parseRoot(Location* location);
   void parseAutoIndex(Location* location);
