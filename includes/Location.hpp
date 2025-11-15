@@ -24,43 +24,43 @@ class Location {
  public:
   Location();
 
-  void setName(const std::string& name) {
+  void SetName(const std::string& name) {
     name_ = name;
   }
 
-  const std::string& getName() const {
+  const std::string& GetName() const {
     return name_;
   }
 
-  void setRoot(const std::string& root) {
+  void SetRoot(const std::string& root) {
     root_ = root;
   }
 
-  const std::string& getRoot() const {
+  const std::string& GetRoot() const {
     return root_;
   }
 
-  void setAutoIndex(bool autoindex) {
+  void SetAutoIndex(bool autoindex) {
     autoindex_ = autoindex;
   }
 
-  bool getAutoIndex() const {
+  bool GetAutoIndex() const {
     return autoindex_;
   }
 
-  void addIndex(const std::string& index) {
+  void AddIndex(const std::string& index) {
     index_files_.push_back(index);
   }
 
-  const std::vector<std::string>& getIndexFiles() const {
+  const std::vector<std::string>& GetIndexFiles() const {
     return index_files_;
   }
 
-  void setExtension(const std::string& ext) {
+  void SetExtension(const std::string& ext) {
     extensions_ = ext;
   }
 
-  const std::string& getExtensions() const {
+  const std::string& GetExtensions() const {
     return extensions_;
   }
 

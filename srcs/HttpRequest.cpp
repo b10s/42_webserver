@@ -17,7 +17,7 @@ HttpRequest::HttpRequest()
       headers_(),
       body_(),
       content_length_(-1),  // default: unknown length, chunked possible
-      keepAlive(false) {
+      keep_alive(false) {
 }
 
 HttpRequest::HttpRequest(const HttpRequest& src) {
@@ -35,7 +35,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     headers_ = src.headers_;
     body_ = src.body_;
     content_length_ = src.content_length_;
-    keepAlive = src.keepAlive;
+    keep_alive = src.keep_alive;
     progress_ = src.progress_;
   }
   return *this;

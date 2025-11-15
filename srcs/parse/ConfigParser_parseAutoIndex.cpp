@@ -9,7 +9,7 @@ void ConfigParser::parseAutoIndex(Location* location) {
   if (token != "on" && token != "off") {
     throw std::runtime_error("Invalid autoindex value: " + token);
   }
-  if (token == "on") location->setAutoIndex(true);
+  if (token == "on") location->SetAutoIndex(true);
   token = tokenize(content_);
   if (token != ";")
     throw std::runtime_error(

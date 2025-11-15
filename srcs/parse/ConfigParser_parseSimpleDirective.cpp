@@ -1,7 +1,7 @@
 #include "ConfigParser.hpp"
 
 void ConfigParser::parseRoot(Location* location) {
-  parseSimpleDirective(location, &Location::setRoot, "root directory path");
+  parseSimpleDirective(location, &Location::SetRoot, "root directory path");
 }
 
 void ConfigParser::parseCgiPath(Location* location) {

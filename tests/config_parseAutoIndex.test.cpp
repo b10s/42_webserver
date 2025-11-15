@@ -40,12 +40,12 @@ class ConfigParserTest : public ::testing::Test {
 
 TEST_F(ConfigParserTest, ParseAutoIndex_On_SetsTrue) {
   EXPECT_NO_THROW(CallParseAutoIndex("on;"));
-  EXPECT_TRUE(loc.getAutoIndex());
+  EXPECT_TRUE(loc.GetAutoIndex());
 }
 
 TEST_F(ConfigParserTest, ParseAutoIndex_Off_StaysFalse) {
   EXPECT_NO_THROW(CallParseAutoIndex("off;"));
-  EXPECT_FALSE(loc.getAutoIndex());
+  EXPECT_FALSE(loc.GetAutoIndex());
 }
 
 TEST_F(ConfigParserTest, ParseAutoIndex_MissingValue_Throws) {

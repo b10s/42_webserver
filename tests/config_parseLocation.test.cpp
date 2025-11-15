@@ -20,7 +20,7 @@ TEST(ConfigParser, Location_MinimalEmptyBlock_AddsLocation) {
 
   const std::vector<Location>& locs = sc.getLocations();
   ASSERT_EQ(locs.size(), 1u);
-  EXPECT_EQ(locs[0].getName(), "/images/");
+  EXPECT_EQ(locs[0].GetName(), "/images/");
 }
 
 // only one known directive such as `autoindex on;`
@@ -30,8 +30,8 @@ TEST(ConfigParser, Location_WithAutoIndexOn) {
 
   const std::vector<Location>& locs = sc.getLocations();
   ASSERT_EQ(locs.size(), 1u);
-  EXPECT_EQ(locs[0].getName(), "/cgi/");
-  EXPECT_TRUE(locs[0].getAutoIndex());
+  EXPECT_EQ(locs[0].GetName(), "/cgi/");
+  EXPECT_TRUE(locs[0].GetAutoIndex());
 }
 
 TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
@@ -47,7 +47,7 @@ TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
 
   const std::vector<Location>& locs = sc.getLocations();
   ASSERT_EQ(locs.size(), 1u);
-  EXPECT_EQ(locs[0].getName(), "/app/");
+  EXPECT_EQ(locs[0].GetName(), "/app/");
 }
 
 // ==================== error cases ====================

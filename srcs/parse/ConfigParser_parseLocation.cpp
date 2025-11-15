@@ -9,7 +9,7 @@ void ConfigParser::parseLocation(ServerConfig* server) {
   token = tokenize(content_);
   if (token.empty() || token[0] != '/' || token[token.size() - 1] != '/')
     throw std::runtime_error("Invalid location name: " + token);
-  location.setName(token);
+  location.SetName(token);
   token = tokenize(content_);
   if (token != "{")
     throw std::runtime_error(

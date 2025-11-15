@@ -6,7 +6,7 @@ void ConfigParser::parseIndex(Location* location) {
     throw std::runtime_error("Syntax error : expected index file name" + token);
   }
   while (token != ";") {
-    location->addIndex(token);
+    location->AddIndex(token);
     token = tokenize(content_);
     if (token.empty() || isDirective(token)) {
       throw std::runtime_error(

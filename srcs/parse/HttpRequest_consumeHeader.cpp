@@ -132,15 +132,15 @@ void HttpRequest::parseConnectionDirective() {
   if (headers_.count(key)) {
     const std::string& v = headers_[key];
     if (v == "close")
-      keepAlive = false;
+      keep_alive = false;
     else if (v == "keep-alive")
-      keepAlive = true;
+      keep_alive = true;
     else
       throw http::ResponseStatusException(BAD_REQUEST);
     return;
   }
   // HTTP/1.1 default is keep-alive
-  keepAlive = (version_ == "HTTP/1.1");
+  keep_alive = (version_ == "HTTP/1.1");
 }
 
 const char* HttpRequest::consumeHeader(const char* req) {

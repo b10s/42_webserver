@@ -73,7 +73,7 @@ class HttpRequest {
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
   static const std::string kDefaultPort;
-  bool keepAlive;
+  bool keep_alive;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);
@@ -102,7 +102,7 @@ class HttpRequest {
   }
 
   bool isKeepAlive() const {
-    return keepAlive;
+    return keep_alive;
   }
 
   bool isDone() const {

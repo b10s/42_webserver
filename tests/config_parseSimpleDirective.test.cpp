@@ -40,7 +40,7 @@ static void callParseServerName(const std::string& input, ServerConfig* sc) {
 TEST(ConfigParser, SimpleDir_parseRoot_OK) {
   Location loc;
   EXPECT_NO_THROW(callParseRoot("/var/www/html;", &loc));
-  EXPECT_EQ(loc.getRoot(), "/var/www/html");
+  EXPECT_EQ(loc.GetRoot(), "/var/www/html");
 }
 
 TEST(ConfigParser, SimpleDir_parseRoot_MissingSemicolon_Throws) {

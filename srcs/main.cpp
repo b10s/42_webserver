@@ -46,18 +46,18 @@ int main() {
       const std::vector<Location>& locations = servers[i].getLocations();
       for (size_t j = 0; j < locations.size(); ++j) {
         std::cout << "    Location " << j << ":\n";
-        std::cout << "      Name: " << locations[j].getName() << "\n";
-        std::cout << "      Root: " << locations[j].getRoot() << "\n";
+        std::cout << "      Name: " << locations[j].GetName() << "\n";
+        std::cout << "      Root: " << locations[j].GetRoot() << "\n";
         std::cout << "      Autoindex: "
-                  << (locations[j].getAutoIndex() ? "on" : "off") << "\n";
+                  << (locations[j].GetAutoIndex() ? "on" : "off") << "\n";
         std::cout << "      Index Files: ";
         const std::vector<std::string>& index_files =
-            locations[j].getIndexFiles();
+            locations[j].GetIndexFiles();
         for (size_t k = 0; k < index_files.size(); ++k) {
           std::cout << index_files[k] << " ";
         }
         std::cout << "\n";
-        std::cout << "      Extensions: " << locations[j].getExtensions();
+        std::cout << "      Extensions: " << locations[j].GetExtensions();
         std::cout << "\n";
         std::cout << "      Upload Path: " << locations[j].getUploadPath()
                   << "\n";
