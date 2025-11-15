@@ -59,7 +59,7 @@ TEST_F(HttpRequestParse, consumeMethod_UnsupportedMethod_ThrowsNotImplemented) {
         try {
           req.consumeMethod(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(NOT_IMPLEMENTED, e.getStatus());
+          EXPECT_EQ(NOT_IMPLEMENTED, e.GetStatus());
           throw;
         }
       },

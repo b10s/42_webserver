@@ -15,7 +15,7 @@ TEST(OptionalTest, ValueMethodReturnsValue) {
 TEST(OptionalTest, ValueMethodThrowsException) {
   lib::type::Optional<int> test;
 
-  EXPECT_THROW(test.value(), lib::exception::bad_optional_access);
+  EXPECT_THROW(test.value(), lib::exception::BadOptionalAccess);
 }
 
 TEST(OptionalTest, OperatorOverload) {
@@ -41,5 +41,5 @@ TEST(OptionalTest, ResetMethod) {
   lib::type::Optional<int> test = 1;
   test.reset();
 
-  EXPECT_THROW(test.value(), lib::exception::bad_optional_access);
+  EXPECT_THROW(test.value(), lib::exception::BadOptionalAccess);
 }

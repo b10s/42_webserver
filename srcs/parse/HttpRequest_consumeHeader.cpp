@@ -5,11 +5,11 @@
 #include "HttpRequest.hpp"
 
 // ============== utils ===============
-bool HttpRequest::isCRLF(const char* p) const {
+bool HttpRequest::IsCRLF(const char* p) const {
   return p != NULL && p[0] == '\r' && p[1] == '\n';
 }
 
-std::string HttpRequest::toLowerAscii(const std::string& s) {
+std::string HttpRequest::ToLowerAscii(const std::string& s) {
   std::string result = s;
   for (size_t i = 0; i < result.size(); ++i) {
     result[i] =
@@ -27,7 +27,7 @@ void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
 
 // we allow only single space after ":" and require CRLF at end
 // OWS (optional whitespace) is not supported for simplicity
-const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
+const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
                                         std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
@@ -49,7 +49,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
     bumpLenOrThrow(total_len, 1);
     ++vlen;
   }
-  if (!isCRLF(req + vlen)) {
+  if (!IsCRLF(req + vlen)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
   value.assign(req, vlen);      // value can be empty
@@ -60,7 +60,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
 // Store header key in lowercase. We are not keeping original case for simplicity.
 void HttpRequest::storeHeader(const std::string& raw_key,
                               const std::string& value) {
-  std::string k = toLowerAscii(raw_key);
+  std::string k = ToLowerAscii(raw_key);
   headers_[k] = value;
 }
 
@@ -145,12 +145,12 @@ void HttpRequest::parseConnectionDirective() {
 
 const char* HttpRequest::consumeHeader(const char* req) {
   size_t total_len = 0;
-  while (*req && !isCRLF(req)) {
+  while (*req && !IsCRLF(req)) {
     std::string key, value;
-    req = readHeaderLine(req, key, value, total_len);
+    req = ReadHeaderLine(req, key, value, total_len);
     storeHeader(key, value);
   }
-  if (!isCRLF(req)) {
+  if (!IsCRLF(req)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
   bumpLenOrThrow(total_len, 2);

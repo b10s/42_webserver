@@ -72,7 +72,7 @@ TEST_F(HttpRequestParseUri, EmptyPath_ThrowsBadRequest) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },
@@ -86,7 +86,7 @@ TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },
@@ -100,7 +100,7 @@ TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },
@@ -114,7 +114,7 @@ TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },
@@ -129,7 +129,7 @@ TEST_F(HttpRequestParseUri, PathMustStartWithSlash_ThrowsBadRequest) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },
@@ -154,7 +154,7 @@ TEST_F(HttpRequestParseUri, UriTooLong_Throws414_WhenReachesLimitExactly) {
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(URI_TOO_LONG, e.getStatus());
+          EXPECT_EQ(URI_TOO_LONG, e.GetStatus());
           throw;
         }
       },
@@ -198,7 +198,7 @@ TEST_F(HttpRequestParseUri,
         try {
           req.consumeUri(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
         }
       },

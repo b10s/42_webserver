@@ -78,12 +78,10 @@ const Dict& HttpRequest::getHeader() const {
 
 const std::string& HttpRequest::getHeader(const std::string& key) const {
   Dict::const_iterator it = headers_.find(key);
-  if (it != headers_.end()) {
-    return it->second;
-  } else {
-    static const std::string e;
-    return e;
+  if (it == headers_.end()) {
+    throw std::out_of_range("Header not found: " + key);
   }
+  return it->second;
 }
 
 const std::string& HttpRequest::getBody() const {

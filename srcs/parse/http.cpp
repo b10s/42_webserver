@@ -46,7 +46,7 @@ ResponseStatusException::ResponseStatusException(HttpStatus status)
     : std::runtime_error(StatusToString(status)), status_(status) {
 }
 
-HttpStatus ResponseStatusException::getStatus() const {
+HttpStatus ResponseStatusException::GetStatus() const {
   return status_;
 }
 

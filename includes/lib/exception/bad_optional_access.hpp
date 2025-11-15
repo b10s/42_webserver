@@ -5,7 +5,7 @@
 
 namespace lib {
 namespace exception {
-class bad_optional_access : public std::exception {
+class BadOptionalAccess : public std::exception {
  public:
   const char* what() const throw();
 };

@@ -21,7 +21,7 @@ class ResponseStatusException : public std::runtime_error {
 
  public:
   ResponseStatusException(HttpStatus status);
-  HttpStatus getStatus() const;
+  HttpStatus GetStatus() const;
 };
 }  // namespace http
 
@@ -47,13 +47,13 @@ class HttpRequest {
   long content_length_;
 
   // bool consumeHeader();  // returns false if more data needed
-  bool consumeBody();
-  static std::string::size_type find_end_of_header(const std::string& payload);
-  const char* parseHeader(const char* req);
-  bool isCRLF(const char* p) const;
-  static std::string toLowerAscii(const std::string& s);
+  bool ConsumeBody();
+  static std::string::size_type FindEndOfHeader(const std::string& payload);
+  const char* ParseHeader(const char* req);
+  bool IsCRLF(const char* p) const;
+  static std::string ToLowerAscii(const std::string& s);
   void bumpLenOrThrow(size_t& total, size_t inc) const;
-  const char* readHeaderLine(const char* req, std::string& key,
+  const char* ReadHeaderLine(const char* req, std::string& key,
                              std::string& value, size_t& total_len);
   void storeHeader(const std::string& raw_key, const std::string& value);
   void validateAndExtractHost();
