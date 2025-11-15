@@ -20,7 +20,7 @@
 
 //     std::string token;
 //     Config config("sample_config/server_localhost.conf");
-//     while (!(token = config.tokenize(content)).empty()) {
+//     while (!(token = config.Tokenize(content)).empty()) {
 //         std::cout << token << std::endl;
 //     }
 

@@ -51,7 +51,7 @@ TEST(ConfigParser, ParseMaxBody_MissingSemicolon_Throws) {
 
 /*
 std::atoi(token.c_str()) accepts "abd; " and returns 0.
-TODO: introduce isAllDigits(token) to validate the token before calling atoi.
+TODO: introduce IsAllDigits(token) to validate the token before calling atoi.
 */
 TEST(ConfigParser, ParseMaxBody_NonNumeric_TreatedAsZero_CurrentBehavior) {
   ServerConfig sc;

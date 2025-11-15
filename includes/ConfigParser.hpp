@@ -33,20 +33,20 @@ const std::string kRedirect = "return";
 const std::string kCgiPath = "cgi_path";
 }  // namespace config_tokens
 
-namespace UrlConstants {
+namespace url_constants {
 const std::string kHttpsPrefix = "https://";
 const std::string kHttpPrefix = "http://";
-}  // namespace UrlConstants
+}  // namespace url_constants
 
 class ConfigParser {
  private:
   size_t current_pos_;
   std::vector<ServerConfig> server_configs_;
-  bool isValidPortNumber(const std::string& port) const;
-  bool isAllDigits(const std::string& str) const;
-  bool isDirective(const std::string& token) const;
-  TokenType toTokenType(const std::string& token) const;
-  std::string tokenize(const std::string& content);
+  bool IsValidPortNumber(const std::string& port) const;
+  bool IsAllDigits(const std::string& str) const;
+  bool IsDirective(const std::string& token) const;
+  TokenType ToTokenType(const std::string& token) const;
+  std::string Tokenize(const std::string& content);
 
  public:
   std::string content_;  // Made public for easier access in parsing functions
@@ -82,12 +82,12 @@ class ConfigParser {
 template <typename T, typename Setter>
 void ConfigParser::parseSimpleDirective(T* obj, Setter setter,
                                         const std::string& errorMsg) {
-  std::string token = tokenize(content_);
+  std::string token = Tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error: expected " + errorMsg);
   }
   (obj->*setter)(token);
-  token = tokenize(content_);
+  token = Tokenize(content_);
   if (token != ";") {
     throw std::runtime_error("Syntax error: expected ';' after " + errorMsg);
   }

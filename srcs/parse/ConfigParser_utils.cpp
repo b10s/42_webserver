@@ -29,7 +29,7 @@ std::map<std::string, TokenType> CreateTokenTable() {
 const std::map<std::string, TokenType> kTokenTable = CreateTokenTable();
 }  // namespace
 
-TokenType ConfigParser::toTokenType(const std::string& token) const {
+TokenType ConfigParser::ToTokenType(const std::string& token) const {
   std::map<std::string, TokenType>::const_iterator it = kTokenTable.find(token);
   if (it != kTokenTable.end()) return it->second;
   return TOKEN_UNKNOWN;
@@ -38,7 +38,7 @@ TokenType ConfigParser::toTokenType(const std::string& token) const {
 // Extracts the next token (word or symbol) from the configuration file content.
 // Parameters: content: The entire configuration file as a string
 // Returns: The next token string
-std::string ConfigParser::tokenize(const std::string& content) {
+std::string ConfigParser::Tokenize(const std::string& content) {
   if (current_pos_ >= content.size()) return "";
 
   while (current_pos_ < content.size() &&
@@ -57,7 +57,7 @@ std::string ConfigParser::tokenize(const std::string& content) {
   return content.substr(start, current_pos_ - start);
 }
 
-bool ConfigParser::isValidPortNumber(const std::string& port) const {
+bool ConfigParser::IsValidPortNumber(const std::string& port) const {
   if (port.empty() || port.length() > 5) return false;
   for (size_t i = 0; i < port.length(); ++i) {
     if (!isdigit(static_cast<unsigned char>(port[i]))) return false;
@@ -66,13 +66,13 @@ bool ConfigParser::isValidPortNumber(const std::string& port) const {
   return port_num > 0 && port_num <= 65535;
 }
 
-bool ConfigParser::isAllDigits(const std::string& str) const {
+bool ConfigParser::IsAllDigits(const std::string& str) const {
   for (size_t i = 0; i < str.length(); ++i) {
     if (!isdigit(str[i])) return false;
   }
   return true;
 }
 
-bool ConfigParser::isDirective(const std::string& token) const {
-  return toTokenType(token) != TOKEN_UNKNOWN;
+bool ConfigParser::IsDirective(const std::string& token) const {
+  return ToTokenType(token) != TOKEN_UNKNOWN;
 }

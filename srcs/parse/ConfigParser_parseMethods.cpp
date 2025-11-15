@@ -4,7 +4,7 @@ void ConfigParser::consumeMethods(Location* location) {
   std::string token;
 
   while (true) {
-    token = tokenize(content_);
+    token = Tokenize(content_);
     if (token == ";") break;
     if (token == "GET")
       location->addMethod(GET);

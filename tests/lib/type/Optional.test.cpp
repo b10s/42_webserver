@@ -28,18 +28,18 @@ TEST(OptionalTest, OperatorOverload) {
 TEST(OptionalTest, ValueOrMethodReturnsValue) {
   lib::type::Optional<int> test = 1;
 
-  EXPECT_EQ(test.value_or(-1), 1);
+  EXPECT_EQ(test.ValueOr(-1), 1);
 }
 
 TEST(OptionalTest, ValueOrMethodReturnsDefault) {
   lib::type::Optional<int> test;
 
-  EXPECT_EQ(test.value_or(-1), -1);
+  EXPECT_EQ(test.ValueOr(-1), -1);
 }
 
 TEST(OptionalTest, ResetMethod) {
   lib::type::Optional<int> test = 1;
-  test.reset();
+  test.Reset();
 
   EXPECT_THROW(test.value(), lib::exception::BadOptionalAccess);
 }

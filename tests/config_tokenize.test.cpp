@@ -11,12 +11,12 @@
 //   ConfigParser parser;
 //   parser.content_ = "server { listen 8080; }";
 
-//   EXPECT_EQ(parser.tokenize(parser.content_), "server");
-//   EXPECT_EQ(parser.tokenize(parser.content_), "{");
-//   EXPECT_EQ(parser.tokenize(parser.content_), "listen");
-//   EXPECT_EQ(parser.tokenize(parser.content_), "8080");
-//   EXPECT_EQ(parser.tokenize(parser.content_), ";");
-//   EXPECT_EQ(parser.tokenize(parser.content_), "}");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), "server");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), "{");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), "listen");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), "8080");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), ";");
+//   EXPECT_EQ(parser.Tokenize(parser.content_), "}");
 // }
 
 // TEST(ConfigParser, LoadFromFile) {

@@ -1,7 +1,7 @@
 #ifndef LIB_TYPE_OPTIONAL_HPP_
 #define LIB_TYPE_OPTIONAL_HPP_
 
-#include "lib/exception/BadOptionalAccess.hpp"
+#include "lib/exception/bad_optional_access.hpp"
 
 namespace lib {
 namespace type {
@@ -36,21 +36,21 @@ class Optional {
     return *this;
   }
 
-  T value() const {
+  T Value() const {
     if (!has_value_) throw lib::exception::BadOptionalAccess();
     return value_;
   }
 
-  T value_or(const T& def) const {
+  T ValueOr(const T& def) const {
     if (has_value_) return value_;
     return def;
   }
 
-  bool has_value() const {
+  bool HasValue() const {
     return has_value_;
   }
 
-  void reset() {
+  void Reset() {
     has_value_ = false;
   }
 };

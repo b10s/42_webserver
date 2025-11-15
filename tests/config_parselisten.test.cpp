@@ -60,7 +60,7 @@ TEST(ConfigParser, Listen_SpacesAroundColon_Throws) {
 // }
 // TODO: Disallow invalid hostnames
 
-// isValidPortNumber: 1..65535
+// IsValidPortNumber: 1..65535
 TEST(ConfigParser, Listen_PortOutOfRange_Throws) {
   ServerConfig sc1, sc2, sc3;
   EXPECT_THROW(callParseListen("0;", &sc1), std::runtime_error);

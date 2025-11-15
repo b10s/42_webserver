@@ -9,7 +9,7 @@
 static void callParseExtensions(const std::string& input, Location* loc) {
   ConfigParser
       parser;  // call default constructor to initialize current_pos_ to 0
-  parser.content_ = input;  // parseAutoIndex は content_ から tokenize する想定
+  parser.content_ = input;  // parseAutoIndex は content_ から Tokenize する想定
   parser.parseExtensions(loc);
 }
 
