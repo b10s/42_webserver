@@ -19,8 +19,8 @@ class ServerConfig {
  private:
   std::string host_;
   std::string port_;
-  std::string serverName_;
-  int maxBodySize_;
+  std::string server_name_;
+  int max_body_size_;
   std::map<HttpStatus, std::string> errors_;
   std::vector<Location> locations_;
 
@@ -44,11 +44,11 @@ class ServerConfig {
   }
 
   const std::string getServerName() const {
-    return serverName_;
+    return server_name_;
   }
 
   int getMaxBodySize() const {
-    return maxBodySize_;
+    return max_body_size_;
   }
 
   const std::map<HttpStatus, std::string>& getErrorPages() const {

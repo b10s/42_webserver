@@ -7,7 +7,7 @@ const size_t HttpRequest::kMaxUriSize;
 const std::string HttpRequest::kDefaultPort = "8080";
 
 HttpRequest::HttpRequest()
-    : progress(HEADER),
+    : progress_(HEADER),
       buffer_(),
       method_(UNKNOWN_METHOD),
       uri_(),
@@ -36,7 +36,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     body_ = src.body_;
     contentLength_ = src.contentLength_;
     keepAlive = src.keepAlive;
-    progress = src.progress;
+    progress_ = src.progress_;
   }
   return *this;
 }

@@ -28,10 +28,10 @@ void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
 // we allow only single space after ":" and require CRLF at end
 // OWS (optional whitespace) is not supported for simplicity
 const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
-                                        std::string& value, size_t& totalLen) {
+                                        std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
-    bumpLenOrThrow(totalLen, 1);
+    bumpLenOrThrow(total_len, 1);
     ++i;
   }
   if (req[i] == '\0' || req[i] != ':' ||
@@ -41,45 +41,45 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
   key.assign(req, i);
   // ": " を飛ばす
   i += 2;
-  bumpLenOrThrow(totalLen, 2);
+  bumpLenOrThrow(total_len, 2);
   req += i;
   // 2) 値は CR まで
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
-    bumpLenOrThrow(totalLen, 1);
+    bumpLenOrThrow(total_len, 1);
     ++vlen;
   }
   if (!isCRLF(req + vlen)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
   value.assign(req, vlen);      // value can be empty
-  bumpLenOrThrow(totalLen, 2);  // skip CRLF
+  bumpLenOrThrow(total_len, 2);  // skip CRLF
   return req + vlen + 2;
 }
 
 // Store header key in lowercase. We are not keeping original case for simplicity.
-void HttpRequest::storeHeader(const std::string& rawKey,
+void HttpRequest::storeHeader(const std::string& raw_key,
                               const std::string& value) {
-  std::string k = toLowerAscii(rawKey);
+  std::string k = toLowerAscii(raw_key);
   this->headers_[k] = value;
 }
 
 void HttpRequest::validateAndExtractHost() {
-  std::string hostValue;
+  std::string host_value;
   if (headers_.count("host"))
-    hostValue = headers_["host"];
+    host_value = headers_["host"];
   else
     throw http::ResponseStatusException(BAD_REQUEST);
 
-  if (hostValue.empty()) throw http::ResponseStatusException(BAD_REQUEST);
+  if (host_value.empty()) throw http::ResponseStatusException(BAD_REQUEST);
   size_t i = 0;
-  while (i < hostValue.size() && hostValue[i] != ':') ++i;
+  while (i < host_value.size() && host_value[i] != ':') ++i;
   if (i == 0) throw http::ResponseStatusException(BAD_REQUEST);
-  this->hostName_ = hostValue.substr(0, i);
-  if (i == hostValue.size()) {
+  this->hostName_ = host_value.substr(0, i);
+  if (i == host_value.size()) {
     this->hostPort_ = kDefaultPort;
   } else {
-    this->hostPort_ = hostValue.substr(i + 1);
+    this->hostPort_ = host_value.substr(i + 1);
   }
 }
 
@@ -87,15 +87,15 @@ void HttpRequest::validateAndExtractHost() {
 // but since headers are normalized to lowercase, only 'transfer-encoding'
 // should be accessed?
 void HttpRequest::validateBodyHeaders() {
-  bool hasCL = headers_.count("content-length");
-  bool hasTE = headers_.count("transfer-encoding");
-  if (hasCL && hasTE) {
+  bool has_cl = headers_.count("content-length");
+  bool has_te = headers_.count("transfer-encoding");
+  if (has_cl && has_te) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
-  if (hasCL) {
+  if (has_cl) {
     const std::string& s = headers_["content-length"];
     parseContentLength(s);
-  } else if (hasTE) {
+  } else if (has_te) {
     const std::string& s = headers_["transfer-encoding"];
     parseTransferEncoding(s);
   } else {
@@ -144,16 +144,16 @@ void HttpRequest::parseConnectionDirective() {
 }
 
 const char* HttpRequest::consumeHeader(const char* req) {
-  size_t totalLen = 0;
+  size_t total_len = 0;
   while (*req && !isCRLF(req)) {
     std::string key, value;
-    req = readHeaderLine(req, key, value, totalLen);
+    req = readHeaderLine(req, key, value, total_len);
     storeHeader(key, value);
   }
   if (!isCRLF(req)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
-  bumpLenOrThrow(totalLen, 2);
+  bumpLenOrThrow(total_len, 2);
   req += 2;  // skip CRLF
   validateAndExtractHost();
   validateBodyHeaders();

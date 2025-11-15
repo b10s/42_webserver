@@ -33,7 +33,7 @@ class HttpRequest {
     HEADER = 0,  // initial state, reading header
     BODY,        // reading body
     DONE         // finished parsing request
-  } progress;    // progress is initially HEADER
+  } progress_;    // progress is initially HEADER
 
   std::string buffer_;
   RequestMethod method_;
@@ -55,7 +55,7 @@ class HttpRequest {
   void bumpLenOrThrow(size_t& total, size_t inc) const;
   const char* readHeaderLine(const char* req, std::string& key,
                              std::string& value, size_t& total_len);
-  void storeHeader(const std::string& rawKey, const std::string& value);
+  void storeHeader(const std::string& raw_key, const std::string& value);
   void validateAndExtractHost();
   void validateBodyHeaders();
   void parseContentLength(const std::string& s);
@@ -106,7 +106,7 @@ class HttpRequest {
   }
 
   bool isDone() const {
-    return progress == DONE;
+    return progress_ == DONE;
   }  // for test purposes
 };
 

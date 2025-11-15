@@ -8,7 +8,7 @@ const std::string kSpecialLetter = "{};";
 }  // namespace
 
 namespace {
-std::map<std::string, TokenType> createTokenTable() {
+std::map<std::string, TokenType> CreateTokenTable() {
   std::map<std::string, TokenType> m;
   m.insert(std::make_pair(config_tokens::kListen, TOKEN_LISTEN));
   m.insert(std::make_pair(config_tokens::kServerName, TOKEN_SERVER_NAME));
@@ -26,7 +26,7 @@ std::map<std::string, TokenType> createTokenTable() {
   return m;
 }
 
-const std::map<std::string, TokenType> kTokenTable = createTokenTable();
+const std::map<std::string, TokenType> kTokenTable = CreateTokenTable();
 }  // namespace
 
 TokenType ConfigParser::toTokenType(const std::string& token) const {
@@ -62,8 +62,8 @@ bool ConfigParser::isValidPortNumber(const std::string& port) const {
   for (size_t i = 0; i < port.length(); ++i) {
     if (!isdigit(static_cast<unsigned char>(port[i]))) return false;
   }
-  int portNum = std::atoi(port.c_str());
-  return portNum > 0 && portNum <= 65535;
+  int port_num = std::atoi(port.c_str());
+  return port_num > 0 && port_num <= 65535;
 }
 
 bool ConfigParser::isAllDigits(const std::string& str) const {
