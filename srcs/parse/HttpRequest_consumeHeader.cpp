@@ -57,19 +57,16 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
   return req + vlen + 2;
 }
 
-// ============ ヘッダー表へ格納（キーは小文字化） ============
+// Store header key in lowercase. We are not keeping original case for simplicity.
 void HttpRequest::storeHeader(const std::string& rawKey,
                               const std::string& value) {
   std::string k = toLowerAscii(rawKey);
-  this->headers_[k] = value;  // Store header key in lowercase. TODO: Consider
-                              // whether to keep the original key name.
+  this->headers_[k] = value;
 }
 
 void HttpRequest::validateAndExtractHost() {
   std::string hostValue;
-  if (headers_.count("Host"))
-    hostValue = headers_["Host"];
-  else if (headers_.count("host"))
+  if (headers_.count("host"))
     hostValue = headers_["host"];
   else
     throw http::responseStatusException(BAD_REQUEST);
@@ -90,22 +87,16 @@ void HttpRequest::validateAndExtractHost() {
 // but since headers are normalized to lowercase, only 'transfer-encoding'
 // should be accessed?
 void HttpRequest::validateBodyHeaders() {
-  bool hasCL =
-      headers_.count("Content-Length") || headers_.count("content-length");
-  bool hasTE = headers_.count("Transfer-Encoding") ||
-               headers_.count("transfer-encoding");
+  bool hasCL = headers_.count("content-length");
+  bool hasTE = headers_.count("transfer-encoding");
   if (hasCL && hasTE) {
     throw http::responseStatusException(BAD_REQUEST);
   }
   if (hasCL) {
-    const std::string& s = headers_.count("Content-Length")
-                               ? headers_["Content-Length"]
-                               : headers_["content-length"];
+    const std::string& s = headers_["content-length"];
     parseContentLength(s);
   } else if (hasTE) {
-    const std::string& s = headers_.count("Transfer-Encoding")
-                               ? headers_["Transfer-Encoding"]
-                               : headers_["transfer-encoding"];
+    const std::string& s = headers_["transfer-encoding"];
     parseTransferEncoding(s);
   } else {
     if (method_ == POST) {
@@ -137,17 +128,19 @@ void HttpRequest::parseTransferEncoding(const std::string& s) {
 // 'Connection' and 'connection' is redundant? Only 'connection' should be
 // checked?
 void HttpRequest::parseConnectionDirective() {
-  if (headers_.count("Connection") || headers_.count("connection")) {
-    const std::string& v = headers_.count("Connection")
-                               ? headers_["Connection"]
-                               : headers_["connection"];
+  const std::string key = "connection";
+  if (headers_.count(key)) {
+    const std::string& v = headers_[key];
     if (v == "close")
       keepAlive = false;
     else if (v == "keep-alive")
       keepAlive = true;
     else
       throw http::responseStatusException(BAD_REQUEST);
+    return;
   }
+  // HTTP/1.1 default is keep-alive
+  keepAlive = (version_ == "HTTP/1.1");
 }
 
 const char* HttpRequest::consumeHeader(const char* req) {
