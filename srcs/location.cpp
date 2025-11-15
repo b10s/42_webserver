@@ -5,11 +5,11 @@ Location::Location()
       name_("/"),
       root_("./"),
       autoindex_(false),
-      indexFiles_(),
+      index_files_(),
       extensions_(),
-      uploadPath_(),
+      upload_path_(),
       redirect_(),
-      cgiPath_() {
+      cgi_path_() {
 }
 
 // Remove this function from location.cpp and implement it in the correct class

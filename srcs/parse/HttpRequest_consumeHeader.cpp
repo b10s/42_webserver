@@ -61,7 +61,7 @@ const char* HttpRequest::readHeaderLine(const char* req, std::string& key,
 void HttpRequest::storeHeader(const std::string& raw_key,
                               const std::string& value) {
   std::string k = toLowerAscii(raw_key);
-  this->headers_[k] = value;
+  headers_[k] = value;
 }
 
 void HttpRequest::validateAndExtractHost() {
@@ -75,11 +75,11 @@ void HttpRequest::validateAndExtractHost() {
   size_t i = 0;
   while (i < host_value.size() && host_value[i] != ':') ++i;
   if (i == 0) throw http::ResponseStatusException(BAD_REQUEST);
-  this->hostName_ = host_value.substr(0, i);
+  host_name_ = host_value.substr(0, i);
   if (i == host_value.size()) {
-    this->hostPort_ = kDefaultPort;
+    host_port_ = kDefaultPort;
   } else {
-    this->hostPort_ = host_value.substr(i + 1);
+    host_port_ = host_value.substr(i + 1);
   }
 }
 
@@ -102,15 +102,15 @@ void HttpRequest::validateBodyHeaders() {
     if (method_ == POST) {
       throw http::ResponseStatusException(LENGTH_REQUIRED);
     }
-    contentLength_ = 0;
+    content_length_ = 0;
   }
 }
 
 void HttpRequest::parseContentLength(const std::string& s) {
   std::stringstream ss(s);
-  ss >> contentLength_;
-  if (ss.fail() || contentLength_ < 0 ||
-      static_cast<size_t>(contentLength_) > kMaxPayloadSize) {
+  ss >> content_length_;
+  if (ss.fail() || content_length_ < 0 ||
+      static_cast<size_t>(content_length_) > kMaxPayloadSize) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
 }
@@ -118,7 +118,7 @@ void HttpRequest::parseContentLength(const std::string& s) {
 // we allow only "chunked" for simplicity
 void HttpRequest::parseTransferEncoding(const std::string& s) {
   if (s == "chunked") {
-    contentLength_ = -1;
+    content_length_ = -1;
   } else {
     throw http::ResponseStatusException(NOT_IMPLEMENTED);
   }

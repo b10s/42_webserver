@@ -25,26 +25,26 @@ class ResponseStatusException : public std::runtime_error {
 };
 }  // namespace http
 
-typedef std::map<std::string, std::string> dict;
+typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
   enum Progress {
-    HEADER = 0,  // initial state, reading header
-    BODY,        // reading body
-    DONE         // finished parsing request
-  } progress_;    // progress is initially HEADER
+    kHeader = 0,  // initial state, reading header
+    kBody,        // reading body
+    kDone         // finished parsing request
+  } progress_;    // progress is initially kHeader
 
   std::string buffer_;
   RequestMethod method_;
   std::string uri_;
-  dict query_;
-  std::string hostName_;
-  std::string hostPort_;
+  Dict query_;
+  std::string host_name_;
+  std::string host_port_;
   std::string version_;
-  dict headers_;
+  Dict headers_;
   std::string body_;
-  long contentLength_;
+  long content_length_;
 
   // bool consumeHeader();  // returns false if more data needed
   bool consumeBody();
@@ -92,13 +92,13 @@ class HttpRequest {
   const std::string& getHostName() const;
   const std::string& getHostPort() const;
   const std::string& getVersion() const;
-  const dict& getHeader() const;
+  const Dict& getHeader() const;
   const std::string& getHeader(const std::string& key) const;
-  const dict& getQuery() const;
+  const Dict& getQuery() const;
   const std::string& getBody() const;
 
   long getContentLength() const {
-    return contentLength_;
+    return content_length_;
   }
 
   bool isKeepAlive() const {
@@ -106,7 +106,7 @@ class HttpRequest {
   }
 
   bool isDone() const {
-    return progress_ == DONE;
+    return progress_ == kDone;
   }  // for test purposes
 };
 

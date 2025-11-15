@@ -51,10 +51,10 @@ int main() {
         std::cout << "      Autoindex: "
                   << (locations[j].getAutoIndex() ? "on" : "off") << "\n";
         std::cout << "      Index Files: ";
-        const std::vector<std::string>& indexFiles =
+        const std::vector<std::string>& index_files =
             locations[j].getIndexFiles();
-        for (size_t k = 0; k < indexFiles.size(); ++k) {
-          std::cout << indexFiles[k] << " ";
+        for (size_t k = 0; k < index_files.size(); ++k) {
+          std::cout << index_files[k] << " ";
         }
         std::cout << "\n";
         std::cout << "      Extensions: " << locations[j].getExtensions();

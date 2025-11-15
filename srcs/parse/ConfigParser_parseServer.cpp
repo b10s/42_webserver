@@ -6,7 +6,7 @@ void ConfigParser::parse() {
     token = tokenize(content_);
     if (token.empty()) break;
     if (token == config_tokens::kServer) {
-      this->parseServer();
+      parseServer();
     } else {
       throw std::runtime_error("Syntax error: " + token);
     }
@@ -42,5 +42,5 @@ void ConfigParser::parseServer() {
         throw std::runtime_error("Unknown directive: " + token);
     }
   }
-  this->server_configs_.push_back(server_config);
+  server_configs_.push_back(server_config);
 }

@@ -47,7 +47,7 @@ ResponseStatusException::ResponseStatusException(HttpStatus status)
 }
 
 HttpStatus ResponseStatusException::getStatus() const {
-  return this->status_;
+  return status_;
 }
 
 std::string MethodToString(RequestMethod method) {

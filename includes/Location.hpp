@@ -14,12 +14,12 @@ class Location {
   std::string name_;
   std::string root_;
   bool autoindex_;
-  std::vector<std::string> indexFiles_;
+  std::vector<std::string> index_files_;
   std::string extensions_;  // we are not doing bonus so only one extension is
                             // allowed here
-  std::string uploadPath_;
+  std::string upload_path_;
   std::string redirect_;
-  std::string cgiPath_;
+  std::string cgi_path_;
 
  public:
   Location();
@@ -49,11 +49,11 @@ class Location {
   }
 
   void addIndex(const std::string& index) {
-    indexFiles_.push_back(index);
+    index_files_.push_back(index);
   }
 
   const std::vector<std::string>& getIndexFiles() const {
-    return indexFiles_;
+    return index_files_;
   }
 
   void setExtension(const std::string& ext) {
@@ -65,11 +65,11 @@ class Location {
   }
 
   void setUploadPath(const std::string& path) {
-    uploadPath_ = path;
+    upload_path_ = path;
   }
 
   const std::string& getUploadPath() const {
-    return uploadPath_;
+    return upload_path_;
   }
 
   void setRedirect(const std::string& redirect) {
@@ -81,11 +81,11 @@ class Location {
   }
 
   void setCgiPath(const std::string& path) {
-    cgiPath_ = path;
+    cgi_path_ = path;
   }
 
   const std::string& getCgiPath() const {
-    return cgiPath_;
+    return cgi_path_;
   }
 
   void addMethod(RequestMethod method) {
