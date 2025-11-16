@@ -49,11 +49,11 @@ class ConfigParser {
   std::string Tokenize(const std::string& content);
 
  public:
-  std::string content_;  // Made public for easier access in parsing functions
+  std::string content;  // Made public for easier access in parsing functions
   ConfigParser();        // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
-  void loadFile(const std::string& filename);
+  void LoadFile(const std::string& filename);
 
   void Parse();
   void ParseServer();
@@ -72,7 +72,7 @@ class ConfigParser {
   void ParseRedirect(Location* location);
   void ParseCgiPath(Location* location);
   template <typename T, typename Setter>
-  void ParseSimpleDirective(T* obj, Setter setter, const std::string& errorMsg);
+  void ParseSimpleDirective(T* obj, Setter setter, const std::string& error_msg);
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
@@ -81,15 +81,15 @@ class ConfigParser {
 
 template <typename T, typename Setter>
 void ConfigParser::ParseSimpleDirective(T* obj, Setter setter,
-                                        const std::string& errorMsg) {
-  std::string token = Tokenize(content_);
+                                        const std::string& error_msg) {
+  std::string token = Tokenize(content);
   if (token.empty()) {
-    throw std::runtime_error("Syntax error: expected " + errorMsg);
+    throw std::runtime_error("Syntax error: expected " + error_msg);
   }
   (obj->*setter)(token);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token != ";") {
-    throw std::runtime_error("Syntax error: expected ';' after " + errorMsg);
+    throw std::runtime_error("Syntax error: expected ';' after " + error_msg);
   }
 }
 

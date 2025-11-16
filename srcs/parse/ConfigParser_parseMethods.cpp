@@ -4,7 +4,7 @@ void ConfigParser::ParseMethods(Location* location) {
   std::string token;
 
   while (true) {
-    token = Tokenize(content_);
+    token = Tokenize(content);
     if (token == ";") break;
     if (token == "GET")
       location->AddMethod(GET);

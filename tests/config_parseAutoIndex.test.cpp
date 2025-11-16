@@ -28,12 +28,12 @@ class ConfigParserTest : public ::testing::Test {
   Location loc;
 
   virtual void SetUp() {
-    parser.content_.clear();
+    parser.content.clear();
   }
 
   // boilerplate to call ParseAutoIndex
   void CallParseAutoIndex(const std::string& input) {
-    parser.content_ = input;      // Tokenize は content_ から読む想定
+    parser.content = input;      // Tokenize は content から読む想定
     parser.ParseAutoIndex(&loc);  // ここで例外が出たらテスト側で検証
   }
 };

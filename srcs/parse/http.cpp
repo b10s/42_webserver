@@ -3,7 +3,7 @@
 namespace http {
 std::string StatusToString(HttpStatus status) {
   switch (status) {
-    case OK:
+    case kOk:
       return "OK";
     case CREATED:
       return "Created";

@@ -8,7 +8,7 @@ Default values for port and host are set in the ServerConfig constructor:
   - Host/address defaults to 0.0.0.0 (listen on all interfaces)
 */
 void ConfigParser ::ParseListen(ServerConfig* server_config) {
-  std::string token1 = Tokenize(content_);
+  std::string token1 = Tokenize(content);
   if (token1.empty()) {
     throw std::runtime_error(
         "Syntax error : expected host or port after listen");
@@ -20,7 +20,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     if (!IsValidPortNumber(port))
       throw std::runtime_error(
           "Invalid port number after ':' in listen directive: " + port);
-    std::string end = Tokenize(content_);
+    std::string end = Tokenize(content);
     if (end != ";")
       throw std::runtime_error(
           "Syntax error: expected ';' after listen directive " + end);
@@ -29,7 +29,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     return;
   }
   // host only or port only
-  std::string token2 = Tokenize(content_);
+  std::string token2 = Tokenize(content);
   if (token2 != ";") {
     throw std::runtime_error("Syntax error: expected ';' after listen value: " +
                              token2);

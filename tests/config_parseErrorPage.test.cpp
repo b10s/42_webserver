@@ -16,7 +16,7 @@ static void expectErrorPageEq(const ServerConfig& sc, int code,
 
 static void callParseErrorPage(const std::string& input, ServerConfig* sc) {
   ConfigParser parser;
-  parser.content_ = input;
+  parser.content = input;
   parser.ParseErrorPage(sc);
 }
 

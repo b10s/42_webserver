@@ -10,19 +10,19 @@ const std::string kSpecialLetter = "{};";
 namespace {
 std::map<std::string, TokenType> CreateTokenTable() {
   std::map<std::string, TokenType> m;
-  m.insert(std::make_pair(config_tokens::kListen, TOKEN_LISTEN));
-  m.insert(std::make_pair(config_tokens::kServerName, TOKEN_SERVER_NAME));
-  m.insert(std::make_pair(config_tokens::kMaxBody, TOKEN_MAX_BODY));
-  m.insert(std::make_pair(config_tokens::kErrorPage, TOKEN_ERROR_PAGE));
-  m.insert(std::make_pair(config_tokens::kLocation, TOKEN_LOCATION));
-  m.insert(std::make_pair(config_tokens::kAllowMethods, TOKEN_ALLOW_METHODS));
-  m.insert(std::make_pair(config_tokens::kRoot, TOKEN_ROOT));
-  m.insert(std::make_pair(config_tokens::kAutoIndex, TOKEN_AUTOINDEX));
-  m.insert(std::make_pair(config_tokens::kIndex, TOKEN_INDEX));
-  m.insert(std::make_pair(config_tokens::kExtension, TOKEN_EXTENSION));
-  m.insert(std::make_pair(config_tokens::kUploadPath, TOKEN_UPLOAD_PATH));
-  m.insert(std::make_pair(config_tokens::kRedirect, TOKEN_REDIRECT));
-  m.insert(std::make_pair(config_tokens::kCgiPath, TOKEN_CGI_PATH));
+  m.insert(std::make_pair(config_tokens::kListen, kTokenListen));
+  m.insert(std::make_pair(config_tokens::kServerName, kTokenServerName));
+  m.insert(std::make_pair(config_tokens::kMaxBody, kTokenMaxBody));
+  m.insert(std::make_pair(config_tokens::kErrorPage, kTokenErrorPage));
+  m.insert(std::make_pair(config_tokens::kLocation, kTokenLocation));
+  m.insert(std::make_pair(config_tokens::kAllowMethods, kTokenAllowMethods));
+  m.insert(std::make_pair(config_tokens::kRoot, kTokenRoot));
+  m.insert(std::make_pair(config_tokens::kAutoIndex, kTokenAutoindex));
+  m.insert(std::make_pair(config_tokens::kIndex, kTokenIndex));
+  m.insert(std::make_pair(config_tokens::kExtension, kTokenExtension));
+  m.insert(std::make_pair(config_tokens::kUploadPath, kTokenUploadPath));
+  m.insert(std::make_pair(config_tokens::kRedirect, kTokenRedirect));
+  m.insert(std::make_pair(config_tokens::kCgiPath, kTokenCgiPath));
   return m;
 }
 
@@ -32,7 +32,7 @@ const std::map<std::string, TokenType> kTokenTable = CreateTokenTable();
 TokenType ConfigParser::ToTokenType(const std::string& token) const {
   std::map<std::string, TokenType>::const_iterator it = kTokenTable.find(token);
   if (it != kTokenTable.end()) return it->second;
-  return TOKEN_UNKNOWN;
+  return kTokenUnknown;
 }
 
 // Extracts the next token (word or symbol) from the configuration file content.
@@ -74,5 +74,5 @@ bool ConfigParser::IsAllDigits(const std::string& str) const {
 }
 
 bool ConfigParser::IsDirective(const std::string& token) const {
-  return ToTokenType(token) != TOKEN_UNKNOWN;
+  return ToTokenType(token) != kTokenUnknown;
 }

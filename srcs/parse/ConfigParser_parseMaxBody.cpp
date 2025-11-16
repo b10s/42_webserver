@@ -1,7 +1,7 @@
 #include "ConfigParser.hpp"
 
 void ConfigParser::ParseMaxBody(ServerConfig* server_config) {
-  std::string token = Tokenize(content_);
+  std::string token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected max_body value" + token);
   }
@@ -10,7 +10,7 @@ void ConfigParser::ParseMaxBody(ServerConfig* server_config) {
     throw std::runtime_error("Invalid max_body size: " + token);
   }
   server_config->SetMaxBodySize(size);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token != ";") {
     throw std::runtime_error("Syntax error: expected ';' after max_body value" +
                              token);

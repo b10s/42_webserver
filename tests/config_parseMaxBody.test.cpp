@@ -8,7 +8,7 @@
 // set up a helper to call ParseAutoIndex
 static void callParseMaxBody(const std::string& input, ServerConfig* sc) {
   ConfigParser parser;
-  parser.content_ = input;
+  parser.content = input;
   parser.ParseMaxBody(sc);
 }
 

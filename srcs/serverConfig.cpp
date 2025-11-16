@@ -16,8 +16,8 @@ void ServerConfig::SetPort(const std::string& port) {
   port_ = port;
 }
 
-void ServerConfig::SetServerName(const std::string& serverName) {
-  server_name_ = serverName;
+void ServerConfig::SetServerName(const std::string& server_name) {
+  server_name_ = server_name;
 }
 
 void ServerConfig::SetMaxBodySize(int size) {

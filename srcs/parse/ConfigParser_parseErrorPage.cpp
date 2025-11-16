@@ -11,7 +11,7 @@ Relative Path (e.g., ./404.html, ../404.html)
 mechanism.
 */
 void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
-  std::string token = Tokenize(content_);
+  std::string token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected error code" + token);
   }
@@ -21,7 +21,7 @@ void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
     throw std::runtime_error("Invalid error code: " + token);
   }
 
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected error page path" + token);
   }
@@ -33,7 +33,7 @@ void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
     token = "/" + token;
   }
   server_config->SetErrorPage(static_cast<HttpStatus>(error_code), token);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token != ";") {
     throw std::runtime_error(
         "Syntax error: expected ';' after error_page directive" + token);

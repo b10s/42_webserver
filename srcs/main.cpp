@@ -30,7 +30,7 @@
 int main() {
   try {
     ConfigParser config;
-    config.loadFile("sample_config/server_test_for_parse.conf");
+    config.LoadFile("sample_config/server_test_for_parse.conf");
     config.Parse();
     const std::vector<ServerConfig>& servers = config.GetServerConfigs();
     for (size_t i = 0; i < servers.size(); ++i) {

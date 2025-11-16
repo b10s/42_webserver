@@ -7,7 +7,7 @@
 
 static void callParseLocation(const std::string& input, ServerConfig* sc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseLocation(sc);
 }
 

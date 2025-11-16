@@ -2,7 +2,7 @@
 
 // autoindex is off by default (see Location constructor)
 void ConfigParser::ParseAutoIndex(Location* location) {
-  std::string token = Tokenize(content_);
+  std::string token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected autoindex value" + token);
   }
@@ -10,7 +10,7 @@ void ConfigParser::ParseAutoIndex(Location* location) {
     throw std::runtime_error("Invalid autoindex value: " + token);
   }
   if (token == "on") location->SetAutoIndex(true);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token != ";")
     throw std::runtime_error(
         "Syntax error: expected ';' after autoindex value" + token);

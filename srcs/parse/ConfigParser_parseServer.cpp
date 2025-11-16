@@ -3,7 +3,7 @@
 void ConfigParser::Parse() {
   std::string token;
   while (true) {
-    token = Tokenize(content_);
+    token = Tokenize(content);
     if (token.empty()) break;
     if (token == config_tokens::kServer) {
       ParseServer();
@@ -14,28 +14,28 @@ void ConfigParser::Parse() {
 }
 
 void ConfigParser::ParseServer() {
-  std::string token = Tokenize(content_);
+  std::string token = Tokenize(content);
   if (token != "{") {
     throw std::runtime_error("Syntax error: " + token);
   }
   ServerConfig server_config = ServerConfig();
   while (true) {
-    token = Tokenize(content_);
+    token = Tokenize(content);
     if (token == "}") break;
     switch (ToTokenType(token)) {
-      case TOKEN_LISTEN:
+      case kTokenListen:
         ParseListen(&server_config);
         break;
-      case TOKEN_SERVER_NAME:
+      case kTokenServerName:
         ParseServerName(&server_config);
         break;
-      case TOKEN_MAX_BODY:
+      case kTokenMaxBody:
         ParseMaxBody(&server_config);
         break;
-      case TOKEN_ERROR_PAGE:
+      case kTokenErrorPage:
         ParseErrorPage(&server_config);
         break;
-      case TOKEN_LOCATION:
+      case kTokenLocation:
         ParseLocation(&server_config);
         break;
       default:

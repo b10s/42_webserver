@@ -8,7 +8,7 @@
 // set up a helper to call ParseAutoIndex
 static void callParseIndex(const std::string& input, Location* loc) {
   ConfigParser parser;
-  parser.content_ = input;
+  parser.content = input;
   parser.ParseIndex(loc);
 }
 

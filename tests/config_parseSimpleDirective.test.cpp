@@ -8,31 +8,31 @@
 // set up a helper to call ParseAutoIndex
 static void callParseRoot(const std::string& input, Location* loc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseRoot(loc);
 }
 
 static void callParseCgiPath(const std::string& input, Location* loc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseCgiPath(loc);
 }
 
 static void callParseUploadPath(const std::string& input, Location* loc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseUploadPath(loc);
 }
 
 static void callParseRedirect(const std::string& input, Location* loc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseRedirect(loc);
 }
 
 static void callParseServerName(const std::string& input, ServerConfig* sc) {
   ConfigParser p;
-  p.content_ = input;
+  p.content = input;
   p.ParseServerName(sc);
 }
 

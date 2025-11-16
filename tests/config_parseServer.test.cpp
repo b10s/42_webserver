@@ -8,7 +8,7 @@
 // ==================== happy path ====================
 TEST(ConfigParser, Server_MinimalEmptyBlock_AddsServerConfig) {
   ConfigParser parser;
-  parser.content_ = "{ }";
+  parser.content = "{ }";
   EXPECT_NO_THROW(parser.ParseServer());
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   EXPECT_EQ(parser.GetServerConfigs().size(), 1u);
@@ -18,7 +18,7 @@ TEST(ConfigParser, Server_MinimalEmptyBlock_AddsServerConfig) {
 
 TEST(ConfigParser, Server_WithListenDirective) {
   ConfigParser parser;
-  parser.content_ = "{ listen 8080; }";
+  parser.content = "{ listen 8080; }";
   EXPECT_NO_THROW(parser.ParseServer());
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   ASSERT_EQ(servers.size(), 1u);
@@ -28,18 +28,18 @@ TEST(ConfigParser, Server_WithListenDirective) {
 // ==================== error cases ====================
 TEST(ConfigParser, Server_MissingOpeningBrace_Throws) {
   ConfigParser parser;
-  parser.content_ = "listen 8080; }";
+  parser.content = "listen 8080; }";
   EXPECT_THROW(parser.ParseServer(), std::runtime_error);
 }
 
 TEST(ConfigParser, Server_MissingClosingBrace_Throws) {
   ConfigParser parser;
-  parser.content_ = "listen 8080; }";
+  parser.content = "listen 8080; }";
   EXPECT_THROW(parser.ParseServer(), std::runtime_error);
 }
 
 TEST(ConfigParser, Server_UnknownDirective_Throws) {
   ConfigParser parser;
-  parser.content_ = "{ foo bar; }";
+  parser.content = "{ foo bar; }";
   EXPECT_THROW(parser.ParseServer(), std::runtime_error);
 }

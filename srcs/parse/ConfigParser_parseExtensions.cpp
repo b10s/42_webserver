@@ -3,9 +3,9 @@
 void ConfigParser::ParseExtensions(Location* location) {
   std::string token;
 
-  token = Tokenize(content_);
+  token = Tokenize(content);
   location->SetExtension(token);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   // we are not doing bonus so only one extension is allowed here
   if (token != ";")
     throw std::runtime_error(

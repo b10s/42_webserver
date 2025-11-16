@@ -28,7 +28,7 @@ class ServerConfig {
   ServerConfig();
   void SetHost(const std::string& host);
   void SetPort(const std::string& port);
-  void SetServerName(const std::string& serverName);
+  void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
 
   void SetErrorPage(HttpStatus status, const std::string& path) {

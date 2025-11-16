@@ -6,40 +6,40 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
   std::string token;
   Location location = Location();
 
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token.empty() || token[0] != '/' || token[token.size() - 1] != '/')
     throw std::runtime_error("Invalid location name: " + token);
   location.SetName(token);
-  token = Tokenize(content_);
+  token = Tokenize(content);
   if (token != "{")
     throw std::runtime_error(
         "Syntax error: expected '{' after location name, got: " + token);
   while (true) {
-    token = Tokenize(content_);
+    token = Tokenize(content);
     if (token == "}") break;
     switch (ToTokenType(token)) {
-      case TOKEN_ALLOW_METHODS:
+      case kTokenAllowMethods:
         ParseMethods(&location);
         break;
-      case TOKEN_ROOT:
+      case kTokenRoot:
         ParseRoot(&location);
         break;
-      case TOKEN_AUTOINDEX:
+      case kTokenAutoindex:
         ParseAutoIndex(&location);
         break;
-      case TOKEN_INDEX:
+      case kTokenIndex:
         ParseIndex(&location);
         break;
-      case TOKEN_EXTENSION:
+      case kTokenExtension:
         ParseExtensions(&location);
         break;
-      case TOKEN_UPLOAD_PATH:
+      case kTokenUploadPath:
         ParseUploadPath(&location);
         break;
-      case TOKEN_REDIRECT:
+      case kTokenRedirect:
         ParseRedirect(&location);
         break;
-      case TOKEN_CGI_PATH:
+      case kTokenCgiPath:
         ParseCgiPath(&location);
         break;
       default:
