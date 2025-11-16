@@ -43,7 +43,6 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   i += 2;
   BumpLenOrThrow(total_len, 2);
   req += i;
-  // 2) 値は CR まで
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
     BumpLenOrThrow(total_len, 1);
@@ -84,9 +83,7 @@ void HttpRequest::ValidateAndExtractHost() {
   }
 }
 
-// This line checks for both 'Transfer-Encoding' and 'transfer-encoding',
-// but since headers are normalized to lowercase, only 'transfer-encoding'
-// should be accessed?
+// header keys are normalized to lowercase
 void HttpRequest::ValidateBodyHeaders() {
   bool has_cl = headers_.count("content-length");
   bool has_te = headers_.count("transfer-encoding");
@@ -125,9 +122,7 @@ void HttpRequest::ParseTransferEncoding(const std::string& s) {
   }
 }
 
-// TODO: Since headers are normalized to lowercase, checking for both
-// 'Connection' and 'connection' is redundant? Only 'connection' should be
-// checked?
+// header keys are normalized to lowercase
 void HttpRequest::ParseConnectionDirective() {
   const std::string key = "connection";
   if (headers_.count(key)) {
