@@ -4,7 +4,7 @@
 namespace lib {
 namespace exception {
 extern const char* kBadOptionalAccessMsg;
-}
-}  // namespace lib
+} // namespace exception
+} // namespace lib
 
 #endif

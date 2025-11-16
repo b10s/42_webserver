@@ -47,6 +47,5 @@ enum RequestMethod {
   kDelete,
   kUnknownMethod
 };
-// enum RequestMethod { kNone, kGet, HEAD, POST, DELETE, UNKNOWN_METHOD };
 
 #endif
