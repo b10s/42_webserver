@@ -1,5 +1,5 @@
-#ifndef ENUMS_HPP
-#define ENUMS_HPP
+#ifndef ENUMS_HPP_
+#define ENUMS_HPP_
 
 enum TokenType {
   kTokenUnknown,
@@ -48,4 +48,4 @@ enum RequestMethod {
   kUnknownMethod
 };
 
-#endif
+#endif // ENUMS_HPP_
