@@ -5,12 +5,12 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
+// set up a helper to call ParseAutoIndex
 static void callParseExtensions(const std::string& input, Location* loc) {
   ConfigParser
       parser;  // call default constructor to initialize current_pos_ to 0
-  parser.content_ = input;  // parseAutoIndex は content_ から Tokenize する想定
-  parser.parseExtensions(loc);
+  parser.content_ = input;  // ParseAutoIndex は content_ から Tokenize する想定
+  parser.ParseExtensions(loc);
 }
 
 TEST(ConfigParser, ParseExtensions) {

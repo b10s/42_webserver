@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-const char* HttpRequest::consumeVersion(const char* req) {
+const char* HttpRequest::ConsumeVersion(const char* req) {
   std::size_t len = 0;
   while (req[len] && req[len] != '\r') {
     if (!http::IsVisibleAscii(req[len])) {

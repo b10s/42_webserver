@@ -26,36 +26,36 @@ class ServerConfig {
 
  public:
   ServerConfig();
-  void setHost(const std::string& host);
-  void setPort(const std::string& port);
-  void setServerName(const std::string& serverName);
-  void setMaxBodySize(int size);
+  void SetHost(const std::string& host);
+  void SetPort(const std::string& port);
+  void SetServerName(const std::string& serverName);
+  void SetMaxBodySize(int size);
 
-  void setErrorPage(HttpStatus status, const std::string& path) {
+  void SetErrorPage(HttpStatus status, const std::string& path) {
     errors_[status] = path;
   }
 
-  const std::string getHost() const {
+  const std::string GetHost() const {
     return host_;
   }
 
-  const std::string getPort() const {
+  const std::string GetPort() const {
     return port_;
   }
 
-  const std::string getServerName() const {
+  const std::string GetServerName() const {
     return server_name_;
   }
 
-  int getMaxBodySize() const {
+  int GetMaxBodySize() const {
     return max_body_size_;
   }
 
-  const std::map<HttpStatus, std::string>& getErrorPages() const {
+  const std::map<HttpStatus, std::string>& GetErrorPages() const {
     return errors_;
   }
 
-  std::string getErrorPagesString() const {
+  std::string GetErrorPagesString() const {
     std::string result;
     for (std::map<HttpStatus, std::string>::const_iterator it = errors_.begin();
          it != errors_.end(); ++it) {
@@ -66,11 +66,11 @@ class ServerConfig {
     return result;
   }
 
-  void addLocation(const Location& location) {
+  void AddLocation(const Location& location) {
     locations_.push_back(location);
   }
 
-  const std::vector<Location>& getLocations() const {
+  const std::vector<Location>& GetLocations() const {
     return locations_;
   }
 };

@@ -1,6 +1,6 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parseExtensions(Location* location) {
+void ConfigParser::ParseExtensions(Location* location) {
   std::string token;
 
   token = Tokenize(content_);

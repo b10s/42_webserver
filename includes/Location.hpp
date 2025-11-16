@@ -64,39 +64,39 @@ class Location {
     return extensions_;
   }
 
-  void setUploadPath(const std::string& path) {
+  void SetUploadPath(const std::string& path) {
     upload_path_ = path;
   }
 
-  const std::string& getUploadPath() const {
+  const std::string& GetUploadPath() const {
     return upload_path_;
   }
 
-  void setRedirect(const std::string& redirect) {
+  void SetRedirect(const std::string& redirect) {
     redirect_ = redirect;
   }
 
-  const std::string& getRedirect() const {
+  const std::string& GetRedirect() const {
     return redirect_;
   }
 
-  void setCgiPath(const std::string& path) {
+  void SetCgiPath(const std::string& path) {
     cgi_path_ = path;
   }
 
-  const std::string& getCgiPath() const {
+  const std::string& GetCgiPath() const {
     return cgi_path_;
   }
 
-  void addMethod(RequestMethod method) {
+  void AddMethod(RequestMethod method) {
     methods_.insert(method);
   }
 
-  bool isMethodAllowed(RequestMethod method) const {
+  bool IsMethodAllowed(RequestMethod method) const {
     return methods_.count(method) > 0;
   }
 
-  std::set<RequestMethod> getMethods() const {
+  std::set<RequestMethod> GetMethods() const {
     return methods_;
   }
 };

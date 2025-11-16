@@ -8,7 +8,7 @@
 static void callParseLocation(const std::string& input, ServerConfig* sc) {
   ConfigParser p;
   p.content_ = input;
-  p.parseLocation(sc);
+  p.ParseLocation(sc);
 }
 
 // ==================== happy path ====================
@@ -18,7 +18,7 @@ TEST(ConfigParser, Location_MinimalEmptyBlock_AddsLocation) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseLocation("/images/ { }", &sc));
 
-  const std::vector<Location>& locs = sc.getLocations();
+  const std::vector<Location>& locs = sc.GetLocations();
   ASSERT_EQ(locs.size(), 1u);
   EXPECT_EQ(locs[0].GetName(), "/images/");
 }
@@ -28,7 +28,7 @@ TEST(ConfigParser, Location_WithAutoIndexOn) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseLocation("/cgi/ { autoindex on; }", &sc));
 
-  const std::vector<Location>& locs = sc.getLocations();
+  const std::vector<Location>& locs = sc.GetLocations();
   ASSERT_EQ(locs.size(), 1u);
   EXPECT_EQ(locs[0].GetName(), "/cgi/");
   EXPECT_TRUE(locs[0].GetAutoIndex());
@@ -45,7 +45,7 @@ TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
       "}\n";
   EXPECT_NO_THROW(callParseLocation(s, &sc));
 
-  const std::vector<Location>& locs = sc.getLocations();
+  const std::vector<Location>& locs = sc.GetLocations();
   ASSERT_EQ(locs.size(), 1u);
   EXPECT_EQ(locs[0].GetName(), "/app/");
 }

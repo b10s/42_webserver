@@ -31,10 +31,10 @@ class ConfigParserTest : public ::testing::Test {
     parser.content_.clear();
   }
 
-  // boilerplate to call parseAutoIndex
+  // boilerplate to call ParseAutoIndex
   void CallParseAutoIndex(const std::string& input) {
     parser.content_ = input;      // Tokenize は content_ から読む想定
-    parser.parseAutoIndex(&loc);  // ここで例外が出たらテスト側で検証
+    parser.ParseAutoIndex(&loc);  // ここで例外が出たらテスト側で検証
   }
 };
 

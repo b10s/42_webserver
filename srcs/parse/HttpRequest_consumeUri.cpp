@@ -26,7 +26,7 @@ inline const char* ConsumeUntilStopChar(const char* req, std::size_t& len,
 
 // read query--- req points to the next char after '?'
 // len is the length of the URI part read so far (including '?')
-const char* HttpRequest::consumeQuery(const char* req, std::size_t& len) {
+const char* HttpRequest::ConsumeQuery(const char* req, std::size_t& len) {
   while (true) {
     const char* key_begin = req;
     const char* key_end = ConsumeUntilStopChar(req, len, " =&");
@@ -56,7 +56,7 @@ const char* HttpRequest::consumeQuery(const char* req, std::size_t& len) {
   return req;
 }
 
-const char* HttpRequest::consumeUri(const char* req) {
+const char* HttpRequest::ConsumeUri(const char* req) {
   std::size_t len = 0;
   if (*req != '/') {  // origin-form must start with '/'
     throw http::ResponseStatusException(BAD_REQUEST);
@@ -72,7 +72,7 @@ const char* HttpRequest::consumeUri(const char* req) {
     ++req;  // skip '?'
     ++len;  // add '?' to length
     BumpOrThrow(len);
-    req = consumeQuery(req, len);
+    req = ConsumeQuery(req, len);
   }
   if (*req != ' ') {
     throw http::ResponseStatusException(BAD_REQUEST);

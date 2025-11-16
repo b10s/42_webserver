@@ -8,18 +8,18 @@ ServerConfig::ServerConfig()
     : host_("0.0.0.0"), port_("80"), server_name_(), max_body_size_(0) {
 }
 
-void ServerConfig::setHost(const std::string& host) {
+void ServerConfig::SetHost(const std::string& host) {
   host_ = host;
 }
 
-void ServerConfig::setPort(const std::string& port) {
+void ServerConfig::SetPort(const std::string& port) {
   port_ = port;
 }
 
-void ServerConfig::setServerName(const std::string& serverName) {
+void ServerConfig::SetServerName(const std::string& serverName) {
   server_name_ = serverName;
 }
 
-void ServerConfig::setMaxBodySize(int size) {
+void ServerConfig::SetMaxBodySize(int size) {
   max_body_size_ = size;
 }

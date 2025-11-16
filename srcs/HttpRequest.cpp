@@ -44,39 +44,39 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
 HttpRequest::~HttpRequest() {
 }
 
-RequestMethod HttpRequest::getMethod() const {
+RequestMethod HttpRequest::GetMethod() const {
   return method_;
 }
 
-void HttpRequest::setMethod(RequestMethod method) {
+void HttpRequest::SetMethod(RequestMethod method) {
   method_ = method;
 }
 
-const std::string& HttpRequest::getUri() const {
+const std::string& HttpRequest::GetUri() const {
   return uri_;
 }
 
-const Dict& HttpRequest::getQuery() const {
+const Dict& HttpRequest::GetQuery() const {
   return query_;
 }
 
-const std::string& HttpRequest::getHostName() const {
+const std::string& HttpRequest::GetHostName() const {
   return host_name_;
 }
 
-const std::string& HttpRequest::getHostPort() const {
+const std::string& HttpRequest::GetHostPort() const {
   return host_port_;
 }
 
-const std::string& HttpRequest::getVersion() const {
+const std::string& HttpRequest::GetVersion() const {
   return version_;
 }
 
-const Dict& HttpRequest::getHeader() const {
+const Dict& HttpRequest::GetHeader() const {
   return headers_;
 }
 
-const std::string& HttpRequest::getHeader(const std::string& key) const {
+const std::string& HttpRequest::GetHeader(const std::string& key) const {
   Dict::const_iterator it = headers_.find(key);
   if (it == headers_.end()) {
     throw std::out_of_range("Header not found: " + key);
@@ -84,6 +84,6 @@ const std::string& HttpRequest::getHeader(const std::string& key) const {
   return it->second;
 }
 
-const std::string& HttpRequest::getBody() const {
+const std::string& HttpRequest::GetBody() const {
   return body_;
 }

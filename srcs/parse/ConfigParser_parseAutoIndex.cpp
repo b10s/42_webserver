@@ -1,7 +1,7 @@
 #include "ConfigParser.hpp"
 
 // autoindex is off by default (see Location constructor)
-void ConfigParser::parseAutoIndex(Location* location) {
+void ConfigParser::ParseAutoIndex(Location* location) {
   std::string token = Tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected autoindex value" + token);

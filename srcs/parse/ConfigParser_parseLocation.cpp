@@ -1,7 +1,7 @@
 #include "ConfigParser.hpp"
 
 // Extracts the next token (word or symbol) from the configuration file content.
-void ConfigParser::parseLocation(ServerConfig* server) {
+void ConfigParser::ParseLocation(ServerConfig* server) {
   (void)server;
   std::string token;
   Location location = Location();
@@ -19,32 +19,32 @@ void ConfigParser::parseLocation(ServerConfig* server) {
     if (token == "}") break;
     switch (ToTokenType(token)) {
       case TOKEN_ALLOW_METHODS:
-        consumeMethods(&location);
+        ParseMethods(&location);
         break;
       case TOKEN_ROOT:
-        parseRoot(&location);
+        ParseRoot(&location);
         break;
       case TOKEN_AUTOINDEX:
-        parseAutoIndex(&location);
+        ParseAutoIndex(&location);
         break;
       case TOKEN_INDEX:
-        parseIndex(&location);
+        ParseIndex(&location);
         break;
       case TOKEN_EXTENSION:
-        parseExtensions(&location);
+        ParseExtensions(&location);
         break;
       case TOKEN_UPLOAD_PATH:
-        parseUploadPath(&location);
+        ParseUploadPath(&location);
         break;
       case TOKEN_REDIRECT:
-        parseRedirect(&location);
+        ParseRedirect(&location);
         break;
       case TOKEN_CGI_PATH:
-        parseCgiPath(&location);
+        ParseCgiPath(&location);
         break;
       default:
         throw std::runtime_error("Unknown directive in location: " + token);
     }
   }
-  server->addLocation(location);
+  server->AddLocation(location);
 }

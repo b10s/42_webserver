@@ -55,32 +55,32 @@ class ConfigParser {
   ~ConfigParser();
   void loadFile(const std::string& filename);
 
-  void parse();
-  void parseServer();
-  void parseListen(ServerConfig* server_config);
-  void parseServerName(ServerConfig* server_config);
-  void parseMaxBody(ServerConfig* server_config);
-  void parseErrorPage(ServerConfig* server_config);
+  void Parse();
+  void ParseServer();
+  void ParseListen(ServerConfig* server_config);
+  void ParseServerName(ServerConfig* server_config);
+  void ParseMaxBody(ServerConfig* server_config);
+  void ParseErrorPage(ServerConfig* server_config);
 
-  void parseLocation(ServerConfig* server_config);
-  void consumeMethods(Location* location);
-  void parseRoot(Location* location);
-  void parseAutoIndex(Location* location);
-  void parseIndex(Location* location);
-  void parseExtensions(Location* location);
-  void parseUploadPath(Location* location);
-  void parseRedirect(Location* location);
-  void parseCgiPath(Location* location);
+  void ParseLocation(ServerConfig* server_config);
+  void ParseMethods(Location* location);
+  void ParseRoot(Location* location);
+  void ParseAutoIndex(Location* location);
+  void ParseIndex(Location* location);
+  void ParseExtensions(Location* location);
+  void ParseUploadPath(Location* location);
+  void ParseRedirect(Location* location);
+  void ParseCgiPath(Location* location);
   template <typename T, typename Setter>
-  void parseSimpleDirective(T* obj, Setter setter, const std::string& errorMsg);
+  void ParseSimpleDirective(T* obj, Setter setter, const std::string& errorMsg);
 
-  const std::vector<ServerConfig>& getServerConfigs() const {
+  const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
   }
 };
 
 template <typename T, typename Setter>
-void ConfigParser::parseSimpleDirective(T* obj, Setter setter,
+void ConfigParser::ParseSimpleDirective(T* obj, Setter setter,
                                         const std::string& errorMsg) {
   std::string token = Tokenize(content_);
   if (token.empty()) {

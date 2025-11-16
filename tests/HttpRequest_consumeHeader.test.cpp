@@ -31,13 +31,13 @@ static HeaderStart makeHeaderStart(const std::string& method,
   return hs;
 }
 
-class HttpRequestconsumeHeader : public ::testing::Test { // fixture class for google test
+class HttpRequestConsumeHeader : public ::testing::Test { // fixture class for google test
  protected:
   HttpRequest req;
 };
 
 // =============== Happy path ===============
-TEST_F(HttpRequestconsumeHeader, Basic_HostOnly_NoBody_ParsesAndAdvances) {
+TEST_F(HttpRequestConsumeHeader, Basic_HostOnly_NoBody_ParsesAndAdvances) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "\r\n"
@@ -45,14 +45,14 @@ TEST_F(HttpRequestconsumeHeader, Basic_HostOnly_NoBody_ParsesAndAdvances) {
   auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
 
   const char* ret = NULL;
-  ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
-  EXPECT_EQ("example.com", req.getHostName());
-  EXPECT_EQ(HttpRequest::kDefaultPort, req.getHostPort());
-  EXPECT_EQ(0, req.getContentLength());
+  ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
+  EXPECT_EQ("example.com", req.GetHostName());
+  EXPECT_EQ(HttpRequest::kDefaultPort, req.GetHostPort());
+  EXPECT_EQ(0, req.GetContentLength());
   EXPECT_STREQ("ABC", ret);
 }
 
-TEST_F(HttpRequestconsumeHeader, HostWithPort_ParsesHostnameAndPort) {
+TEST_F(HttpRequestConsumeHeader, HostWithPort_ParsesHostnameAndPort) {
   std::string headers_and_after =
       "Host: example.com:8080\r\n"
       "Connection: keep-alive\r\n"
@@ -60,14 +60,14 @@ TEST_F(HttpRequestconsumeHeader, HostWithPort_ParsesHostnameAndPort) {
   auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
 
   const char* ret = NULL;
-  ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
-  EXPECT_EQ("example.com", req.getHostName());
-  EXPECT_EQ("8080", req.getHostPort());
-  EXPECT_EQ(0, req.getContentLength());
+  ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
+  EXPECT_EQ("example.com", req.GetHostName());
+  EXPECT_EQ("8080", req.GetHostPort());
+  EXPECT_EQ(0, req.GetContentLength());
 }
 
 // =============== Case-insensitive keys ===============
-TEST_F(HttpRequestconsumeHeader, HeaderFieldName_IsCaseInsensitive) {
+TEST_F(HttpRequestConsumeHeader, HeaderFieldName_IsCaseInsensitive) {
   std::string headers_and_after =
       "host: example.org\r\n"
       "cOnNeCtIoN: close\r\n"
@@ -75,13 +75,13 @@ TEST_F(HttpRequestconsumeHeader, HeaderFieldName_IsCaseInsensitive) {
   auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
 
   const char* ret = NULL;
-  ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
-  EXPECT_EQ("example.org", req.getHostName());
-  EXPECT_FALSE(req.isKeepAlive());
+  ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
+  EXPECT_EQ("example.org", req.GetHostName());
+  EXPECT_FALSE(req.IsKeepAlive());
 }
 
 // =============== Error path: Host ===============
-TEST_F(HttpRequestconsumeHeader, MissingHost_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, MissingHost_ThrowsBadRequest) {
   std::string headers_and_after =
       "Connection: keep-alive\r\n"
       "\r\n";
@@ -90,7 +90,7 @@ TEST_F(HttpRequestconsumeHeader, MissingHost_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -99,7 +99,7 @@ TEST_F(HttpRequestconsumeHeader, MissingHost_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestconsumeHeader, EmptyHost_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, EmptyHost_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: \r\n"
       "\r\n";
@@ -108,7 +108,7 @@ TEST_F(HttpRequestconsumeHeader, EmptyHost_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -118,7 +118,7 @@ TEST_F(HttpRequestconsumeHeader, EmptyHost_ThrowsBadRequest) {
 }
 
 // =============== Content-Length / Transfer-Encoding ===============
-TEST_F(HttpRequestconsumeHeader, ContentLengthAndTransferEncodingTogether_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, ContentLengthAndTransferEncodingTogether_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Content-Length: 10\r\n"
@@ -129,7 +129,7 @@ TEST_F(HttpRequestconsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -139,17 +139,17 @@ TEST_F(HttpRequestconsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
 }
 
 // if method is POST and neither Content-Length nor Transfer-Encoding is present, throw LENGTH_REQUIRED
-TEST_F(HttpRequestconsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
+TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "\r\n";
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
-  req.setMethod(hs.method);
+  req.SetMethod(hs.method);
 
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(LENGTH_REQUIRED, e.GetStatus());
           throw;
@@ -159,7 +159,7 @@ TEST_F(HttpRequestconsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
 }
 
 // =============== Content-Length の検証 ===============
-TEST_F(HttpRequestconsumeHeader, ContentLength_Valid_SetsContentLength) {
+TEST_F(HttpRequestConsumeHeader, ContentLength_Valid_SetsContentLength) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Content-Length: 5\r\n"
@@ -168,12 +168,12 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_Valid_SetsContentLength) {
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
 
   const char* ret = NULL;
-  ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
-  EXPECT_EQ(5, req.getContentLength());
+  ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
+  EXPECT_EQ(5, req.GetContentLength());
   EXPECT_EQ('1', *ret);
 }
 
-TEST_F(HttpRequestconsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Content-Length: x\r\n"
@@ -183,7 +183,7 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -192,7 +192,7 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestconsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
   std::stringstream ss;
   ss << (HttpRequest::kMaxPayloadSize + 1);
   std::string headers_and_after =
@@ -204,7 +204,7 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -214,7 +214,7 @@ TEST_F(HttpRequestconsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
 }
 
 // =============== Transfer-Encoding ===============
-TEST_F(HttpRequestconsumeHeader, TransferEncoding_Chunked_SetsMinusOne) {
+TEST_F(HttpRequestConsumeHeader, TransferEncoding_Chunked_SetsMinusOne) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Transfer-Encoding: chunked\r\n"
@@ -222,11 +222,11 @@ TEST_F(HttpRequestconsumeHeader, TransferEncoding_Chunked_SetsMinusOne) {
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
 
   const char* ret = NULL;
-  ASSERT_NO_THROW(ret = req.consumeHeader(hs.p_headers));
-  EXPECT_EQ(-1, req.getContentLength());
+  ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
+  EXPECT_EQ(-1, req.GetContentLength());
 }
 
-TEST_F(HttpRequestconsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) {
+TEST_F(HttpRequestConsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Transfer-Encoding: gzip\r\n"
@@ -236,7 +236,7 @@ TEST_F(HttpRequestconsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) 
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(NOT_IMPLEMENTED, e.GetStatus());
           throw;
@@ -246,7 +246,7 @@ TEST_F(HttpRequestconsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) 
 }
 
 // =============== Connection ===============
-TEST_F(HttpRequestconsumeHeader, Connection_KeepAliveAndClose) {
+TEST_F(HttpRequestConsumeHeader, Connection_KeepAliveAndClose) {
   { // keep-alive
     HttpRequest r1;
     std::string headers_and_after =
@@ -254,8 +254,8 @@ TEST_F(HttpRequestconsumeHeader, Connection_KeepAliveAndClose) {
         "Connection: keep-alive\r\n"
         "\r\n";
     auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
-    ASSERT_NO_THROW(r1.consumeHeader(hs.p_headers));
-    EXPECT_TRUE(r1.isKeepAlive());
+    ASSERT_NO_THROW(r1.ConsumeHeader(hs.p_headers));
+    EXPECT_TRUE(r1.IsKeepAlive());
   }
   { // close
     HttpRequest r2;
@@ -264,12 +264,12 @@ TEST_F(HttpRequestconsumeHeader, Connection_KeepAliveAndClose) {
         "Connection: close\r\n"
         "\r\n";
     auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
-    ASSERT_NO_THROW(r2.consumeHeader(hs.p_headers));
-    EXPECT_FALSE(r2.isKeepAlive());
+    ASSERT_NO_THROW(r2.ConsumeHeader(hs.p_headers));
+    EXPECT_FALSE(r2.IsKeepAlive());
   }
 }
 
-TEST_F(HttpRequestconsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Connection: upgrade\r\n"
@@ -279,7 +279,7 @@ TEST_F(HttpRequestconsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -289,7 +289,7 @@ TEST_F(HttpRequestconsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
 }
 
 // =============== Bad requests ===============
-TEST_F(HttpRequestconsumeHeader, MissingColon_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, MissingColon_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host example.com\r\n"
       "\r\n";
@@ -298,7 +298,7 @@ TEST_F(HttpRequestconsumeHeader, MissingColon_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -307,7 +307,7 @@ TEST_F(HttpRequestconsumeHeader, MissingColon_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestconsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host:example.com\r\n"
       "\r\n";
@@ -316,7 +316,7 @@ TEST_F(HttpRequestconsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -325,7 +325,7 @@ TEST_F(HttpRequestconsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, MissingCRLF_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\n"
       "\n";
@@ -334,7 +334,7 @@ TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(BAD_REQUEST, e.GetStatus());
           throw;
@@ -343,7 +343,7 @@ TEST_F(HttpRequestconsumeHeader, MissingCRLF_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestconsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTooLarge) {
+TEST_F(HttpRequestConsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTooLarge) {
   std::string bigValue(HttpRequest::kMaxHeaderSize, 'a');
   std::string headers_and_after =
       "Host: example.com\r\n"
@@ -354,7 +354,7 @@ TEST_F(HttpRequestconsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTo
   EXPECT_THROW(
       {
         try {
-          req.consumeHeader(hs.p_headers);
+          req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
           EXPECT_EQ(REQUEST_HEADER_FIELDS_TOO_LARGE, e.GetStatus());
           throw;

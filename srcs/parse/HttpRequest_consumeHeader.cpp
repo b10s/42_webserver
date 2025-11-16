@@ -18,7 +18,7 @@ std::string HttpRequest::ToLowerAscii(const std::string& s) {
   return result;
 }
 
-void HttpRequest::bumpLenOrThrow(size_t& total, size_t inc) const {
+void HttpRequest::BumpLenOrThrow(size_t& total, size_t inc) const {
   if (inc > kMaxHeaderSize - total) {
     throw http::ResponseStatusException(REQUEST_HEADER_FIELDS_TOO_LARGE);
   }
@@ -31,7 +31,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
                                         std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
-    bumpLenOrThrow(total_len, 1);
+    BumpLenOrThrow(total_len, 1);
     ++i;
   }
   if (req[i] == '\0' || req[i] != ':' ||
@@ -41,31 +41,31 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   key.assign(req, i);
   // ": " を飛ばす
   i += 2;
-  bumpLenOrThrow(total_len, 2);
+  BumpLenOrThrow(total_len, 2);
   req += i;
   // 2) 値は CR まで
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
-    bumpLenOrThrow(total_len, 1);
+    BumpLenOrThrow(total_len, 1);
     ++vlen;
   }
   if (!IsCRLF(req + vlen)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
   value.assign(req, vlen);       // value can be empty
-  bumpLenOrThrow(total_len, 2);  // skip CRLF
+  BumpLenOrThrow(total_len, 2);  // skip CRLF
   return req + vlen + 2;
 }
 
 // Store header key in lowercase. We are not keeping original case for
 // simplicity.
-void HttpRequest::storeHeader(const std::string& raw_key,
+void HttpRequest::StoreHeader(const std::string& raw_key,
                               const std::string& value) {
   std::string k = ToLowerAscii(raw_key);
   headers_[k] = value;
 }
 
-void HttpRequest::validateAndExtractHost() {
+void HttpRequest::ValidateAndExtractHost() {
   std::string host_value;
   if (headers_.count("host"))
     host_value = headers_["host"];
@@ -87,7 +87,7 @@ void HttpRequest::validateAndExtractHost() {
 // This line checks for both 'Transfer-Encoding' and 'transfer-encoding',
 // but since headers are normalized to lowercase, only 'transfer-encoding'
 // should be accessed?
-void HttpRequest::validateBodyHeaders() {
+void HttpRequest::ValidateBodyHeaders() {
   bool has_cl = headers_.count("content-length");
   bool has_te = headers_.count("transfer-encoding");
   if (has_cl && has_te) {
@@ -95,10 +95,10 @@ void HttpRequest::validateBodyHeaders() {
   }
   if (has_cl) {
     const std::string& s = headers_["content-length"];
-    parseContentLength(s);
+    ParseContentLength(s);
   } else if (has_te) {
     const std::string& s = headers_["transfer-encoding"];
-    parseTransferEncoding(s);
+    ParseTransferEncoding(s);
   } else {
     if (method_ == POST) {
       throw http::ResponseStatusException(LENGTH_REQUIRED);
@@ -107,7 +107,7 @@ void HttpRequest::validateBodyHeaders() {
   }
 }
 
-void HttpRequest::parseContentLength(const std::string& s) {
+void HttpRequest::ParseContentLength(const std::string& s) {
   std::stringstream ss(s);
   ss >> content_length_;
   if (ss.fail() || content_length_ < 0 ||
@@ -117,7 +117,7 @@ void HttpRequest::parseContentLength(const std::string& s) {
 }
 
 // we allow only "chunked" for simplicity
-void HttpRequest::parseTransferEncoding(const std::string& s) {
+void HttpRequest::ParseTransferEncoding(const std::string& s) {
   if (s == "chunked") {
     content_length_ = -1;
   } else {
@@ -128,7 +128,7 @@ void HttpRequest::parseTransferEncoding(const std::string& s) {
 // TODO: Since headers are normalized to lowercase, checking for both
 // 'Connection' and 'connection' is redundant? Only 'connection' should be
 // checked?
-void HttpRequest::parseConnectionDirective() {
+void HttpRequest::ParseConnectionDirective() {
   const std::string key = "connection";
   if (headers_.count(key)) {
     const std::string& v = headers_[key];
@@ -144,20 +144,20 @@ void HttpRequest::parseConnectionDirective() {
   keep_alive = (version_ == "HTTP/1.1");
 }
 
-const char* HttpRequest::consumeHeader(const char* req) {
+const char* HttpRequest::ConsumeHeader(const char* req) {
   size_t total_len = 0;
   while (*req && !IsCRLF(req)) {
     std::string key, value;
     req = ReadHeaderLine(req, key, value, total_len);
-    storeHeader(key, value);
+    StoreHeader(key, value);
   }
   if (!IsCRLF(req)) {
     throw http::ResponseStatusException(BAD_REQUEST);
   }
-  bumpLenOrThrow(total_len, 2);
+  BumpLenOrThrow(total_len, 2);
   req += 2;  // skip CRLF
-  validateAndExtractHost();
-  validateBodyHeaders();
-  parseConnectionDirective();
+  ValidateAndExtractHost();
+  ValidateBodyHeaders();
+  ParseConnectionDirective();
   return req;
 }

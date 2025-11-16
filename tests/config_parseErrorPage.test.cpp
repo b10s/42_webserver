@@ -7,7 +7,7 @@
 
 static void expectErrorPageEq(const ServerConfig& sc, int code,
                               const std::string& expected) {
-  const std::map<HttpStatus, std::string>& pages = sc.getErrorPages();
+  const std::map<HttpStatus, std::string>& pages = sc.GetErrorPages();
   HttpStatus key = static_cast<HttpStatus>(code);
   std::map<HttpStatus, std::string>::const_iterator it = pages.find(key);
   ASSERT_NE(it, pages.end()) << "error page for code " << code << " not found";
@@ -17,7 +17,7 @@ static void expectErrorPageEq(const ServerConfig& sc, int code,
 static void callParseErrorPage(const std::string& input, ServerConfig* sc) {
   ConfigParser parser;
   parser.content_ = input;
-  parser.parseErrorPage(sc);
+  parser.ParseErrorPage(sc);
 }
 
 // ============ happy path ============

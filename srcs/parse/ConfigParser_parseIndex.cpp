@@ -1,6 +1,6 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parseIndex(Location* location) {
+void ConfigParser::ParseIndex(Location* location) {
   std::string token = Tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected index file name" + token);

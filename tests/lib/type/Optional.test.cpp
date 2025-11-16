@@ -37,7 +37,7 @@ TEST(OptionalTest, ValueOrMethodReturnsDefault) {
   EXPECT_EQ(test.ValueOr(-1), -1);
 }
 
-TEST(OptionalTest, ResetMethod) {
+TEST(OptionalTest, ReSetMethod) {
   lib::type::Optional<int> test = 1;
   test.Reset();
 

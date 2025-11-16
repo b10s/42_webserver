@@ -1,19 +1,19 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parse() {
+void ConfigParser::Parse() {
   std::string token;
   while (true) {
     token = Tokenize(content_);
     if (token.empty()) break;
     if (token == config_tokens::kServer) {
-      parseServer();
+      ParseServer();
     } else {
       throw std::runtime_error("Syntax error: " + token);
     }
   }
 }
 
-void ConfigParser::parseServer() {
+void ConfigParser::ParseServer() {
   std::string token = Tokenize(content_);
   if (token != "{") {
     throw std::runtime_error("Syntax error: " + token);
@@ -24,19 +24,19 @@ void ConfigParser::parseServer() {
     if (token == "}") break;
     switch (ToTokenType(token)) {
       case TOKEN_LISTEN:
-        parseListen(&server_config);
+        ParseListen(&server_config);
         break;
       case TOKEN_SERVER_NAME:
-        parseServerName(&server_config);
+        ParseServerName(&server_config);
         break;
       case TOKEN_MAX_BODY:
-        parseMaxBody(&server_config);
+        ParseMaxBody(&server_config);
         break;
       case TOKEN_ERROR_PAGE:
-        parseErrorPage(&server_config);
+        ParseErrorPage(&server_config);
         break;
       case TOKEN_LOCATION:
-        parseLocation(&server_config);
+        ParseLocation(&server_config);
         break;
       default:
         throw std::runtime_error("Unknown directive: " + token);

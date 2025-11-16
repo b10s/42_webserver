@@ -10,7 +10,7 @@ Relative Path (e.g., ./404.html, ../404.html)
   Invalid in nginx configuration. Cannot be matched in nginx's routing
 mechanism.
 */
-void ConfigParser::parseErrorPage(ServerConfig* server_config) {
+void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
   std::string token = Tokenize(content_);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected error code" + token);
@@ -32,7 +32,7 @@ void ConfigParser::parseErrorPage(ServerConfig* server_config) {
       token.find(url_constants::kHttpPrefix) != 0 && token[0] != '/') {
     token = "/" + token;
   }
-  server_config->setErrorPage(static_cast<HttpStatus>(error_code), token);
+  server_config->SetErrorPage(static_cast<HttpStatus>(error_code), token);
   token = Tokenize(content_);
   if (token != ";") {
     throw std::runtime_error(

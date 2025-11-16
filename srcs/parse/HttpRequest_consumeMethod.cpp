@@ -1,6 +1,6 @@
 #include "HttpRequest.hpp"
 
-const char* HttpRequest::consumeMethod(const char* req) {
+const char* HttpRequest::ConsumeMethod(const char* req) {
   switch (req[0]) {
     case 'G':
       if (std::strncmp(req, "GET ", 4) == 0) {

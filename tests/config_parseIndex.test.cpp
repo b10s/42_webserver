@@ -5,11 +5,11 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
+// set up a helper to call ParseAutoIndex
 static void callParseIndex(const std::string& input, Location* loc) {
   ConfigParser parser;
   parser.content_ = input;
-  parser.parseIndex(loc);
+  parser.ParseIndex(loc);
 }
 
 TEST(ConfigParser, ParseIndex_SingleIndex) {
