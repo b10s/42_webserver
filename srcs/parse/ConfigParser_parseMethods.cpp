@@ -7,11 +7,11 @@ void ConfigParser::ParseMethods(Location* location) {
     token = Tokenize(content);
     if (token == ";") break;
     if (token == "GET")
-      location->AddMethod(GET);
+      location->AddMethod(kGet);
     else if (token == "POST")
-      location->AddMethod(POST);
+      location->AddMethod(kPost);
     else if (token == "DELETE")
-      location->AddMethod(DELETE);
+      location->AddMethod(kDelete);
     else
       throw std::runtime_error("Invalid method in allow_methods: " + token);
   }

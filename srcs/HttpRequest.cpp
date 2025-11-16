@@ -9,7 +9,7 @@ const std::string HttpRequest::kDefaultPort = "8080";
 HttpRequest::HttpRequest()
     : progress_(kHeader),
       buffer_(),
-      method_(UNKNOWN_METHOD),
+      method_(kUnknownMethod),
       uri_(),
       host_name_(),
       host_port_("8080"),

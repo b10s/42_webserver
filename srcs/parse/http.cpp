@@ -5,37 +5,37 @@ std::string StatusToString(HttpStatus status) {
   switch (status) {
     case kOk:
       return "OK";
-    case CREATED:
+    case kCreated:
       return "Created";
-    case ACCEPTED:
+    case kAccepted:
       return "Accepted";
-    case NO_CONTENT:
+    case kNoContent:
       return "No Content";
-    case RESET_CONTENT:
+    case kResetContent:
       return "Reset Content";
-    case TEMPORARY_REDIRECT:
+    case kTemporaryRedirect:
       return "Temporary Redirect";
-    case BAD_REQUEST:
+    case kBadRequest:
       return "Bad Request";
-    case UNAUTHORIZED:
+    case kUnauthorized:
       return "Unauthorized";
-    case FORBIDDEN:
+    case kForbidden:
       return "Forbidden";
-    case NOT_FOUND:
+    case kNotFound:
       return "Not Found";
-    case METHOD_NOT_ALLOWED:
+    case kMethodNotAllowed:
       return "Method Not Allowed";
-    case URI_TOO_LONG:
+    case kUriTooLong:
       return "URI Too Long";
-    case INTERNAL_SERVER_ERROR:
+    case kInternalServerError:
       return "Internal Server Error";
-    case NOT_IMPLEMENTED:
+    case kNotImplemented:
       return "Not Implemented";
-    case BAD_GATEWAY:
+    case kBadGateway:
       return "Bad Gateway";
-    case REQUEST_HEADER_FIELDS_TOO_LARGE:
+    case kRequestHeaderFieldsTooLarge:
       return "Request Header Fields Too Large";
-    case LENGTH_REQUIRED:
+    case kLengthRequired:
       return "Length Required";
     default:
       return "I'm a teapot";
@@ -52,18 +52,18 @@ HttpStatus ResponseStatusException::GetStatus() const {
 
 std::string MethodToString(RequestMethod method) {
   switch (method) {
-    case GET:
+    case kGet:
       return "GET";
-    case HEAD:
+    case kHead:
       return "HEAD";
-    case POST:
+    case kPost:
       return "POST";
-    case DELETE:
+    case kDelete:
       return "DELETE";
-    case UNKNOWN_METHOD:
+    case kUnknownMethod:
       return "UNKNOWN_METHOD";
     default:
-      return "NONE";
+      return "kNone";
   }
 }
 }  // namespace http

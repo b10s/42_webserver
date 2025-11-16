@@ -23,11 +23,11 @@ static HeaderStart makeHeaderStart(const std::string& method,
   std::string startLine = method + " " + uri + " " + version + "\r\n";
   hs.reqbuf = startLine + headers_and_after;
   hs.p_headers = hs.reqbuf.c_str() + startLine.size();
-  if (method == "GET") hs.method = GET;
-  else if (method == "HEAD") hs.method = HEAD;
-  else if (method == "POST") hs.method = POST;
-  else if (method == "DELETE") hs.method = DELETE;
-  else hs.method = UNKNOWN_METHOD;
+  if (method == "GET") hs.method = kGet;
+  else if (method == "HEAD") hs.method = kHead;
+  else if (method == "POST") hs.method = kPost;
+  else if (method == "DELETE") hs.method = kDelete;
+  else hs.method = kUnknownMethod;
   return hs;
 }
 
@@ -92,7 +92,7 @@ TEST_F(HttpRequestConsumeHeader, MissingHost_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -110,7 +110,7 @@ TEST_F(HttpRequestConsumeHeader, EmptyHost_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -131,14 +131,14 @@ TEST_F(HttpRequestConsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
       http::ResponseStatusException);
 }
 
-// if method is POST and neither Content-Length nor Transfer-Encoding is present, throw LENGTH_REQUIRED
+// if method is POST and neither Content-Length nor Transfer-Encoding is present, throw kLengthRequired
 TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
   std::string headers_and_after =
       "Host: example.com\r\n"
@@ -151,7 +151,7 @@ TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(LENGTH_REQUIRED, e.GetStatus());
+          EXPECT_EQ(kLengthRequired, e.GetStatus());
           throw;
         }
       },
@@ -185,7 +185,7 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -206,7 +206,7 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -238,7 +238,7 @@ TEST_F(HttpRequestConsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) 
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(NOT_IMPLEMENTED, e.GetStatus());
+          EXPECT_EQ(kNotImplemented, e.GetStatus());
           throw;
         }
       },
@@ -281,7 +281,7 @@ TEST_F(HttpRequestConsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -300,7 +300,7 @@ TEST_F(HttpRequestConsumeHeader, MissingColon_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -318,7 +318,7 @@ TEST_F(HttpRequestConsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -336,7 +336,7 @@ TEST_F(HttpRequestConsumeHeader, MissingCRLF_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -356,7 +356,7 @@ TEST_F(HttpRequestConsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTo
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(REQUEST_HEADER_FIELDS_TOO_LARGE, e.GetStatus());
+          EXPECT_EQ(kRequestHeaderFieldsTooLarge, e.GetStatus());
           throw;
         }
       },

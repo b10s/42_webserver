@@ -21,16 +21,16 @@ TEST(ConfigParser, parseMethods_Empty_OK) {
 TEST(ConfigParser, parseMethod_SingleMethod_GET_OK) {
   Location loc;
   EXPECT_NO_THROW(callParseMethods("GET;", &loc));
-  EXPECT_TRUE(loc.IsMethodAllowed(GET));
+  EXPECT_TRUE(loc.IsMethodAllowed(kGet));
 }
 
 TEST(ConfigParser, parseMethods_State_Set) {
   Location loc;
   ASSERT_NO_THROW(callParseMethods("GET POST DELETE;", &loc));
   const std::set<RequestMethod>& methods = loc.GetMethods();
-  EXPECT_EQ(methods.count(GET), 1u);
-  EXPECT_EQ(methods.count(POST), 1u);
-  EXPECT_EQ(methods.count(DELETE), 1u);
+  EXPECT_EQ(methods.count(kGet), 1u);
+  EXPECT_EQ(methods.count(kPost), 1u);
+  EXPECT_EQ(methods.count(kDelete), 1u);
   EXPECT_EQ(methods.size(), 3u);
 }
 

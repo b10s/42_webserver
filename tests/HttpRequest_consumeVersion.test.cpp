@@ -38,7 +38,7 @@ TEST_F(HttpRequestParse, ConsumeVersion_UnsupportedVersion20_ThrowsBadRequest) {
         try {
           req.ConsumeVersion(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -53,7 +53,7 @@ TEST_F(HttpRequestParse,
         try {
           req.ConsumeVersion(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -67,7 +67,7 @@ TEST_F(HttpRequestParse, ConsumeVersion_NonAsciiCharacter_ThrowsBadRequest) {
         try {
           req.ConsumeVersion(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
@@ -81,7 +81,7 @@ TEST_F(HttpRequestParse, ConsumeVersion_MissingCRLF_ThrowsBadRequest) {
         try {
           req.ConsumeVersion(s.c_str());
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.GetStatus());
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },

@@ -2,7 +2,7 @@
 
 inline void BumpOrThrow(std::size_t& len) {
   if (len >= HttpRequest::kMaxUriSize) {
-    throw http::ResponseStatusException(URI_TOO_LONG);
+    throw http::ResponseStatusException(kUriTooLong);
   }
 }
 
@@ -13,12 +13,12 @@ inline const char* ConsumeUntilStopChar(const char* req, std::size_t& len,
                                         const char* stop_char) {
   while (*req && std::strchr(stop_char, *req) == 0) {
     if (*req == '#') {  // fragment not allowed in HTTP request URI
-      throw http::ResponseStatusException(BAD_REQUEST);
+      throw http::ResponseStatusException(kBadRequest);
     }
     ++len;
     BumpOrThrow(len);
     if (!http::IsVisibleAscii(*req))
-      throw http::ResponseStatusException(BAD_REQUEST);
+      throw http::ResponseStatusException(kBadRequest);
     ++req;
   }
   return req;
@@ -32,7 +32,7 @@ const char* HttpRequest::ConsumeQuery(const char* req, std::size_t& len) {
     const char* key_end = ConsumeUntilStopChar(req, len, " =&");
     std::string key(key_begin, key_end - key_begin);  // key should not be empty
     req = key_end;
-    if (key.empty()) throw http::ResponseStatusException(BAD_REQUEST);
+    if (key.empty()) throw http::ResponseStatusException(kBadRequest);
     std::string val;  // val can be empty so initialize as empty
     if (*req == '=') {
       ++req;  // skip '='
@@ -59,13 +59,13 @@ const char* HttpRequest::ConsumeQuery(const char* req, std::size_t& len) {
 const char* HttpRequest::ConsumeUri(const char* req) {
   std::size_t len = 0;
   if (*req != '/') {  // origin-form must start with '/'
-    throw http::ResponseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(kBadRequest);
   }
 
   const char* path_stop = ConsumeUntilStopChar(req, len, " ?");
   uri_.assign(req, path_stop - req);
   if (uri_.empty() || (*path_stop != ' ' && *path_stop != '?')) {
-    throw http::ResponseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(kBadRequest);
   }
   req = path_stop;
   if (*req == '?') {
@@ -75,7 +75,7 @@ const char* HttpRequest::ConsumeUri(const char* req) {
     req = ConsumeQuery(req, len);
   }
   if (*req != ' ') {
-    throw http::ResponseStatusException(BAD_REQUEST);
+    throw http::ResponseStatusException(kBadRequest);
   }
   return req + 1;  // skip space after URI and move to consume version
 }
