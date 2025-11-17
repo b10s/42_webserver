@@ -6,5 +6,5 @@
 
 TEST(BadOptionalAccessTest, WhatReturnsExpectedString) {
   lib::exception::BadOptionalAccess e;
-  EXPECT_STREQ(e.what(), lib::exception::kBadOptionalAccessMsg);
+  EXPECT_STREQ(e.what(), lib::exception::k_bad_optional_access_msg);
 }

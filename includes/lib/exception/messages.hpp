@@ -3,7 +3,7 @@
 
 namespace lib {
 namespace exception {
-extern const char* kBadOptionalAccessMsg;
+extern const char* k_bad_optional_access_msg;
 } // namespace exception
 } // namespace lib
 

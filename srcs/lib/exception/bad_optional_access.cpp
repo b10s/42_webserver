@@ -5,7 +5,7 @@
 namespace lib {
 namespace exception {
 const char* BadOptionalAccess::what() const throw() {
-  return kBadOptionalAccessMsg;
+  return k_bad_optional_access_msg;
 }
 }  // namespace exception
 }  // namespace lib
