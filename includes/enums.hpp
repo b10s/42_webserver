@@ -39,13 +39,6 @@ enum HttpStatus {
   kBadGateway = 502
 };
 
-enum RequestMethod {
-  kNone,
-  kGet,
-  kHead,
-  kPost,
-  kDelete,
-  kUnknownMethod
-};
+enum RequestMethod { kNone, kGet, kHead, kPost, kDelete, kUnknownMethod };
 
-#endif // ENUMS_HPP_
+#endif  // ENUMS_HPP_

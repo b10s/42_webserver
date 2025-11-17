@@ -50,7 +50,7 @@ class ConfigParser {
 
  public:
   std::string content;  // Made public for easier access in parsing functions
-  ConfigParser();        // Default constructor for tests
+  ConfigParser();       // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
   void LoadFile(const std::string& filename);
@@ -72,7 +72,8 @@ class ConfigParser {
   void ParseRedirect(Location* location);
   void ParseCgiPath(Location* location);
   template <typename T, typename Setter>
-  void ParseSimpleDirective(T* obj, Setter setter, const std::string& error_msg);
+  void ParseSimpleDirective(T* obj, Setter setter,
+                            const std::string& error_msg);
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;

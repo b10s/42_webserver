@@ -1,7 +1,6 @@
 #include "ConfigParser.hpp"
 
-ConfigParser::ConfigParser()
-    : current_pos_(0), server_configs_(), content("") {
+ConfigParser::ConfigParser() : current_pos_(0), server_configs_(), content("") {
 }
 
 ConfigParser::ConfigParser(const std::string& text)
@@ -24,6 +23,6 @@ void ConfigParser::LoadFile(const std::string& filename) {
     throw std::runtime_error("Failed to open file: " + filename);
   }
   content.assign(std::istreambuf_iterator<char>(file),
-                  std::istreambuf_iterator<char>());
+                 std::istreambuf_iterator<char>());
   file.close();
 }
