@@ -362,3 +362,22 @@ TEST_F(HttpRequestConsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTo
       },
       http::ResponseStatusException);
 }
+
+TEST_F(HttpRequestConsumeHeader, MultipleHost_ThrowsBadRequest) {
+  std::string headers_and_after =
+      "Host: example.com\r\n"
+      "Host: another.com\r\n"
+      "\r\n";
+  auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
+
+  EXPECT_THROW(
+      {
+        try {
+          req.ConsumeHeader(hs.p_headers);
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
