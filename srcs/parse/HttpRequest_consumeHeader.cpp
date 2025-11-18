@@ -56,7 +56,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   return req + vlen + 2;
 }
 
-// Store header key in lowercase. 
+// Store header key in lowercase.
 // We are not keeping original case for simplicity.
 void HttpRequest::StoreHeader(const std::string& raw_key,
                               const std::string& value) {
