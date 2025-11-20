@@ -5,21 +5,21 @@ If the port is omitted, the default port is 80.
 If the address is omitted, the server listens on all addresses (0.0.0.0).
 */
 ServerConfig::ServerConfig()
-    : host_("0.0.0.0"), port_("80"), serverName_(), maxBodySize_(0) {
+    : host_("0.0.0.0"), port_("80"), server_name_(), max_body_size_(0) {
 }
 
-void ServerConfig::setHost(const std::string& host) {
+void ServerConfig::SetHost(const std::string& host) {
   host_ = host;
 }
 
-void ServerConfig::setPort(const std::string& port) {
+void ServerConfig::SetPort(const std::string& port) {
   port_ = port;
 }
 
-void ServerConfig::setServerName(const std::string& serverName) {
-  serverName_ = serverName;
+void ServerConfig::SetServerName(const std::string& server_name) {
+  server_name_ = server_name;
 }
 
-void ServerConfig::setMaxBodySize(int size) {
-  maxBodySize_ = size;
+void ServerConfig::SetMaxBodySize(int size) {
+  max_body_size_ = size;
 }

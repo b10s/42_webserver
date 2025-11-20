@@ -10,30 +10,30 @@ Relative Path (e.g., ./404.html, ../404.html)
   Invalid in nginx configuration. Cannot be matched in nginx's routing
 mechanism.
 */
-void ConfigParser::parseErrorPage(ServerConfig* serverConfig) {
-  std::string token = tokenize(content_);
+void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
+  std::string token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected error code" + token);
   }
-  std::string errorCodeStr = token;
-  int errorCode = std::atoi(token.c_str());
-  if (errorCode < 400 || errorCode > 599) {
+  std::string error_code_str = token;
+  int error_code = std::atoi(token.c_str());
+  if (error_code < 400 || error_code > 599) {
     throw std::runtime_error("Invalid error code: " + token);
   }
 
-  token = tokenize(content_);
+  token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error("Syntax error : expected error page path" + token);
   }
   if (token[0] == '.') {
     throw std::runtime_error("Error page path must be absolute: " + token);
   }
-  if (token.find(UrlConstants::kHttpsPrefix) != 0 &&
-      token.find(UrlConstants::kHttpPrefix) != 0 && token[0] != '/') {
+  if (token.find(url_constants::kHttpsPrefix) != 0 &&
+      token.find(url_constants::kHttpPrefix) != 0 && token[0] != '/') {
     token = "/" + token;
   }
-  serverConfig->setErrorPage(static_cast<HttpStatus>(errorCode), token);
-  token = tokenize(content_);
+  server_config->SetErrorPage(static_cast<HttpStatus>(error_code), token);
+  token = Tokenize(content);
   if (token != ";") {
     throw std::runtime_error(
         "Syntax error: expected ';' after error_page directive" + token);

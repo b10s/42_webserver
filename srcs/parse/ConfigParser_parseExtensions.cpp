@@ -1,11 +1,11 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parseExtensions(Location* location) {
+void ConfigParser::ParseExtensions(Location* location) {
   std::string token;
 
-  token = tokenize(content_);
-  location->setExtension(token);
-  token = tokenize(content_);
+  token = Tokenize(content);
+  location->SetExtension(token);
+  token = Tokenize(content);
   // we are not doing bonus so only one extension is allowed here
   if (token != ";")
     throw std::runtime_error(

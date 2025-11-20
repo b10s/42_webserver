@@ -5,6 +5,6 @@
 #include "lib/exception/messages.hpp"
 
 TEST(BadOptionalAccessTest, WhatReturnsExpectedString) {
-  lib::exception::bad_optional_access e;
-  EXPECT_STREQ(e.what(), lib::exception::BAD_OPTIONAL_ACCESS_MSG);
+  lib::exception::BadOptionalAccess e;
+  EXPECT_STREQ(e.what(), lib::exception::k_bad_optional_access_msg);
 }

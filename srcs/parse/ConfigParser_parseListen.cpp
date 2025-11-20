@@ -7,8 +7,8 @@ Default values for port and host are set in the ServerConfig constructor:
   - Port defaults to 80
   - Host/address defaults to 0.0.0.0 (listen on all interfaces)
 */
-void ConfigParser ::parseListen(ServerConfig* serverConfig) {
-  std::string token1 = tokenize(content_);
+void ConfigParser ::ParseListen(ServerConfig* server_config) {
+  std::string token1 = Tokenize(content);
   if (token1.empty()) {
     throw std::runtime_error(
         "Syntax error : expected host or port after listen");
@@ -17,30 +17,30 @@ void ConfigParser ::parseListen(ServerConfig* serverConfig) {
   if (colon_pos != std::string::npos) {
     std::string host = token1.substr(0, colon_pos);
     std::string port = token1.substr(colon_pos + 1);
-    if (!isValidPortNumber(port))
+    if (!IsValidPortNumber(port))
       throw std::runtime_error(
           "Invalid port number after ':' in listen directive: " + port);
-    std::string end = tokenize(content_);
+    std::string end = Tokenize(content);
     if (end != ";")
       throw std::runtime_error(
           "Syntax error: expected ';' after listen directive " + end);
-    serverConfig->setHost(host);
-    serverConfig->setPort(port);
+    server_config->SetHost(host);
+    server_config->SetPort(port);
     return;
   }
   // host only or port only
-  std::string token2 = tokenize(content_);
+  std::string token2 = Tokenize(content);
   if (token2 != ";") {
     throw std::runtime_error("Syntax error: expected ';' after listen value: " +
                              token2);
   }
-  if (isAllDigits(token1)) {
-    if (!isValidPortNumber(token1))
+  if (IsAllDigits(token1)) {
+    if (!IsValidPortNumber(token1))
       throw std::runtime_error("Invalid port number in listen directive: " +
                                token1);
-    serverConfig->setPort(token1);
+    server_config->SetPort(token1);
   } else {
-    serverConfig->setHost(token1);
+    server_config->SetHost(token1);
   }
   return;
 }

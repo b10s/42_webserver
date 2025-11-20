@@ -5,37 +5,37 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
-static void callconsumeMethods(const std::string& input, Location* loc) {
+// set up a helper to call ParseAutoIndex
+static void callParseMethods(const std::string& input, Location* loc) {
   ConfigParser parser;
-  parser.content_ = input;
-  parser.consumeMethods(loc);
+  parser.content = input;
+  parser.ParseMethods(loc);
 }
 
 // ==================== happy path ====================
-TEST(ConfigParser, consumeMethod_Empty_OK) {
+TEST(ConfigParser, parseMethods_Empty_OK) {
   Location loc;
-  EXPECT_NO_THROW(callconsumeMethods(";", &loc));
+  EXPECT_NO_THROW(callParseMethods(";", &loc));
 }
 
-TEST(ConfigParser, consumeMethod_SingleMethod_GET_OK) {
+TEST(ConfigParser, parseMethod_SingleMethod_GET_OK) {
   Location loc;
-  EXPECT_NO_THROW(callconsumeMethods("GET;", &loc));
-  EXPECT_TRUE(loc.isMethodAllowed(GET));
+  EXPECT_NO_THROW(callParseMethods("GET;", &loc));
+  EXPECT_TRUE(loc.IsMethodAllowed(kGet));
 }
 
-TEST(ConfigParser, consumeMethods_State_Set) {
+TEST(ConfigParser, parseMethods_State_Set) {
   Location loc;
-  ASSERT_NO_THROW(callconsumeMethods("GET POST DELETE;", &loc));
-  const std::set<RequestMethod>& methods = loc.getMethods();
-  EXPECT_EQ(methods.count(GET), 1u);
-  EXPECT_EQ(methods.count(POST), 1u);
-  EXPECT_EQ(methods.count(DELETE), 1u);
+  ASSERT_NO_THROW(callParseMethods("GET POST DELETE;", &loc));
+  const std::set<RequestMethod>& methods = loc.GetMethods();
+  EXPECT_EQ(methods.count(kGet), 1u);
+  EXPECT_EQ(methods.count(kPost), 1u);
+  EXPECT_EQ(methods.count(kDelete), 1u);
   EXPECT_EQ(methods.size(), 3u);
 }
 
 // ==================== error cases ====================
-TEST(ConfigParser, consumeMethods_InvalidMethod_Throws) {
+TEST(ConfigParser, parseMethods_InvalidMethod_Throws) {
   Location loc;
-  EXPECT_THROW(callconsumeMethods("GET PUT;", &loc), std::runtime_error);
+  EXPECT_THROW(callParseMethods("GET PUT;", &loc), std::runtime_error);
 }

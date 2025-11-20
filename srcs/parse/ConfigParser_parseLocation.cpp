@@ -1,50 +1,50 @@
 #include "ConfigParser.hpp"
 
 // Extracts the next token (word or symbol) from the configuration file content.
-void ConfigParser::parseLocation(ServerConfig* server) {
+void ConfigParser::ParseLocation(ServerConfig* server) {
   (void)server;
   std::string token;
   Location location = Location();
 
-  token = tokenize(content_);
+  token = Tokenize(content);
   if (token.empty() || token[0] != '/' || token[token.size() - 1] != '/')
     throw std::runtime_error("Invalid location name: " + token);
-  location.setName(token);
-  token = tokenize(content_);
+  location.SetName(token);
+  token = Tokenize(content);
   if (token != "{")
     throw std::runtime_error(
         "Syntax error: expected '{' after location name, got: " + token);
   while (true) {
-    token = tokenize(content_);
+    token = Tokenize(content);
     if (token == "}") break;
-    switch (toTokenType(token)) {
-      case TOKEN_ALLOW_METHODS:
-        consumeMethods(&location);
+    switch (ToTokenType(token)) {
+      case kTokenAllowMethods:
+        ParseMethods(&location);
         break;
-      case TOKEN_ROOT:
-        parseRoot(&location);
+      case kTokenRoot:
+        ParseRoot(&location);
         break;
-      case TOKEN_AUTOINDEX:
-        parseAutoIndex(&location);
+      case kTokenAutoindex:
+        ParseAutoIndex(&location);
         break;
-      case TOKEN_INDEX:
-        parseIndex(&location);
+      case kTokenIndex:
+        ParseIndex(&location);
         break;
-      case TOKEN_EXTENSION:
-        parseExtensions(&location);
+      case kTokenExtension:
+        ParseExtensions(&location);
         break;
-      case TOKEN_UPLOAD_PATH:
-        parseUploadPath(&location);
+      case kTokenUploadPath:
+        ParseUploadPath(&location);
         break;
-      case TOKEN_REDIRECT:
-        parseRedirect(&location);
+      case kTokenRedirect:
+        ParseRedirect(&location);
         break;
-      case TOKEN_CGI_PATH:
-        parseCgiPath(&location);
+      case kTokenCgiPath:
+        ParseCgiPath(&location);
         break;
       default:
         throw std::runtime_error("Unknown directive in location: " + token);
     }
   }
-  server->addLocation(location);
+  server->AddLocation(location);
 }

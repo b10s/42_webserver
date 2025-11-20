@@ -7,56 +7,61 @@
 
 #include "enums.hpp"
 
-#define DEFAULT_PORT "8080"
-
 // http
 namespace http {
-std::string statusToString(HttpStatus status);
-std::string methodToString(RequestMethod method);
+std::string StatusToString(HttpStatus status);
+std::string MethodToString(RequestMethod method);
 
-class responseStatusException : public std::runtime_error {
+inline bool IsVisibleAscii(char c) {
+  return c >= '!' && c <= '~';
+}
+
+class ResponseStatusException : public std::runtime_error {
  private:
   HttpStatus status_;
 
  public:
-  responseStatusException(HttpStatus status);
-  HttpStatus getStatus() const;
+  ResponseStatusException(HttpStatus status);
+  HttpStatus GetStatus() const;
 };
 }  // namespace http
 
-typedef std::map<std::string, std::string> dict;
+typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
   enum Progress {
-    HEADER = 0,  // initial state, reading header
-    BODY,        // reading body
-    DONE         // finished parsing request
-  } progress;    // progress is initially HEADER
+    kHeader = 0,  // initial state, reading header
+    kBody,        // reading body
+    kDone         // finished parsing request
+  } progress_;    // progress is initially kHeader
 
   std::string buffer_;
   RequestMethod method_;
   std::string uri_;
-  dict query_;
-  std::string hostName_;
-  std::string hostPort_;
+  Dict query_;
+  std::string host_name_;
+  std::string host_port_;
   std::string version_;
-  dict headers_;
+  Dict headers_;
   std::string body_;
-  long contentLength_;
+  long content_length_;
 
-  bool consumeHeader();  // returns false if more data needed
-  bool consumeBody();
-  static std::string::size_type find_end_of_header(const std::string& payload);
-  const char* parseHeader(const char* req);
-  static std::string toLowerCopy(const std::string& s);
-  static void bumpLenOrThrow(size_t& acc, size_t add, size_t limit);
-  static const char* parseHeaderLine(const char* req, size_t& accLen,
-                                     std::string& outKey,
-                                     std::string& outValue);
-  void validateAndApplyHeaders();  // Host / CL / TE / Connection の事後処理
-  void parseHostHeader(
-      const std::string& host);  // hostName_ / hostPort_ を決める
+  // bool ConsumeHeader();  // returns false if more data needed
+  bool ConsumeBody();
+  static std::string::size_type FindEndOfHeader(const std::string& payload);
+  const char* ParseHeader(const char* req);
+  bool IsCRLF(const char* p) const;
+  static std::string ToLowerAscii(const std::string& s);
+  void BumpLenOrThrow(size_t& total, size_t inc) const;
+  const char* ReadHeaderLine(const char* req, std::string& key,
+                             std::string& value, size_t& total_len);
+  void StoreHeader(const std::string& raw_key, const std::string& value);
+  void ValidateAndExtractHost();
+  void ValidateBodyHeaders();
+  void ParseContentLength(const std::string& s);
+  void ParseTransferEncoding(const std::string& s);
+  void ParseConnectionDirective();
 
  public:
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes
@@ -68,30 +73,41 @@ class HttpRequest {
   // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
-  bool keepAlive;
+  static const std::string kDefaultPort;
+  bool keep_alive;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);
   HttpRequest& operator=(const HttpRequest& src);
   ~HttpRequest();
 
-  void parseRequest(const char* payload);
-  const char* consumeMethod(const char* req);
-  const char* consumeVersion(const char* req);
-  const char* consumeUri(const char* req);
-  const char* consumeQuery(const char* req, std::size_t& len);
-  RequestMethod getMethod() const;
-  const std::string& getUri() const;
-  const std::string& getHostName() const;
-  const std::string& getHostPort() const;
-  const std::string& getVersion() const;
-  const dict& getHeader() const;
-  const std::string& getHeader(const std::string& key) const;
-  const dict& getQuery() const;
-  const std::string& getBody() const;
+  void ParseRequest(const char* payload);
+  const char* ConsumeMethod(const char* req);
+  const char* ConsumeVersion(const char* req);
+  const char* ConsumeUri(const char* req);
+  const char* ConsumeQuery(const char* req, std::size_t& len);
+  const char* ConsumeHeader(const char* req);
+  RequestMethod GetMethod() const;
+  void SetMethod(RequestMethod method);  // for test purposes
+  const std::string& GetUri() const;
+  const std::string& GetHostName() const;
+  const std::string& GetHostPort() const;
+  const std::string& GetVersion() const;
+  const Dict& GetHeader() const;
+  const std::string& GetHeader(const std::string& key) const;
+  const Dict& GetQuery() const;
+  const std::string& GetBody() const;
 
-  bool isDone() const {
-    return progress == DONE;
+  long GetContentLength() const {
+    return content_length_;
+  }
+
+  bool IsKeepAlive() const {
+    return keep_alive;
+  }
+
+  bool IsDone() const {
+    return progress_ == kDone;
   }  // for test purposes
 };
 

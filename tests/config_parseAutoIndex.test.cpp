@@ -28,24 +28,24 @@ class ConfigParserTest : public ::testing::Test {
   Location loc;
 
   virtual void SetUp() {
-    parser.content_.clear();
+    parser.content.clear();
   }
 
-  // boilerplate to call parseAutoIndex
+  // boilerplate to call ParseAutoIndex
   void CallParseAutoIndex(const std::string& input) {
-    parser.content_ = input;      // tokenize は content_ から読む想定
-    parser.parseAutoIndex(&loc);  // ここで例外が出たらテスト側で検証
+    parser.content = input;      // Tokenize は content から読む想定
+    parser.ParseAutoIndex(&loc);  // ここで例外が出たらテスト側で検証
   }
 };
 
 TEST_F(ConfigParserTest, ParseAutoIndex_On_SetsTrue) {
   EXPECT_NO_THROW(CallParseAutoIndex("on;"));
-  EXPECT_TRUE(loc.getAutoIndex());
+  EXPECT_TRUE(loc.GetAutoIndex());
 }
 
 TEST_F(ConfigParserTest, ParseAutoIndex_Off_StaysFalse) {
   EXPECT_NO_THROW(CallParseAutoIndex("off;"));
-  EXPECT_FALSE(loc.getAutoIndex());
+  EXPECT_FALSE(loc.GetAutoIndex());
 }
 
 TEST_F(ConfigParserTest, ParseAutoIndex_MissingValue_Throws) {

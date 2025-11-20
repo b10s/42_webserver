@@ -1,46 +1,46 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::parse() {
+void ConfigParser::Parse() {
   std::string token;
   while (true) {
-    token = tokenize(content_);
+    token = Tokenize(content);
     if (token.empty()) break;
-    if (token == ConfigTokens::SERVER) {
-      this->parseServer();
+    if (token == config_tokens::kServer) {
+      ParseServer();
     } else {
       throw std::runtime_error("Syntax error: " + token);
     }
   }
 }
 
-void ConfigParser::parseServer() {
-  std::string token = tokenize(content_);
+void ConfigParser::ParseServer() {
+  std::string token = Tokenize(content);
   if (token != "{") {
     throw std::runtime_error("Syntax error: " + token);
   }
-  ServerConfig serverConfig = ServerConfig();
+  ServerConfig server_config = ServerConfig();
   while (true) {
-    token = tokenize(content_);
+    token = Tokenize(content);
     if (token == "}") break;
-    switch (toTokenType(token)) {
-      case TOKEN_LISTEN:
-        parseListen(&serverConfig);
+    switch (ToTokenType(token)) {
+      case kTokenListen:
+        ParseListen(&server_config);
         break;
-      case TOKEN_SERVER_NAME:
-        parseServerName(&serverConfig);
+      case kTokenServerName:
+        ParseServerName(&server_config);
         break;
-      case TOKEN_MAX_BODY:
-        parseMaxBody(&serverConfig);
+      case kTokenMaxBody:
+        ParseMaxBody(&server_config);
         break;
-      case TOKEN_ERROR_PAGE:
-        parseErrorPage(&serverConfig);
+      case kTokenErrorPage:
+        ParseErrorPage(&server_config);
         break;
-      case TOKEN_LOCATION:
-        parseLocation(&serverConfig);
+      case kTokenLocation:
+        ParseLocation(&server_config);
         break;
       default:
         throw std::runtime_error("Unknown directive: " + token);
     }
   }
-  this->serverConfigs_.push_back(serverConfig);
+  server_configs_.push_back(server_config);
 }

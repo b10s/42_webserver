@@ -1,17 +1,17 @@
 #include "ConfigParser.hpp"
 
-void ConfigParser::consumeMethods(Location* location) {
+void ConfigParser::ParseMethods(Location* location) {
   std::string token;
 
   while (true) {
-    token = tokenize(content_);
+    token = Tokenize(content);
     if (token == ";") break;
     if (token == "GET")
-      location->addMethod(GET);
+      location->AddMethod(kGet);
     else if (token == "POST")
-      location->addMethod(POST);
+      location->AddMethod(kPost);
     else if (token == "DELETE")
-      location->addMethod(DELETE);
+      location->AddMethod(kDelete);
     else
       throw std::runtime_error("Invalid method in allow_methods: " + token);
   }

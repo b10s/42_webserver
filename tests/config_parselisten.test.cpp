@@ -5,11 +5,11 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
+// set up a helper to call ParseAutoIndex
 static void callParseListen(const std::string& input, ServerConfig* sc) {
   ConfigParser parser;
-  parser.content_ = input;
-  parser.parseListen(sc);
+  parser.content = input;
+  parser.ParseListen(sc);
 }
 
 // ==================== happy path ====================
@@ -17,22 +17,22 @@ static void callParseListen(const std::string& input, ServerConfig* sc) {
 TEST(ConfigParser, Listen_HostColonPort) {
   ServerConfig sc;  // default: host=0.0.0.0, port=80
   EXPECT_NO_THROW(callParseListen("127.0.0.1:8080;", &sc));
-  EXPECT_EQ(sc.getHost(), "127.0.0.1");
-  EXPECT_EQ(sc.getPort(), "8080");
+  EXPECT_EQ(sc.GetHost(), "127.0.0.1");
+  EXPECT_EQ(sc.GetPort(), "8080");
 }
 
 TEST(ConfigParser, Listen_PortOnly) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseListen("8081;", &sc));
-  EXPECT_EQ(sc.getHost(), "0.0.0.0");  // default host
-  EXPECT_EQ(sc.getPort(), "8081");
+  EXPECT_EQ(sc.GetHost(), "0.0.0.0");  // default host
+  EXPECT_EQ(sc.GetPort(), "8081");
 }
 
 TEST(ConfigParser, Listen_HostOnly) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseListen("10.0.0.5;", &sc));
-  EXPECT_EQ(sc.getHost(), "10.0.0.5");
-  EXPECT_EQ(sc.getPort(), "80");  // default port
+  EXPECT_EQ(sc.GetHost(), "10.0.0.5");
+  EXPECT_EQ(sc.GetPort(), "80");  // default port
 }
 
 // ==================== error cases ====================
@@ -60,7 +60,7 @@ TEST(ConfigParser, Listen_SpacesAroundColon_Throws) {
 // }
 // TODO: Disallow invalid hostnames
 
-// isValidPortNumber: 1..65535
+// IsValidPortNumber: 1..65535
 TEST(ConfigParser, Listen_PortOutOfRange_Throws) {
   ServerConfig sc1, sc2, sc3;
   EXPECT_THROW(callParseListen("0;", &sc1), std::runtime_error);

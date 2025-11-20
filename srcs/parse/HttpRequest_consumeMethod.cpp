@@ -1,33 +1,33 @@
 #include "HttpRequest.hpp"
 
-const char* HttpRequest::consumeMethod(const char* req) {
+const char* HttpRequest::ConsumeMethod(const char* req) {
   switch (req[0]) {
     case 'G':
       if (std::strncmp(req, "GET ", 4) == 0) {
-        method_ = GET;
+        method_ = kGet;
         return req + 4;
       }
       break;
     case 'H':
       if (std::strncmp(req, "HEAD ", 5) == 0) {
-        method_ = HEAD;
+        method_ = kHead;
         return req + 5;
       }
       break;
     case 'P':
       if (std::strncmp(req, "POST ", 5) == 0) {
-        method_ = POST;
+        method_ = kPost;
         return req + 5;
       }
       break;
     case 'D':
       if (std::strncmp(req, "DELETE ", 7) == 0) {
-        method_ = DELETE;
+        method_ = kDelete;
         return req + 7;
       }
       break;
     default:
       break;
   }
-  throw http::responseStatusException(NOT_IMPLEMENTED);
+  throw http::ResponseStatusException(kNotImplemented);
 }

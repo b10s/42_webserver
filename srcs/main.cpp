@@ -20,7 +20,7 @@
 
 //     std::string token;
 //     Config config("sample_config/server_localhost.conf");
-//     while (!(token = config.tokenize(content)).empty()) {
+//     while (!(token = config.Tokenize(content)).empty()) {
 //         std::cout << token << std::endl;
 //     }
 
@@ -30,39 +30,39 @@
 int main() {
   try {
     ConfigParser config;
-    config.loadFile("sample_config/server_test_for_parse.conf");
-    config.parse();
-    const std::vector<ServerConfig>& servers = config.getServerConfigs();
+    config.LoadFile("sample_config/server_test_for_parse.conf");
+    config.Parse();
+    const std::vector<ServerConfig>& servers = config.GetServerConfigs();
     for (size_t i = 0; i < servers.size(); ++i) {
       std::cout << "Server " << i << ":\n";
-      std::cout << "  Host: " << servers[i].getHost() << "\n";
-      std::cout << "  Port: " << servers[i].getPort() << "\n";
-      std::cout << "  Server Name: " << servers[i].getServerName() << "\n";
-      std::cout << "  Max Body Size: " << servers[i].getMaxBodySize() << "\n";
+      std::cout << "  Host: " << servers[i].GetHost() << "\n";
+      std::cout << "  Port: " << servers[i].GetPort() << "\n";
+      std::cout << "  Server Name: " << servers[i].GetServerName() << "\n";
+      std::cout << "  Max Body Size: " << servers[i].GetMaxBodySize() << "\n";
       std::cout << "  Error Pages:\n"
-                << servers[i].getErrorPagesString() << "\n";
+                << servers[i].GetErrorPagesString() << "\n";
 
       std::cout << "  Locations:\n";
-      const std::vector<Location>& locations = servers[i].getLocations();
+      const std::vector<Location>& locations = servers[i].GetLocations();
       for (size_t j = 0; j < locations.size(); ++j) {
         std::cout << "    Location " << j << ":\n";
-        std::cout << "      Name: " << locations[j].getName() << "\n";
-        std::cout << "      Root: " << locations[j].getRoot() << "\n";
+        std::cout << "      Name: " << locations[j].GetName() << "\n";
+        std::cout << "      Root: " << locations[j].GetRoot() << "\n";
         std::cout << "      Autoindex: "
-                  << (locations[j].getAutoIndex() ? "on" : "off") << "\n";
+                  << (locations[j].GetAutoIndex() ? "on" : "off") << "\n";
         std::cout << "      Index Files: ";
-        const std::vector<std::string>& indexFiles =
-            locations[j].getIndexFiles();
-        for (size_t k = 0; k < indexFiles.size(); ++k) {
-          std::cout << indexFiles[k] << " ";
+        const std::vector<std::string>& index_files =
+            locations[j].GetIndexFiles();
+        for (size_t k = 0; k < index_files.size(); ++k) {
+          std::cout << index_files[k] << " ";
         }
         std::cout << "\n";
-        std::cout << "      Extensions: " << locations[j].getExtensions();
+        std::cout << "      Extensions: " << locations[j].GetExtensions();
         std::cout << "\n";
-        std::cout << "      Upload Path: " << locations[j].getUploadPath()
+        std::cout << "      Upload Path: " << locations[j].GetUploadPath()
                   << "\n";
-        std::cout << "      Redirect: " << locations[j].getRedirect() << "\n";
-        std::cout << "      CGI Path: " << locations[j].getCgiPath() << "\n";
+        std::cout << "      Redirect: " << locations[j].GetRedirect() << "\n";
+        std::cout << "      CGI Path: " << locations[j].GetCgiPath() << "\n";
       }
       std::cout << "\n";
     }

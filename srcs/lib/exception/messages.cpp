@@ -2,6 +2,6 @@
 
 namespace lib {
 namespace exception {
-const char* BAD_OPTIONAL_ACCESS_MSG = "bad optional access";
+const char* k_bad_optional_access_msg = "bad optional access";
 }  // namespace exception
 }  // namespace lib

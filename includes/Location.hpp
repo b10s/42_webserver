@@ -14,89 +14,89 @@ class Location {
   std::string name_;
   std::string root_;
   bool autoindex_;
-  std::vector<std::string> indexFiles_;
+  std::vector<std::string> index_files_;
   std::string extensions_;  // we are not doing bonus so only one extension is
                             // allowed here
-  std::string uploadPath_;
+  std::string upload_path_;
   std::string redirect_;
-  std::string cgiPath_;
+  std::string cgi_path_;
 
  public:
   Location();
 
-  void setName(const std::string& name) {
+  void SetName(const std::string& name) {
     name_ = name;
   }
 
-  const std::string& getName() const {
+  const std::string& GetName() const {
     return name_;
   }
 
-  void setRoot(const std::string& root) {
+  void SetRoot(const std::string& root) {
     root_ = root;
   }
 
-  const std::string& getRoot() const {
+  const std::string& GetRoot() const {
     return root_;
   }
 
-  void setAutoIndex(bool autoindex) {
+  void SetAutoIndex(bool autoindex) {
     autoindex_ = autoindex;
   }
 
-  bool getAutoIndex() const {
+  bool GetAutoIndex() const {
     return autoindex_;
   }
 
-  void addIndex(const std::string& index) {
-    indexFiles_.push_back(index);
+  void AddIndex(const std::string& index) {
+    index_files_.push_back(index);
   }
 
-  const std::vector<std::string>& getIndexFiles() const {
-    return indexFiles_;
+  const std::vector<std::string>& GetIndexFiles() const {
+    return index_files_;
   }
 
-  void setExtension(const std::string& ext) {
+  void SetExtension(const std::string& ext) {
     extensions_ = ext;
   }
 
-  const std::string& getExtensions() const {
+  const std::string& GetExtensions() const {
     return extensions_;
   }
 
-  void setUploadPath(const std::string& path) {
-    uploadPath_ = path;
+  void SetUploadPath(const std::string& path) {
+    upload_path_ = path;
   }
 
-  const std::string& getUploadPath() const {
-    return uploadPath_;
+  const std::string& GetUploadPath() const {
+    return upload_path_;
   }
 
-  void setRedirect(const std::string& redirect) {
+  void SetRedirect(const std::string& redirect) {
     redirect_ = redirect;
   }
 
-  const std::string& getRedirect() const {
+  const std::string& GetRedirect() const {
     return redirect_;
   }
 
-  void setCgiPath(const std::string& path) {
-    cgiPath_ = path;
+  void SetCgiPath(const std::string& path) {
+    cgi_path_ = path;
   }
 
-  const std::string& getCgiPath() const {
-    return cgiPath_;
+  const std::string& GetCgiPath() const {
+    return cgi_path_;
   }
 
-  void addMethod(RequestMethod method) {
+  void AddMethod(RequestMethod method) {
     methods_.insert(method);
   }
 
-  bool isMethodAllowed(RequestMethod method) const {
+  bool IsMethodAllowed(RequestMethod method) const {
     return methods_.count(method) > 0;
   }
 
-  std::set<RequestMethod> getMethods() const {
+  std::set<RequestMethod> GetMethods() const {
     return methods_;
   }
 };

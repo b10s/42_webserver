@@ -17,8 +17,8 @@ TEST_F(HttpRequestParseUri, PathOnly_SetsUri_AdvancesToSpace) {
   std::string s = "/index.html HTTP/1.1";
   const char* p = NULL;
 
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  EXPECT_EQ("/index.html", req.getUri());
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  EXPECT_EQ("/index.html", req.GetUri());
   EXPECT_EQ(s.c_str() + std::strlen("/index.html "), p);
 }
 
@@ -26,10 +26,10 @@ TEST_F(HttpRequestParseUri, PathWithQuery_KeyValuePairs) {
   std::string s = "/search?q=cats&page=2 HTTP/1.1";
   const char* p = NULL;
 
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  EXPECT_EQ("/search", req.getUri());
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  EXPECT_EQ("/search", req.GetUri());
 
-  const std::map<std::string, std::string>& q = req.getQuery();
+  const std::map<std::string, std::string>& q = req.GetQuery();
   ASSERT_EQ(2u, q.size());
   EXPECT_EQ("cats", q.at("q"));
   EXPECT_EQ("2", q.at("page"));
@@ -41,10 +41,10 @@ TEST_F(HttpRequestParseUri, QueryAllowsSlashAndQuestion_AsData) {
   std::string s = "/p?next=/login?m=1 HTTP/1.1";
   const char* p = NULL;
 
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  EXPECT_EQ("/p", req.getUri());
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  EXPECT_EQ("/p", req.GetUri());
 
-  const auto& q = req.getQuery();
+  const auto& q = req.GetQuery();
   ASSERT_EQ(1u, q.size());
   EXPECT_EQ("/login?m=1", q.at("next"));
 
@@ -55,8 +55,8 @@ TEST_F(HttpRequestParseUri, EmptyValueAllowed) {
   std::string s = "/p?x=&y=1 HTTP/1.1";
   const char* p = NULL;
 
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  const auto& q = req.getQuery();
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  const auto& q = req.GetQuery();
   ASSERT_EQ(2u, q.size());
   EXPECT_EQ("", q.at("x"));
   EXPECT_EQ("1", q.at("y"));
@@ -70,13 +70,13 @@ TEST_F(HttpRequestParseUri, EmptyPath_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
@@ -84,13 +84,13 @@ TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
@@ -98,13 +98,13 @@ TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
@@ -112,13 +112,13 @@ TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // origin-form has to start with '/'
@@ -127,13 +127,13 @@ TEST_F(HttpRequestParseUri, PathMustStartWithSlash_ThrowsBadRequest) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 // =============== Length boundary (kMaxUriSize) ===============
@@ -152,13 +152,13 @@ TEST_F(HttpRequestParseUri, UriTooLong_Throws414_WhenReachesLimitExactly) {
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(URI_TOO_LONG, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kUriTooLong, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, UriMaxMinusOne_OK_ButMax_EXACT_Throws) {
@@ -169,8 +169,8 @@ TEST_F(HttpRequestParseUri, UriMaxMinusOne_OK_ButMax_EXACT_Throws) {
   std::string s = acceptable + " HTTP/1.1";
 
   const char* p = NULL;
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  EXPECT_EQ(acceptable, req.getUri());
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  EXPECT_EQ(acceptable, req.GetUri());
   EXPECT_EQ(s.c_str() + (acceptable.size() + 1), p);  // URI + ' '
 }
 
@@ -180,8 +180,8 @@ TEST_F(HttpRequestParseUri, QueryOnlyKeys_NoValues) {
   std::string s = "/p?a&b&c HTTP/1.1";
   const char* p = NULL;
 
-  ASSERT_NO_THROW(p = req.consumeUri(s.c_str()));
-  const auto& q = req.getQuery();
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  const auto& q = req.GetQuery();
   ASSERT_EQ(3u, q.size());
   EXPECT_EQ("", q.at("a"));
   EXPECT_EQ("", q.at("b"));
@@ -196,11 +196,11 @@ TEST_F(HttpRequestParseUri,
   EXPECT_THROW(
       {
         try {
-          req.consumeUri(s.c_str());
-        } catch (const http::responseStatusException& e) {
-          EXPECT_EQ(BAD_REQUEST, e.getStatus());
+          req.ConsumeUri(s.c_str());
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::responseStatusException);
+      http::ResponseStatusException);
 }

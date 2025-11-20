@@ -5,11 +5,11 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
+// set up a helper to call ParseAutoIndex
 static void callParseMaxBody(const std::string& input, ServerConfig* sc) {
   ConfigParser parser;
-  parser.content_ = input;
-  parser.parseMaxBody(sc);
+  parser.content = input;
+  parser.ParseMaxBody(sc);
 }
 
 // ==================== happy path ====================
@@ -17,19 +17,19 @@ static void callParseMaxBody(const std::string& input, ServerConfig* sc) {
 TEST(ConfigParser, ParseMaxBody_Zero_OK) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseMaxBody("0;", &sc));
-  EXPECT_EQ(sc.getMaxBodySize(), 0);
+  EXPECT_EQ(sc.GetMaxBodySize(), 0);
 }
 
 TEST(ConfigParser, ParseMaxBody_Normal_OK) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseMaxBody("12345;", &sc));
-  EXPECT_EQ(sc.getMaxBodySize(), 12345);
+  EXPECT_EQ(sc.GetMaxBodySize(), 12345);
 }
 
 TEST(ConfigParser, ParseMaxBody_UpperBound_OK) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseMaxBody("100000000;", &sc));
-  EXPECT_EQ(sc.getMaxBodySize(), 100000000);
+  EXPECT_EQ(sc.GetMaxBodySize(), 100000000);
 }
 
 // ==================== error cases ====================
@@ -51,10 +51,10 @@ TEST(ConfigParser, ParseMaxBody_MissingSemicolon_Throws) {
 
 /*
 std::atoi(token.c_str()) accepts "abd; " and returns 0.
-TODO: introduce isAllDigits(token) to validate the token before calling atoi.
+TODO: introduce IsAllDigits(token) to validate the token before calling atoi.
 */
 TEST(ConfigParser, ParseMaxBody_NonNumeric_TreatedAsZero_CurrentBehavior) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseMaxBody("abc;", &sc));
-  EXPECT_EQ(sc.getMaxBodySize(), 0);
+  EXPECT_EQ(sc.GetMaxBodySize(), 0);
 }

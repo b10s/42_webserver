@@ -5,11 +5,11 @@ Location::Location()
       name_("/"),
       root_("./"),
       autoindex_(false),
-      indexFiles_(),
+      index_files_(),
       extensions_(),
-      uploadPath_(),
+      upload_path_(),
       redirect_(),
-      cgiPath_() {
+      cgi_path_() {
 }
 
 // Remove this function from location.cpp and implement it in the correct class
@@ -18,12 +18,12 @@ Location::Location()
 // In config_parser.hpp (or the appropriate header file):
 // class ConfigParser {
 // public:
-//     const std::vector<Location>& getLocations() const;
+//     const std::vector<Location>& GetLocations() const;
 // private:
 //     std::vector<Location> locations_;
 // };
 
 // In config_parser.cpp (or the appropriate source file):
-// const std::vector<Location>& ConfigParser::getLocations() const {
+// const std::vector<Location>& ConfigParser::GetLocations() const {
 //     return locations_;
 // }

@@ -5,18 +5,18 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call parseAutoIndex
+// set up a helper to call ParseAutoIndex
 static void callParseExtensions(const std::string& input, Location* loc) {
   ConfigParser
-      parser;  // call default constructor to initialize currentPos_ to 0
-  parser.content_ = input;  // parseAutoIndex は content_ から tokenize する想定
-  parser.parseExtensions(loc);
+      parser;  // call default constructor to initialize current_pos_ to 0
+  parser.content = input;  // ParseAutoIndex は content から Tokenize する想定
+  parser.ParseExtensions(loc);
 }
 
 TEST(ConfigParser, ParseExtensions) {
   Location loc;
   EXPECT_NO_THROW(callParseExtensions(".php;", &loc));
-  std::string exts = loc.getExtensions();
+  std::string exts = loc.GetExtensions();
   EXPECT_EQ(exts, std::string(".php"));
 }
 
@@ -36,7 +36,7 @@ TEST(ConfigParser, ParseExtensions_NoExtensions_Throws) {
 //     Location loc;
 //     EXPECT_NO_THROW(callParseExtentions(".php;", &loc));
 //     EXPECT_NO_THROW(callParseExtentions(".php;", &loc));
-//     auto exts = loc.getExtensions();
+//     auto exts = loc.GetExtensions();
 //     // TODO: define expected behavior for duplicates
 //     // EXPECT_EQ(exts.size(), 2);
 // }
