@@ -121,7 +121,11 @@ class Location {
   }
 
   void AddMethod(RequestMethod method) {
+    if (has_allow_methods_) {
+      throw std::runtime_error("Duplicate allow_methods directive");
+    }
     methods_.insert(method);
+    has_allow_methods_ = true;
   }
 
   bool IsMethodAllowed(RequestMethod method) const {

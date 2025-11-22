@@ -10,6 +10,7 @@ Location::Location()
       upload_path_(),
       redirect_(),
       cgi_path_(),
+      has_allow_methods_(false),
       has_root_(false),
       has_autoindex_(false),
       has_extensions_(false),
