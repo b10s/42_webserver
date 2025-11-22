@@ -2,6 +2,7 @@
 #define LOCATION_HPP_
 
 #include <set>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
