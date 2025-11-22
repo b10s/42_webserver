@@ -29,6 +29,7 @@ class ServerConfig {
 
  public:
   ServerConfig();
+  void SetListen(const std::string& host, const std::string& port);
   void SetHost(const std::string& host);
   void SetPort(const std::string& port);
   void SetServerName(const std::string& server_name);
