@@ -22,7 +22,7 @@ class Location {
   std::string cgi_path_;
   // bool has_allow_methods_;
   bool has_root_;
-　bool has_autoindex_;
+  bool has_autoindex_;
   bool has_extensions_;
   bool has_upload_path_;
   bool has_redirect_;
