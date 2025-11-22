@@ -17,9 +17,17 @@ void ServerConfig::SetPort(const std::string& port) {
 }
 
 void ServerConfig::SetServerName(const std::string& server_name) {
+  if (has_server_name_) {
+    throw std::runtime_error("Duplicate server_name directive");
+  }
   server_name_ = server_name;
+  has_server_name_ = true;
 }
 
 void ServerConfig::SetMaxBodySize(int size) {
+  if (has_max_body_) {
+    throw std::runtime_error("Duplicate max body size directive");
+  }
   max_body_size_ = size;
+  has_max_body_ = true;
 }

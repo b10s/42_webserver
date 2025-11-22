@@ -20,6 +20,13 @@ class Location {
   std::string upload_path_;
   std::string redirect_;
   std::string cgi_path_;
+  // bool has_allow_methods_;
+  bool has_root_;
+　bool has_autoindex_;
+  bool has_extensions_;
+  bool has_upload_path_;
+  bool has_redirect_;
+  bool has_cgi_path_;
 
  public:
   Location();
@@ -33,7 +40,11 @@ class Location {
   }
 
   void SetRoot(const std::string& root) {
+    if (has_root_) {
+      throw std::runtime_error("Duplicate root directive");
+    }
     root_ = root;
+    has_root_ = true;
   }
 
   const std::string& GetRoot() const {
@@ -41,7 +52,11 @@ class Location {
   }
 
   void SetAutoIndex(bool autoindex) {
+    if (has_autoindex_) {
+      throw std::runtime_error("Duplicate autoindex directive");
+    }
     autoindex_ = autoindex;
+    has_autoindex_ = true;
   }
 
   bool GetAutoIndex() const {
@@ -57,7 +72,11 @@ class Location {
   }
 
   void SetExtension(const std::string& ext) {
+    if (has_extensions_) {
+      throw std::runtime_error("Duplicate extensions directive");
+    }
     extensions_ = ext;
+    has_extensions_ = true;
   }
 
   const std::string& GetExtensions() const {
@@ -65,7 +84,11 @@ class Location {
   }
 
   void SetUploadPath(const std::string& path) {
+    if (has_upload_path_) {
+      throw std::runtime_error("Duplicate upload_path directive");
+    }
     upload_path_ = path;
+    has_upload_path_ = true;
   }
 
   const std::string& GetUploadPath() const {
@@ -73,7 +96,11 @@ class Location {
   }
 
   void SetRedirect(const std::string& redirect) {
+    if (has_redirect_) {
+      throw std::runtime_error("Duplicate redirect directive");
+    }
     redirect_ = redirect;
+    has_redirect_ = true;
   }
 
   const std::string& GetRedirect() const {
@@ -81,7 +108,11 @@ class Location {
   }
 
   void SetCgiPath(const std::string& path) {
+    if (has_cgi_path_) {
+      throw std::runtime_error("Duplicate cgi_path directive");
+    }
     cgi_path_ = path;
+    has_cgi_path_ = true;
   }
 
   const std::string& GetCgiPath() const {
