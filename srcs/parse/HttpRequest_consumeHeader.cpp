@@ -61,7 +61,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
 void HttpRequest::StoreHeader(const std::string& raw_key,
                               const std::string& value) {
   std::string k = ToLowerAscii(raw_key);
-  // Check for duplicate Host, content-length, and transfer-encoding headers
+  // Reject all duplicate headers
   if (headers_.count(k) > 0) {
     throw http::ResponseStatusException(kBadRequest);
   }
