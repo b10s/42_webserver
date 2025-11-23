@@ -78,7 +78,7 @@ class Location {
 
   void SetExtension(const std::string& ext) {
     if (has_extensions_) {
-      throw std::runtime_error("Duplicate extensions directive");
+      throw std::runtime_error("Duplicate extension directive");
     }
     extensions_ = ext;
     has_extensions_ = true;
