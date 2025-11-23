@@ -30,13 +30,3 @@ TEST(ConfigParser, ParseExtensions_NoExtensions_Throws) {
   EXPECT_THROW(callParseExtensions(";", &loc), std::runtime_error);
   EXPECT_THROW(callParseExtensions("", &loc), std::runtime_error);
 }
-
-// duplicate test: we have to discuss how to handle multiple extensions
-// TEST(ConfigParser, ParseExtensions_DuplicatePolicy) {
-//     Location loc;
-//     EXPECT_NO_THROW(callParseExtentions(".php;", &loc));
-//     EXPECT_NO_THROW(callParseExtentions(".php;", &loc));
-//     auto exts = loc.GetExtensions();
-//     // TODO: define expected behavior for duplicates
-//     // EXPECT_EQ(exts.size(), 2);
-// }

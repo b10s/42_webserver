@@ -151,3 +151,37 @@ TEST(ConfigParser, Location_DuplicateAllowMethods_Throws) {
   EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
 }
 
+// ==================== multiple locations ====================
+TEST(ConfigParser, Location_MultipleLocations_AddsAll) {
+  ServerConfig sc;
+  const std::string s1 =
+      "/images/ {\n"
+      "  autoindex on;\n"
+      "}\n";
+  const std::string s2 =
+      "/app/ {\n"
+      "  root /var/www/app;\n"
+      "}\n";
+  EXPECT_NO_THROW(callParseLocation(s1, &sc));
+  EXPECT_NO_THROW(callParseLocation(s2, &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  ASSERT_EQ(locs.size(), 2u);
+  EXPECT_EQ(locs[0].GetName(), "/images/");
+  EXPECT_EQ(locs[1].GetName(), "/app/");
+}
+
+TEST(ConfigParser, Location_DuplicateLocationName_Throws) {
+  ServerConfig sc;
+  const std::string s1 =
+      "/x/ {\n"
+      "  autoindex on;\n"
+      "}\n";
+  const std::string s2 =
+      "/x/ {\n"
+      "  root /var/www/html;\n"
+      "}\n";
+  EXPECT_NO_THROW(callParseLocation(s1, &sc));
+  EXPECT_THROW(callParseLocation(s2, &sc), std::runtime_error);
+}
+

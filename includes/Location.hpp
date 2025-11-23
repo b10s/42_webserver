@@ -20,7 +20,7 @@ class Location {
   std::string upload_path_;
   std::string redirect_;
   std::string cgi_path_;
-  // bool has_allow_methods_;
+  bool has_allow_methods_;
   bool has_root_;
   bool has_autoindex_;
   // bool has_index_files_;
@@ -67,6 +67,10 @@ class Location {
   void AddIndex(const std::string& index) {
     index_files_.push_back(index);
   }
+
+  bool HasAllowMethods() const { return has_allow_methods_; }
+
+  void SetHasAllowMethods(bool has) { has_allow_methods_ = has; }
 
   const std::vector<std::string>& GetIndexFiles() const {
     return index_files_;
@@ -121,11 +125,7 @@ class Location {
   }
 
   void AddMethod(RequestMethod method) {
-    if (has_allow_methods_) {
-      throw std::runtime_error("Duplicate allow_methods directive");
-    }
     methods_.insert(method);
-    has_allow_methods_ = true;
   }
 
   bool IsMethodAllowed(RequestMethod method) const {
