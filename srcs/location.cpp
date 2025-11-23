@@ -16,7 +16,7 @@ Location::Location()
       has_extensions_(false),
       has_upload_path_(false),
       has_redirect_(false),
-      has_cgi_path_(false) {  
+      has_cgi_path_(false) {
 }
 
 // Remove this function from location.cpp and implement it in the correct class
