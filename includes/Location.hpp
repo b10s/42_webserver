@@ -5,25 +5,25 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <stdexcept>
+
 #include "enums.hpp"
 
 class Location {
  private:
   // parsed
-  std::set<RequestMethod> methods_; // methods can be multiple
+  std::set<RequestMethod> methods_;  // methods can be multiple
   std::string name_;
   std::string root_;
   bool autoindex_;
-  std::vector<std::string> index_files_; // multiple index files allowed
+  std::vector<std::string> index_files_;  // multiple index files allowed
   std::string extensions_;
   std::string upload_path_;
   std::string redirect_;
   std::string cgi_path_;
-  bool has_allow_methods_; // method directive should appear only once
+  bool has_allow_methods_;  // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
-  bool has_index_directive_; // index directive should appear only once
+  bool has_index_directive_;  // index directive should appear only once
   bool has_extensions_;
   bool has_upload_path_;
   bool has_redirect_;
@@ -32,7 +32,7 @@ class Location {
  public:
   Location();
 
-   void AddMethod(RequestMethod method) {
+  void AddMethod(RequestMethod method) {
     methods_.insert(method);
   }
 

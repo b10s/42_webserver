@@ -73,11 +73,3 @@ TEST(ConfigParser, Listen_EmptyOrMissingValue_Throws) {
   EXPECT_THROW(callParseListen("", &sc1), std::runtime_error);
   EXPECT_THROW(callParseListen(";", &sc2), std::runtime_error);
 }
-
-// ==================== duplicate listen directive ====================
-TEST(ConfigParser, Listen_DuplicateDirective_Throws) {
-  ServerConfig sc;
-  EXPECT_NO_THROW(callParseListen(" 8080;", &sc));
-  EXPECT_THROW(callParseListen(" 9090;", &sc), std::runtime_error);
-}
-

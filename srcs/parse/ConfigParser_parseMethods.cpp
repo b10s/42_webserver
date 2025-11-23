@@ -25,5 +25,7 @@ void ConfigParser::ParseMethods(Location* location) {
   }
   location->SetHasAllowMethods(true);
 }
-// has_allow_methods_  is set to true when there is at least one method directive parsed
-// is_method_empty  is used to check if any method was added before encountering the semicolon
+
+// has_allow_methods_  is set to true when there is at least one method
+// directive parsed is_method_empty  is used to check if any method was added
+// before encountering the semicolon

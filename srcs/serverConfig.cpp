@@ -11,8 +11,7 @@ ServerConfig::ServerConfig()
       max_body_size_(0),
       has_listen_(false),
       has_server_name_(false),
-      has_max_body_(false)
-{
+      has_max_body_(false) {
 }
 
 void ServerConfig::SetListen(const std::string& host, const std::string& port) {
@@ -39,7 +38,6 @@ void ServerConfig::SetPort(const std::string& port) {
   port_ = port;
   has_listen_ = true;
 }
-
 
 void ServerConfig::SetServerName(const std::string& server_name) {
   if (has_server_name_) {
