@@ -44,7 +44,7 @@ void ServerConfig::SetServerName(const std::string& server_name) {
 
 void ServerConfig::SetMaxBodySize(int size) {
   if (has_max_body_) {
-    throw std::runtime_error("Duplicate max body size directive");
+    throw std::runtime_error("Duplicate client_max_body_size directive");
   }
   max_body_size_ = size;
   has_max_body_ = true;
