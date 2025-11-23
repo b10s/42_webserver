@@ -403,12 +403,13 @@ TEST_F(HttpRequestConsumeHeader, DuplicateHeader_IgnoringCase_ThrowsBadRequest) 
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_MixedCase_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\r\n"
       "Content-Length: 3\r\n"
-      "Content-Length: 3\r\n"
+      "CONTENT-LENGTH: 3\r\n"
       "\r\n";
+
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
 
   EXPECT_THROW(
@@ -423,11 +424,11 @@ TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_ThrowsBadRequest) {
       http::ResponseStatusException);
 }
 
-TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_MixedCase_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, DuplicateTransferEncoding_DifferentCase_ThrowsBadRequest) {
   std::string headers_and_after =
       "Host: example.com\r\n"
-      "Content-Length: 3\r\n"
-      "CONTENT-LENGTH: 3\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "transfer-encoding: chunked\r\n"
       "\r\n";
 
   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);

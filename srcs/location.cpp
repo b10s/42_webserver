@@ -13,6 +13,7 @@ Location::Location()
       has_allow_methods_(false),
       has_root_(false),
       has_autoindex_(false),
+      has_index_directive_(false),
       has_extensions_(false),
       has_upload_path_(false),
       has_redirect_(false),

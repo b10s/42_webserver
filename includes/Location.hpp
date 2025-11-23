@@ -10,20 +10,19 @@
 class Location {
  private:
   // parsed
-  std::set<RequestMethod> methods_;
+  std::set<RequestMethod> methods_; // methods can be multiple
   std::string name_;
   std::string root_;
   bool autoindex_;
-  std::vector<std::string> index_files_;
-  std::string extensions_;  // we are not doing bonus so only one extension is
-                            // allowed here
+  std::vector<std::string> index_files_; // multiple index files allowed
+  std::string extensions_;
   std::string upload_path_;
   std::string redirect_;
   std::string cgi_path_;
-  bool has_allow_methods_;
+  bool has_allow_methods_; // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
-  // bool has_index_files_;
+  bool has_index_directive_; // index directive should appear only once
   bool has_extensions_;
   bool has_upload_path_;
   bool has_redirect_;
@@ -31,6 +30,26 @@ class Location {
 
  public:
   Location();
+
+   void AddMethod(RequestMethod method) {
+    methods_.insert(method);
+  }
+
+  bool IsMethodAllowed(RequestMethod method) const {
+    return methods_.count(method) > 0;
+  }
+
+  std::set<RequestMethod> GetMethods() const {
+    return methods_;
+  }
+
+  bool HasAllowMethods() const {
+    return has_allow_methods_;
+  }
+
+  void SetHasAllowMethods(bool has) {
+    has_allow_methods_ = has;
+  }
 
   void SetName(const std::string& name) {
     name_ = name;
@@ -68,9 +87,13 @@ class Location {
     index_files_.push_back(index);
   }
 
-  bool HasAllowMethods() const { return has_allow_methods_; }
+  bool HasIndexDirective() const {
+    return has_index_directive_;
+  }
 
-  void SetHasAllowMethods(bool has) { has_allow_methods_ = has; }
+  void SetHasIndexDirective(bool has) {
+    has_index_directive_ = has;
+  }
 
   const std::vector<std::string>& GetIndexFiles() const {
     return index_files_;
@@ -122,18 +145,6 @@ class Location {
 
   const std::string& GetCgiPath() const {
     return cgi_path_;
-  }
-
-  void AddMethod(RequestMethod method) {
-    methods_.insert(method);
-  }
-
-  bool IsMethodAllowed(RequestMethod method) const {
-    return methods_.count(method) > 0;
-  }
-
-  std::set<RequestMethod> GetMethods() const {
-    return methods_;
   }
 };
 
