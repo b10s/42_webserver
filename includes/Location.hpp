@@ -4,7 +4,7 @@
 #include <set>
 #include <string>
 #include <vector>
-
+#include <stdexcept>
 #include "enums.hpp"
 
 class Location {
