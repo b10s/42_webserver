@@ -52,13 +52,29 @@ TEST(ConfigParser, Listen_SpacesAroundColon_Throws) {
   EXPECT_THROW(callParseListen("127.0.0.1 : 8080;", &sc), std::runtime_error);
 }
 
-// TEST(ConfigParser, Listen_invalidHost_Throws) {
-//     ServerConfig sc;
-//     EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc),
-//     std::runtime_error); EXPECT_THROW(callParseListen("http;", &sc),
-//     std::runtime_error);
-// }
-// TODO: Disallow invalid hostnames
+TEST(ConfigParser, Listen_invalidHost_Throws) {
+    ServerConfig sc;
+    EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc),
+    std::runtime_error); EXPECT_THROW(callParseListen("http;", &sc),
+    std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_InvalidIPv4_Throws) {
+  ServerConfig sc1, sc2, sc3;
+  EXPECT_THROW(callParseListen("256.0.0.1:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("192.168.1.300;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("192.168.1.-1;", &sc3), std::runtime_error);
+  EXPECT_THROW(callParseListen("0.0.0.;", &sc3), std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_InvalidDomain_Throws) {
+  ServerConfig sc1, sc2, sc3;
+  EXPECT_THROW(callParseListen("exa mple.com:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("example!.com;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("-example.com;", &sc3), std::runtime_error);
+}
+
+
 
 // IsValidPortNumber: 1..65535
 TEST(ConfigParser, Listen_PortOutOfRange_Throws) {
