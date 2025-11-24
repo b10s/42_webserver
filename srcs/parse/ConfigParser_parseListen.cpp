@@ -30,7 +30,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     std::string port = token1.substr(colon_pos + 1);
     if (!host_validation::IsValidHost(host))
       throw std::runtime_error("Invalid host in listen directive: " + host);
-    if (!ConfigParser::IsValidPortNumber(port))
+    if (!IsValidPortNumber(port))
       throw std::runtime_error(
           "Invalid port number after ':' in listen directive: " + port);
     std::string end = Tokenize(content);
