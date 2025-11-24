@@ -14,7 +14,7 @@ Valid forms of the listen directive in Nginx are:
   - listen <address>:<port>;
 In nginx, the address can be a
   - domain name
-  - a hostname(localhost, etc.)
+  - a hostname (localhost, etc.)
   - IPV4 or IPV6
 In webserv, we don't support IPV6 for simplicity.
 */
