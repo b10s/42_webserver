@@ -1,7 +1,7 @@
 #include "host_validation.hpp"
 
 /*
-The isValidHost() function should ensure that only 
+The isValidHost() function should ensure that only
 - valid IPv4 addresses (0.0.0.0, 127.0.0.1, etc.)
 - localhost
 - syntactically acceptable domain names
@@ -21,11 +21,12 @@ bool host_validation::LooksLikeIPv4(const std::string& host) {
 
 bool host_validation::IsValidIPv4Segment(const std::string& segment) {
   if (segment.empty() || segment.length() > 3) return false;
-  if (segment.length() > 1 && segment[0] == '0') return false; // leading zero is not allowed
+  if (segment.length() > 1 && segment[0] == '0')
+    return false;  // leading zero is not allowed
   int value = 0;
   for (size_t i = 0; i < segment.length(); ++i) {
     unsigned char c = static_cast<unsigned char>(segment[i]);
-    if (!std::isdigit(c)){
+    if (!std::isdigit(c)) {
       return false;
     }
     value = value * 10 + (c - '0');
@@ -36,7 +37,7 @@ bool host_validation::IsValidIPv4Segment(const std::string& segment) {
 bool host_validation::IsValidIPv4(const std::string& host) {
   std::istringstream ss(host);
   std::string segment;
-  int seg_cnt = 0; // count of segments
+  int seg_cnt = 0;  // count of segments
 
   while (std::getline(ss, segment, '.')) {
     if (++seg_cnt > 4) return false;
@@ -47,8 +48,9 @@ bool host_validation::IsValidIPv4(const std::string& host) {
 
 bool host_validation::LooksLikeDomain(const std::string& host) {
   size_t dot_pos = host.find('.');
-  if (dot_pos == std::string::npos || dot_pos == 0 || dot_pos == host.length() - 1) {
-    return false; // No dot or dot at start/end
+  if (dot_pos == std::string::npos || dot_pos == 0 ||
+      dot_pos == host.length() - 1) {
+    return false;  // No dot or dot at start/end
   }
   // Check for leading/trailing hyphens
   // Most DNS resolvers will reject hostnames starting with hyphens as invalid
@@ -60,13 +62,13 @@ bool host_validation::LooksLikeDomain(const std::string& host) {
 }
 
 bool host_validation::IsValidHost(const std::string& host) {
-    if (host.empty()) return false;
-    if (host == "localhost") return true;
-    if (LooksLikeIPv4(host)) {
-      if (IsValidIPv4(host)) return true;
-      return false;
-    }
-    if (ContainsInvalidChars(host)) return false;
-    if (LooksLikeDomain(host)) return true;
+  if (host.empty()) return false;
+  if (host == "localhost") return true;
+  if (LooksLikeIPv4(host)) {
+    if (IsValidIPv4(host)) return true;
     return false;
+  }
+  if (ContainsInvalidChars(host)) return false;
+  if (LooksLikeDomain(host)) return true;
+  return false;
 }

@@ -1,9 +1,9 @@
 #ifndef HOST_VALIDATION_HPP_
 #define HOST_VALIDATION_HPP_
 
-#include <string>
-#include <sstream>
 #include <cctype>
+#include <sstream>
+#include <string>
 
 namespace host_validation {
 
@@ -26,6 +26,6 @@ bool IsValidIPv4(const std::string& host);
 bool LooksLikeDomain(const std::string& host);
 bool IsValidHost(const std::string& host);
 
-} // namespace host_validation
+}  // namespace host_validation
 
-#endif // HOST_VALIDATION_HPP_
+#endif  // HOST_VALIDATION_HPP_

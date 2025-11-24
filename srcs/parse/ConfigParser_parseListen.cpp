@@ -11,15 +11,15 @@ Default values for port and host are set in the ServerConfig constructor:
 void ConfigParser ::ParseListen(ServerConfig* server_config) {
   std::string token1 = Tokenize(content);
   if (token1.empty()) {
-    throw std::runtime_error("Syntax error : expected host or port after listen");
+    throw std::runtime_error(
+        "Syntax error : expected host or port after listen");
   }
   std::string::size_type colon_pos = token1.find(':');
   if (colon_pos != std::string::npos) {
     std::string host = token1.substr(0, colon_pos);
     std::string port = token1.substr(colon_pos + 1);
     if (!host_validation::IsValidHost(host))
-      throw std::runtime_error(
-          "Invalid host in listen directive: " + host);
+      throw std::runtime_error("Invalid host in listen directive: " + host);
     if (!ConfigParser::IsValidPortNumber(port))
       throw std::runtime_error(
           "Invalid port number after ':' in listen directive: " + port);
@@ -48,6 +48,3 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
   }
   return;
 }
-
-
-
