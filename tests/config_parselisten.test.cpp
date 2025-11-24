@@ -59,11 +59,11 @@ TEST(ConfigParser, Listen_invalidHost_Throws) {
 }
 
 TEST(ConfigParser, Listen_InvalidIPv4_Throws) {
-  ServerConfig sc1, sc2, sc3;
+  ServerConfig sc1, sc2, sc3, sc4;
   EXPECT_THROW(callParseListen("256.0.0.1:8080;", &sc1), std::runtime_error);
   EXPECT_THROW(callParseListen("192.168.1.300;", &sc2), std::runtime_error);
   EXPECT_THROW(callParseListen("192.168.1.-1;", &sc3), std::runtime_error);
-  EXPECT_THROW(callParseListen("0.0.0.;", &sc3), std::runtime_error);
+  EXPECT_THROW(callParseListen("0.0.0.;", &sc4), std::runtime_error);
 }
 
 TEST(ConfigParser, Listen_InvalidDomain_Throws) {
