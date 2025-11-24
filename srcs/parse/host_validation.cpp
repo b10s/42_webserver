@@ -1,7 +1,7 @@
 #include "host_validation.hpp"
 
 /*
-The isValidHost() function should ensure that only
+The IsValidHost() function should ensure that only
 - valid IPv4 addresses (0.0.0.0, 127.0.0.1, etc.)
 - localhost
 - syntactically acceptable domain names
