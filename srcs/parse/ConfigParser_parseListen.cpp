@@ -15,8 +15,8 @@ Valid forms of the listen directive in Nginx are:
 In nginx, the address can be a
   - domain name
   - a hostname (localhost, etc.)
-  - IPV4 or IPV6
-In webserv, we don't support IPV6 for simplicity.
+  - IPV4 or IPv6
+In webserv, we don't support IPv6 for simplicity.
 */
 void ConfigParser ::ParseListen(ServerConfig* server_config) {
   std::string token1 = Tokenize(content);
