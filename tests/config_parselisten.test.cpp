@@ -54,9 +54,8 @@ TEST(ConfigParser, Listen_SpacesAroundColon_Throws) {
 
 TEST(ConfigParser, Listen_invalidHost_Throws) {
     ServerConfig sc;
-    EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc),
-    std::runtime_error); EXPECT_THROW(callParseListen("http;", &sc),
-    std::runtime_error);
+    EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc), std::runtime_error);
+    EXPECT_THROW(callParseListen("http;", &sc), std::runtime_error);
 }
 
 TEST(ConfigParser, Listen_InvalidIPv4_Throws) {
