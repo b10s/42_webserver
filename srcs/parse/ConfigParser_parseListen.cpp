@@ -7,6 +7,16 @@ Spaces around ':' are a syntax error.
 Default values for port and host are set in the ServerConfig constructor:
   - Port defaults to 80
   - Host/address defaults to 0.0.0.0 (listen on all interfaces)
+
+Valid forms of the listen directive in Nginx are:
+  - listen <port>;
+  - listen <address>;
+  - listen <address>:<port>;
+In nginx, the address can be a
+  - domain name
+  - a hostname(localhost, etc.)
+  - IPV4 or IPV6
+In webserv, we don't support IPV6 for simplicity.
 */
 void ConfigParser ::ParseListen(ServerConfig* server_config) {
   std::string token1 = Tokenize(content);
