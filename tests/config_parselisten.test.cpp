@@ -74,8 +74,6 @@ TEST(ConfigParser, Listen_InvalidDomain_Throws) {
   EXPECT_THROW(callParseListen("-example.com;", &sc3), std::runtime_error);
 }
 
-
-
 // IsValidPortNumber: 1..65535
 TEST(ConfigParser, Listen_PortOutOfRange_Throws) {
   ServerConfig sc1, sc2, sc3;
