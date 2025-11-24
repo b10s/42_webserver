@@ -25,19 +25,19 @@ inline bool ContainsInvalidChars(const std::string& host) {
 inline bool IsValidIPv4(const std::string& host) {
   std::istringstream ss(host);
   std::string segment;
-  int segments = 0;
+  int seg_cnt = 0; // count of segments
 
   while (std::getline(ss, segment, '.')) {
-    if (++segments > 4) return false;
+    if (++seg_cnt > 4) return false;
     if (segment.empty() || segment.length() > 3) return false;
     for (size_t i = 0; i < segment.length(); ++i) {
       if (!std::isdigit(segment[i])) return false;
     }
     int value = std::atoi(segment.c_str());
     if (value < 0 || value > 255) return false;
-    if (segment[0] == '0' && segment.length() > 1) return false; // leading zero
+    if (segment[0] == '0' && segment.length() > 1) return false; // leading zero is not allowed in IPv4
   }
-  return segments == 4;
+  return seg_cnt == 4;
 }
 
 inline bool LooksLikeDomain(const std::string& host) {
