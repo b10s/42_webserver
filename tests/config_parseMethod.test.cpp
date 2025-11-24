@@ -13,10 +13,6 @@ static void callParseMethods(const std::string& input, Location* loc) {
 }
 
 // ==================== happy path ====================
-TEST(ConfigParser, parseMethods_Empty_OK) {
-  Location loc;
-  EXPECT_NO_THROW(callParseMethods(";", &loc));
-}
 
 TEST(ConfigParser, parseMethod_SingleMethod_GET_OK) {
   Location loc;
@@ -35,6 +31,11 @@ TEST(ConfigParser, parseMethods_State_Set) {
 }
 
 // ==================== error cases ====================
+TEST(ConfigParser, parseMethods_Empty_Throws) {
+  Location loc;
+  EXPECT_THROW(callParseMethods(";", &loc), std::runtime_error);
+}
+
 TEST(ConfigParser, parseMethods_InvalidMethod_Throws) {
   Location loc;
   EXPECT_THROW(callParseMethods("GET PUT;", &loc), std::runtime_error);

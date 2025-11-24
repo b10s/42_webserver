@@ -78,3 +78,120 @@ TEST(ConfigParser, Location_MissingClosingBrace_Throws) {
   EXPECT_THROW(callParseLocation("/x/ { autoindex on; ", &sc),
                std::runtime_error);
 }
+
+// ==================== duplicate directive error cases ====================
+
+TEST(ConfigParser, Location_DuplicateAllowMethods_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  allow_methods GET POST;\n"
+      "  allow_methods GET;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateRoot_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  root /var/www/html;\n"
+      "  root /var/www/other;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateAutoIndex_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  autoindex on;\n"
+      "  autoindex off;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateIndex_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  index index.html;\n"
+      "  index index.htm;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateExtensions_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  extension .php;\n"
+      "  extension .html;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateUploadPath_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  upload_path /tmp/uploads;\n"
+      "  upload_path /var/uploads;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateRedirect_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  redirect https://example.com/;\n"
+      "  redirect https://example.org/;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateCgiPath_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  cgi_path cgi/app.py;\n"
+      "  cgi_path cgi/app2.py;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+// ==================== multiple locations ====================
+TEST(ConfigParser, Location_MultipleLocations_AddsAll) {
+  ServerConfig sc;
+  const std::string s1 =
+      "/images/ {\n"
+      "  autoindex on;\n"
+      "}\n";
+  const std::string s2 =
+      "/app/ {\n"
+      "  root /var/www/app;\n"
+      "}\n";
+  EXPECT_NO_THROW(callParseLocation(s1, &sc));
+  EXPECT_NO_THROW(callParseLocation(s2, &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  ASSERT_EQ(locs.size(), 2u);
+  EXPECT_EQ(locs[0].GetName(), "/images/");
+  EXPECT_EQ(locs[1].GetName(), "/app/");
+}
+
+TEST(ConfigParser, Location_DuplicateLocationName_Throws) {
+  ServerConfig sc;
+  const std::string s1 =
+      "/x/ {\n"
+      "  autoindex on;\n"
+      "}\n";
+  const std::string s2 =
+      "/x/ {\n"
+      "  root /var/www/html;\n"
+      "}\n";
+  EXPECT_NO_THROW(callParseLocation(s1, &sc));
+  EXPECT_THROW(callParseLocation(s2, &sc), std::runtime_error);
+}
+

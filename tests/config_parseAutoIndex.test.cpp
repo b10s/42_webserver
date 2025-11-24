@@ -73,3 +73,4 @@ TEST_F(ConfigParserTest, ErrorMessage_MissingValue_EmptyInput) {
   EXPECT_THROW_WHAT_CONTAINS(CallParseAutoIndex(""), std::runtime_error,
                              "expected autoindex value");
 }
+

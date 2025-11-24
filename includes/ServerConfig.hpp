@@ -23,9 +23,13 @@ class ServerConfig {
   int max_body_size_;
   std::map<HttpStatus, std::string> errors_;
   std::vector<Location> locations_;
+  bool has_listen_;
+  bool has_server_name_;
+  bool has_max_body_;
 
  public:
   ServerConfig();
+  void SetListen(const std::string& host, const std::string& port);
   void SetHost(const std::string& host);
   void SetPort(const std::string& port);
   void SetServerName(const std::string& server_name);
@@ -67,6 +71,13 @@ class ServerConfig {
   }
 
   void AddLocation(const Location& location) {
+    // check for duplicate location names
+    for (size_t i = 0; i < locations_.size(); ++i) {
+      if (locations_[i].GetName() == location.GetName()) {
+        throw std::runtime_error("Duplicate location name: " +
+                                 location.GetName());
+      }
+    }
     locations_.push_back(location);
   }
 

@@ -381,3 +381,66 @@ TEST_F(HttpRequestConsumeHeader, MultipleHost_ThrowsBadRequest) {
       },
       http::ResponseStatusException);
 }
+
+// =============== error: duplicate headers ===============
+
+TEST_F(HttpRequestConsumeHeader, DuplicateHeader_IgnoringCase_ThrowsBadRequest) {
+  std::string headers_and_after =
+      "Host: example.com\r\n"
+      "HOST: example.com\r\n"
+      "\r\n";
+  auto hs = makeHeaderStart("GET", "/", "HTTP/1.1", headers_and_after);
+
+  EXPECT_THROW(
+      {
+        try {
+          req.ConsumeHeader(hs.p_headers);
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
+
+TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_MixedCase_ThrowsBadRequest) {
+  std::string headers_and_after =
+      "Host: example.com\r\n"
+      "Content-Length: 3\r\n"
+      "CONTENT-LENGTH: 3\r\n"
+      "\r\n";
+
+  auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
+
+  EXPECT_THROW(
+      {
+        try {
+          req.ConsumeHeader(hs.p_headers);
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
+
+TEST_F(HttpRequestConsumeHeader, DuplicateTransferEncoding_DifferentCase_ThrowsBadRequest) {
+  std::string headers_and_after =
+      "Host: example.com\r\n"
+      "Transfer-Encoding: chunked\r\n"
+      "transfer-encoding: chunked\r\n"
+      "\r\n";
+
+  auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
+
+  EXPECT_THROW(
+      {
+        try {
+          req.ConsumeHeader(hs.p_headers);
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
