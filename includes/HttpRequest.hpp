@@ -47,8 +47,6 @@ class HttpRequest {
   std::string body_;
   long content_length_;
 
-  // bool ConsumeHeader();  // returns false if more data needed
-  bool ConsumeBody();
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
   bool IsCRLF(const char* p) const;
@@ -82,6 +80,7 @@ class HttpRequest {
   ~HttpRequest();
 
   void ParseRequest(const char* payload);
+  bool AdvanceBodyParsing();
   const char* ConsumeMethod(const char* req);
   const char* ConsumeVersion(const char* req);
   const char* ConsumeUri(const char* req);
