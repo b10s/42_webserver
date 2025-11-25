@@ -52,13 +52,26 @@ TEST(ConfigParser, Listen_SpacesAroundColon_Throws) {
   EXPECT_THROW(callParseListen("127.0.0.1 : 8080;", &sc), std::runtime_error);
 }
 
-// TEST(ConfigParser, Listen_invalidHost_Throws) {
-//     ServerConfig sc;
-//     EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc),
-//     std::runtime_error); EXPECT_THROW(callParseListen("http;", &sc),
-//     std::runtime_error);
-// }
-// TODO: Disallow invalid hostnames
+TEST(ConfigParser, Listen_invalidHost_Throws) {
+    ServerConfig sc;
+    EXPECT_THROW(callParseListen("127.0.0.1:http;", &sc), std::runtime_error);
+    EXPECT_THROW(callParseListen("http;", &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_InvalidIPv4_Throws) {
+  ServerConfig sc1, sc2, sc3, sc4;
+  EXPECT_THROW(callParseListen("256.0.0.1:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("192.168.1.300;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("192.168.1.-1;", &sc3), std::runtime_error);
+  EXPECT_THROW(callParseListen("0.0.0.;", &sc4), std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_InvalidDomain_Throws) {
+  ServerConfig sc1, sc2, sc3;
+  EXPECT_THROW(callParseListen("exa mple.com:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("example!.com;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("-example.com;", &sc3), std::runtime_error);
+}
 
 // IsValidPortNumber: 1..65535
 TEST(ConfigParser, Listen_PortOutOfRange_Throws) {
@@ -72,4 +85,24 @@ TEST(ConfigParser, Listen_EmptyOrMissingValue_Throws) {
   ServerConfig sc1, sc2;
   EXPECT_THROW(callParseListen("", &sc1), std::runtime_error);
   EXPECT_THROW(callParseListen(";", &sc2), std::runtime_error);
+}
+
+// domain name should contain at least one dot
+TEST(ConfigParser, Listen_InvalidDomainWithoutDot_Throws) {
+  ServerConfig sc1, sc2;
+  EXPECT_THROW(callParseListen("eighty;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("one hundred;", &sc2), std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_LeadingZeroInIPv4Segment_Throws) {
+  ServerConfig sc1, sc2;
+  EXPECT_THROW(callParseListen("01.0.0.1:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("192.168.01.1:8080;", &sc2), std::runtime_error);
+}
+
+TEST(ConfigParser, Listen_LeadingOrTrailingHyphenInDomain_Throws) {
+  ServerConfig sc1, sc2, sc3;
+  EXPECT_THROW(callParseListen("-example.com:8080;", &sc1), std::runtime_error);
+  EXPECT_THROW(callParseListen("example.com-:8080;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("sub-.example.com;", &sc3), std::runtime_error);
 }
