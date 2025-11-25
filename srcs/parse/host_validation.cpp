@@ -52,11 +52,15 @@ bool host_validation::LooksLikeDomain(const std::string& host) {
       dot_pos == host.length() - 1) {
     return false;  // No dot or dot at start/end
   }
-  // Check for leading/trailing hyphens
+  // Check for leading/trailing hyphens in each label
   // Most DNS resolvers will reject hostnames starting with hyphens as invalid
-  // RFC 1123 explicitly forbids leading/trailing hyphens in hostnames
-  if (host[0] == '-' || host[host.length() - 1] == '-') {
-    return false;
+  // RFC 1123 explicitly forbids leading/trailing hyphens in each label
+  std::istringstream ss(host);
+  std::string label;
+  while (std::getline(ss, label, '.')) {
+    if (label.empty() || label[0] == '-' || label[label.length() - 1] == '-') {
+      return false;
+    }
   }
   return true;
 }
