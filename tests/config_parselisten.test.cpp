@@ -101,7 +101,8 @@ TEST(ConfigParser, Listen_LeadingZeroInIPv4Segment_Throws) {
 }
 
 TEST(ConfigParser, Listen_LeadingOrTrailingHyphenInDomain_Throws) {
-  ServerConfig sc1, sc2;
+  ServerConfig sc1, sc2, sc3;
   EXPECT_THROW(callParseListen("-example.com:8080;", &sc1), std::runtime_error);
   EXPECT_THROW(callParseListen("example.com-:8080;", &sc2), std::runtime_error);
+  EXPECT_THROW(callParseListen("sub-.example.com;", &sc3), std::runtime_error);
 }
