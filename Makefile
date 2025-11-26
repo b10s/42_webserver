@@ -1,9 +1,9 @@
 NAME	= webserv
 SRCDIR	= srcs
 INCDIR	= includes
-SRCS = $(wildcard $(SRCDIR)/**/*.cpp) $(wildcard $(SRCDIR)/*.cpp)
+SRCS = $(shell find $(SRCDIR) -name '*.cpp')
 OBJDIR  = objs
-OBJS    = $(addprefix $(OBJDIR)/, $(notdir $(SRCS:.cpp=.o)))
+OBJS    = $(SRCS:$(SRCDIR)/%.cpp=$(OBJDIR)/%.o)
 CXX		= c++
 CFLAGS	= -Wall -Werror -Wextra -I$(INCDIR) -g -std=c++98 -pedantic
 
@@ -18,9 +18,7 @@ $(NAME): $(OBJDIR) $(OBJS)
 	$(CXX) $(CFLAGS) -o $(NAME) $(OBJS)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
-
-$(OBJDIR)/%.o: $(SRCDIR)/*/%.cpp
+	@mkdir -p $(dir $@)
 	$(CXX) $(CFLAGS) -c $< -o $@
 
 clean:
@@ -53,4 +51,4 @@ test:
 	cmake --build ./build
 	cd build && ctest
 
-.PHONY: all clean fclean re format test
+.PHONY: all clean fclean re format tidy tidy-fix test
