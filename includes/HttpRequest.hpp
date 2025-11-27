@@ -60,6 +60,12 @@ class HttpRequest {
   void ParseContentLength(const std::string& s);
   void ParseTransferEncoding(const std::string& s);
   void ParseConnectionDirective();
+  // AdvanceBodyParsing helpers
+  bool AdvanceContentLengthBody();
+  bool AdvanceChunkedBody();
+  bool ParseChunkSize(size_t& pos, size_t& chunk_size);
+  bool HandleLastChunk(size_t& pos);
+  bool AppendChunkData(size_t& pos, size_t chunk_size);
 
  public:
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes

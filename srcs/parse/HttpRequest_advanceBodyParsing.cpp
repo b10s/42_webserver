@@ -1,5 +1,113 @@
 #include "HttpRequest.hpp"
 
+bool HttpRequest::AdvanceBodyParsing() {
+  try {
+    if (content_length_ >= 0) {
+      return AdvanceContentLengthBody();
+    } else {
+      return AdvanceChunkedBody();
+    }
+  } catch (http::ResponseStatusException&) {
+    throw; // rethrow
+  } catch (...) {
+    throw http::ResponseStatusException(kInternalServerError);
+  }
+}
+
+// content length mode
+bool HttpRequest::AdvanceContentLengthBody() {
+  const size_t need = static_cast<size_t>(content_length_);
+  if (buffer_.size() < need) return false; // need more data
+  body_.assign(buffer_.data(), need);
+  buffer_.erase(0, need);    // ← 忘れずに消費済みデータを削除
+  progress_ = kDone;
+  return true;
+}
+
+// chunked transfer encoding: return false if more data needed
+bool HttpRequest::AdvanceChunkedBody() {
+  // chunked: "size\r\n<data>\r\n ... 0\r\n\r\n"
+  size_t pos = 0;
+  for (;;) {
+    // 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
+    size_t chunk_size = 0;
+    if (!ParseChunkSize(pos, chunk_size)) {
+      return false; // need more data or error
+    }
+    // 2) 終端チャンク
+    if (chunk_size == 0) {
+      return HandleLastChunk(pos); // false if need more data
+    }
+    if (!AppendChunkData(pos, chunk_size)) {
+      return false; // need more data or error
+    }
+    // 次のサイズ行へ　（まだeraseしないでposのみ前進）
+  }
+}
+
+/// 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
+// <hex>\r\n
+bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
+  chunk_size = 0;
+  bool saw_digit = false;
+  while (pos < buffer_.size()) {
+    char c = buffer_[pos];
+    if (c == '\r') break;
+    if (c >= '0' && c <= '9') {
+      chunk_size = (chunk_size << 4) + (c - '0');
+      saw_digit = true;
+    }
+    else if (c >= 'a' && c <= 'f') {
+      chunk_size = (chunk_size << 4) + (c - 'a' + 10);
+      saw_digit = true;
+    }
+    else if (c >= 'A' && c <= 'F') {
+      chunk_size = (chunk_size << 4) + (c - 'A' + 10);
+      saw_digit = true;
+    } else {
+      throw http::ResponseStatusException(kBadRequest); // 拡張 (";ext") などは未対応 → BAD_REQUEST
+    }
+    ++pos;
+  }
+  if (!saw_digit) return false;
+  if (pos + 1 >= buffer_.size()) return false; // needs '\n' after '\r'
+  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
+    throw http::ResponseStatusException(kBadRequest);
+  pos += 2;
+  return true;
+}
+
+// this function is called when chunk_sie is zero
+// "0\r\n\r\n" が揃っていたら消費してkDoneにする
+bool HttpRequest::HandleLastChunk(size_t& pos) {
+  if (pos + 1 >= buffer_.size()) return false; // still waiting for "\r\n"
+  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
+    return false;
+  pos += 2;
+  buffer_.erase(0, pos); // サイズ行＋CRLFを消費
+  progress_ = kDone;
+  return true;
+}
+
+// chunk_size バイトのデータ＋末尾のCRLFを body_ に追加する
+// pos はその次に進める
+bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
+  const size_t total_needed = chunk_size + 2; // data + CRLF
+  if (pos + total_needed > buffer_.size()) {
+    return false; // need more data
+  }
+  // 5) 本体を body_ に追加
+  body_.append(buffer_, pos, chunk_size);
+  pos += chunk_size;
+  // 6) 本体直後のCRLF確認
+  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
+    throw http::ResponseStatusException(kBadRequest);
+  }
+  pos += 2;
+  return true;
+}
+      
+
 /**
  * @brief Content-Length または chunked transfer encoding に対応する。
  * まだbodyが揃っていない場合は false を返し、揃い次第 true を返す。
@@ -17,171 +125,69 @@
  *  - progress が DONE に更新される（完了時）
  *  - buffer_ から消費済みデータが削除される
  */
-bool HttpRequest::AdvanceBodyParsing() {
-  // content length mode
-  if (content_length_ >= 0) {
-    const size_t need = static_cast<size_t>(content_length_);
-    if (buffer_.size() < need) return false; // need more data
-    body_.assign(buffer_.data(), need);
-    buffer_.erase(0, need);    // ← 忘れずに消費済みデータを削除
-    progress_ = kDone;
-    return true;
-  }
-  // chunked transfer encoding: return false if more data needed
-  // hex chunk size followed by CRLF, then chunk data, then CRLF
-  // chunked: "size\r\n<data>\r\n ... 0\r\n\r\n"
-  size_t pos = 0;
-  for (;;) {
-    // 1) サイズ行を16進で読む（拡張は未対応：';' を許容しない仕様なら BAD_REQUEST）
-    size_t chunk_size = 0;
-    bool saw_digit = false;
-    while (pos < buffer_.size()) {
-      char c = buffer_[pos];
-      if (c == '\r') break;
-      if (c >= '0' && c <= '9') {chunk_size = (chunk_size << 4) + (c - '0'); saw_digit = true; }
-      else if (c >= 'a' && c <= 'f') {chunk_size = (chunk_size << 4) + (c - 'a' + 10); saw_digit = true; }
-      else if (c >= 'A' && c <= 'F') {chunk_size = (chunk_size << 4) + (c - 'A' + 10); saw_digit = true; }
-      else {
-        throw http::ResponseStatusException(kBadRequest); // 拡張未対応
-      }
-      ++pos;
-    }
-    if (!saw_digit) return false;
-    // 2) サイズ行のCRLF
-    if (pos + 1 >= buffer_.size()) return false;
-    if (buffer_[pos] != '\r' || buffer_pos_[pos + 1] != '\n')
-      throw http::ResponseStatusException(kBadRequest);
-    pos += 2;
-  }
- 
-  std::string::const_iterator it = buffer_.begin();
-  while (it != buffer_.end()) {
-    size_t chunkSize = 0;
-    while (it != buffer_.end() && *it != '\r') {
-      if (*it >= '0' && *it <= '9') {
-        chunkSize = chunkSize * 16 + *it - '0';
-      } else if (*it >= 'a' && *it <= 'f') {
-        chunkSize = chunkSize * 16 + *it - 'a' + 10;
-      } else if (*it >= 'A' && *it <= 'F') {
-        chunkSize = chunkSize * 16 + *it - 'A' + 10;
-      } else {
-        throw http::ResponseStatusException(kBadRequest);
-      }
-      it++;
-    }
-    // no CRLF found
-    if (it == buffer_.end() || *it != '\r' || (it + 1) == buffer_.end() || *(it + 1) != '\n') {
-      return false; // need more data
-    }
-    it += 2; // CRLF
-    // if chunk size is zero, we're done. no trailing headers are handled here.
-    if (chunkSize == 0) {
-      // consume trailing CRLF after last chunk
-      // 実装では trailer 未対応：直後に CRLF が来る想定（"0\r\n\r\n"）
-      if (static_cast<size_t>(buffer_.end() - it) < 2) return false;
-      if (*it != '\r' || *(it + 1) != '\n') throw http::ResponseStatusException(kBadRequest);
-      it += 2;
-      // ここまで処理したぶんを buffer_ から取り除く
-      const std::string::size_type consumed =
-      static_cast<std::string::size_type>(it - buffer_.begin());
-      buffer_.erase(0, consumed);
-      progress_ = kDone;
-      return true;
-    }
-    std::string::const_iterator it = buffer_.begin();
-    std::string::const_iterator end = buffer_.end();
-    if (static_cast<size_t>(end - it) < chunkSize + 2) {
-      return false; // not enough data for chunk + CRLF
-    }
-    // add chunk to body
-    body_.append(it, it + chunkSize);
-    it += chunkSize;
-    // check for trailing CRLF
-    if (it == buffer_.end() || *it != '\r' || *(it + 1) != '\n') {
-      throw http::ResponseStatusException(kBadRequest);
-    }
-    it += 2; // CRLF
-    // update buffer to remove processed chunk
-    buffer_ = buffer_.substr(it - buffer_.begin());
-    it = buffer_.begin();
-  }
-  return false; // need more data, waiting for next chunk
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////
-
-// parseBodyStep() の安全化（バグ修正を含む）
-// あなたの実装には次の問題がありました：
-// Content-Length のとき buffer_ を消費していない
-// 取り出した後に buffer_.erase(0, contentLength_) が必要。
-// chunked で iterator をシャドーしている
-// 途中で it を再宣言していてロジックが壊れやすい。
-// chunked のサイズ行の CRLF までしか確認していない
-// データ本体 chunkSize バイト＋直後の CRLF の 2 バイト、両方あるかを確認すべき。
-// 終端チャンク “0\r\n\r\n” 後の消費量計算が不安定
-// 走査はインデックス（size_t pos）で行うと安全。
-
-// bool HttpRequest::advanceBodyParsing() {
-//   // Content-Length
-//   if (contentLength_ >= 0) {
-//     const size_t need = static_cast<size_t>(contentLength_);
-//     if (buffer_.size() < need) return false;
+// bool HttpRequest::AdvanceBodyParsing() {
+//   // content length mode
+//   if (content_length_ >= 0) {
+//     const size_t need = static_cast<size_t>(content_length_);
+//     if (buffer_.size() < need) return false; // need more data
 //     body_.assign(buffer_.data(), need);
-//     buffer_.erase(0, need);    // ← 忘れずに消費
-//     progress = DONE;
+//     buffer_.erase(0, need);    // ← 忘れずに消費済みデータを削除
+//     progress_ = kDone;
 //     return true;
 //   }
-
-//   // chunked (trailer 未対応: "0\r\n\r\n" を期待)
+//   // chunked transfer encoding: return false if more data needed
+//   // hex chunk size followed by CRLF, then chunk data, then CRLF
+//   // chunked: "size\r\n<data>\r\n ... 0\r\n\r\n"
 //   size_t pos = 0;
 //   for (;;) {
-//     // 1) サイズ行（16進数）を読む
-//     size_t chunkSize = 0;
-//     bool sawDigit = false;
+//     // 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
+//     size_t chunk_size = 0;
+//     bool saw_digit = false;
 //     while (pos < buffer_.size()) {
 //       char c = buffer_[pos];
 //       if (c == '\r') break;
-//       if (c >= '0' && c <= '9') { chunkSize = (chunkSize << 4) + (c - '0'); sawDigit = true; }
-//       else if (c >= 'a' && c <= 'f') { chunkSize = (chunkSize << 4) + (c - 'a' + 10); sawDigit = true; }
-//       else if (c >= 'A' && c <= 'F') { chunkSize = (chunkSize << 4) + (c - 'A' + 10); sawDigit = true; }
+//       if (c >= '0' && c <= '9') {chunk_size = (chunk_size << 4) + (c - '0'); saw_digit = true; }
+//       else if (c >= 'a' && c <= 'f') {chunk_size = (chunk_size << 4) + (c - 'a' + 10); saw_digit = true; }
+//       else if (c >= 'A' && c <= 'F') {chunk_size = (chunk_size << 4) + (c - 'A' + 10); saw_digit = true; }
 //       else {
-//         throw http::responseStatusException(BAD_REQUEST);
+//         throw http::ResponseStatusException(kBadRequest); // ';' は BAD_REQUEST
 //       }
 //       ++pos;
 //     }
-//     if (!sawDigit) return false; // サイズがまだ来ていない
-
-//     // 2) サイズ行の CRLF
-//     if (pos + 1 >= buffer_.size()) return false;
+//     if (!saw_digit) return false;
+//     // 2) サイズ行のCRLF
+//     // チャンクサイズを読み終わった後の状態
+//     // buffer_: "5\r\nhello\r\n0\r\n\r\n"
+//     //            ^
+//     //           pos (ここが '\r')
+//     if (pos + 1 >= buffer_.size()) return false; // need more data
 //     if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-//       throw http::responseStatusException(BAD_REQUEST);
+//       throw http::ResponseStatusException(kBadRequest);
 //     pos += 2;
 
 //     // 3) 終端チャンク
-//     if (chunkSize == 0) {
-//       // "0\r\n\r\n" を期待（trailer 未対応）
-//       if (pos + 1 >= buffer_.size()) return false;
+//     if (chunk_size == 0) {
+//       // 直後に CRLF を期待（trailer 未対応）
+//       if (pos + 1 >= buffer_.size()) return false; // need more data
 //       if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-//         return false; // まだ最後の CRLF が来ていない
+//         return false;
 //       pos += 2;
-
-//       // ここまでが消費済み
-//       buffer_.erase(0, pos);
-//       progress = DONE;
+//       buffer_.erase(0, pos); // サイズ行＋CRLFを消費
+//       progress_ = kDone;
 //       return true;
 //     }
-
-//     // 4) チャンク本体 + CRLF の有無確認
-//     if (pos + chunkSize + 2 > buffer_.size()) return false; // 未到着
-//     // 本体を body_ へ追加
-//     body_.append(buffer_, pos, chunkSize);
-//     pos += chunkSize;
-
-//     if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-//       throw http::responseStatusException(BAD_REQUEST);
+//     // 4) 本体 + CRLFが揃っているか
+//     if (pos + chunk_size + 2 > buffer_.size()) {
+//       return false; // need more data
+//     }
+//     // 5) 本体を body_ に追加
+//     body_.append(buffer_, pos, chunk_size);
+//     pos += chunk_size;
+//     // 6) 本体直後のCRLF確認
+//     if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
+//       throw http::ResponseStatusException(kBadRequest);
+//     }
 //     pos += 2;
-
-//     // ループ継続（次のサイズ行へ）
-//     // ここではまだ erase しない（`pos` で前進管理）
+//     // 次のサイズ行へ　（まだeraseしないでposのみ前進）
 //   }
 // }
