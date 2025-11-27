@@ -30,13 +30,13 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
-  enum Progress {
-    kHeader = 0,  // initial state, reading header
-    kBody,        // reading body
-    kDone         // finished parsing request
-  } progress_;    // progress is initially kHeader
+  // enum Progress {
+  //   kHeader = 0,  // initial state, reading header
+  //   kBody,        // reading body
+  //   kDone         // finished parsing request
+  // } progress_;    // progress is initially kHeader
 
-  std::string buffer_;
+  // std::string buffer_;
   RequestMethod method_;
   std::string uri_;
   Dict query_;
@@ -44,8 +44,8 @@ class HttpRequest {
   std::string host_port_;
   std::string version_;
   Dict headers_;
-  std::string body_;
-  long content_length_;
+  // std::string body_;
+  // long content_length_;
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
@@ -79,6 +79,16 @@ class HttpRequest {
   static const size_t kMaxUriSize = 1024;
   static const std::string kDefaultPort;
   bool keep_alive;
+
+  enum Progress {
+    kHeader = 0,  // initial state, reading header
+    kBody,        // reading body
+    kDone         // finished parsing request
+  } progress_;    // progress is initially kHeader
+
+  std::string buffer_;
+  std::string body_;
+  long content_length_;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);

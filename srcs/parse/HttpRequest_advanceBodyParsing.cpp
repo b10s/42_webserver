@@ -8,7 +8,7 @@ bool HttpRequest::AdvanceBodyParsing() {
       return AdvanceChunkedBody();
     }
   } catch (http::ResponseStatusException&) {
-    throw; // rethrow
+    throw;  // rethrow
   } catch (...) {
     throw http::ResponseStatusException(kInternalServerError);
   }
@@ -17,9 +17,9 @@ bool HttpRequest::AdvanceBodyParsing() {
 // content length mode
 bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
-  if (buffer_.size() < need) return false; // need more data
+  if (buffer_.size() < need) return false;  // need more data
   body_.assign(buffer_.data(), need);
-  buffer_.erase(0, need);    // ← 忘れずに消費済みデータを削除
+  buffer_.erase(0, need);  // ← 忘れずに消費済みデータを削除
   progress_ = kDone;
   return true;
 }
@@ -32,14 +32,14 @@ bool HttpRequest::AdvanceChunkedBody() {
     // 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
     size_t chunk_size = 0;
     if (!ParseChunkSize(pos, chunk_size)) {
-      return false; // need more data or error
+      return false;  // need more data or error
     }
     // 2) 終端チャンク
     if (chunk_size == 0) {
-      return HandleLastChunk(pos); // false if need more data
+      return HandleLastChunk(pos);  // false if need more data
     }
     if (!AppendChunkData(pos, chunk_size)) {
-      return false; // need more data or error
+      return false;  // need more data or error
     }
     // 次のサイズ行へ　（まだeraseしないでposのみ前進）
   }
@@ -56,21 +56,20 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
     if (c >= '0' && c <= '9') {
       chunk_size = (chunk_size << 4) + (c - '0');
       saw_digit = true;
-    }
-    else if (c >= 'a' && c <= 'f') {
+    } else if (c >= 'a' && c <= 'f') {
       chunk_size = (chunk_size << 4) + (c - 'a' + 10);
       saw_digit = true;
-    }
-    else if (c >= 'A' && c <= 'F') {
+    } else if (c >= 'A' && c <= 'F') {
       chunk_size = (chunk_size << 4) + (c - 'A' + 10);
       saw_digit = true;
     } else {
-      throw http::ResponseStatusException(kBadRequest); // 拡張 (";ext") などは未対応 → BAD_REQUEST
+      throw http::ResponseStatusException(
+          kBadRequest);  // 拡張 (";ext") などは未対応 → BAD_REQUEST
     }
     ++pos;
   }
   if (!saw_digit) return false;
-  if (pos + 1 >= buffer_.size()) return false; // needs '\n' after '\r'
+  if (pos + 1 >= buffer_.size()) return false;  // needs '\n' after '\r'
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
     throw http::ResponseStatusException(kBadRequest);
   pos += 2;
@@ -80,11 +79,10 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
 // this function is called when chunk_sie is zero
 // "0\r\n\r\n" が揃っていたら消費してkDoneにする
 bool HttpRequest::HandleLastChunk(size_t& pos) {
-  if (pos + 1 >= buffer_.size()) return false; // still waiting for "\r\n"
-  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-    return false;
+  if (pos + 1 >= buffer_.size()) return false;  // still waiting for "\r\n"
+  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') return false;
   pos += 2;
-  buffer_.erase(0, pos); // サイズ行＋CRLFを消費
+  buffer_.erase(0, pos);  // サイズ行＋CRLFを消費
   progress_ = kDone;
   return true;
 }
@@ -92,9 +90,9 @@ bool HttpRequest::HandleLastChunk(size_t& pos) {
 // chunk_size バイトのデータ＋末尾のCRLFを body_ に追加する
 // pos はその次に進める
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
-  const size_t total_needed = chunk_size + 2; // data + CRLF
+  const size_t total_needed = chunk_size + 2;  // data + CRLF
   if (pos + total_needed > buffer_.size()) {
-    return false; // need more data
+    return false;  // need more data
   }
   // 5) 本体を body_ に追加
   body_.append(buffer_, pos, chunk_size);
@@ -106,7 +104,6 @@ bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   pos += 2;
   return true;
 }
-      
 
 /**
  * @brief Content-Length または chunked transfer encoding に対応する。
@@ -146,11 +143,13 @@ bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
 //     while (pos < buffer_.size()) {
 //       char c = buffer_[pos];
 //       if (c == '\r') break;
-//       if (c >= '0' && c <= '9') {chunk_size = (chunk_size << 4) + (c - '0'); saw_digit = true; }
-//       else if (c >= 'a' && c <= 'f') {chunk_size = (chunk_size << 4) + (c - 'a' + 10); saw_digit = true; }
-//       else if (c >= 'A' && c <= 'F') {chunk_size = (chunk_size << 4) + (c - 'A' + 10); saw_digit = true; }
-//       else {
-//         throw http::ResponseStatusException(kBadRequest); // ';' は BAD_REQUEST
+//       if (c >= '0' && c <= '9') {chunk_size = (chunk_size << 4) + (c - '0');
+//       saw_digit = true; } else if (c >= 'a' && c <= 'f') {chunk_size =
+//       (chunk_size << 4) + (c - 'a' + 10); saw_digit = true; } else if (c >=
+//       'A' && c <= 'F') {chunk_size = (chunk_size << 4) + (c - 'A' + 10);
+//       saw_digit = true; } else {
+//         throw http::ResponseStatusException(kBadRequest); // ';' は
+//         BAD_REQUEST
 //       }
 //       ++pos;
 //     }

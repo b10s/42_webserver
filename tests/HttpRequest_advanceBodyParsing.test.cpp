@@ -40,7 +40,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_ContentLength_NeedMoreData) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "");
   EXPECT_EQ(req.buffer_, "Hello");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_NeedMoreData) {
@@ -50,7 +50,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_NeedMoreData) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "hello");
   EXPECT_EQ(req.buffer_, "8\r\nworld12");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_NeedMoreData_ChunkSize) {
@@ -60,7 +60,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_NeedMoreData_ChunkSize) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "");
   EXPECT_EQ(req.buffer_, "5");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 // =============== Malformed requests ===============
@@ -85,7 +85,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_InsufficientDat
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "");
   EXPECT_EQ(req.buffer_, "5\r\nhel");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_NoFinalCRLF) {
@@ -95,7 +95,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_NoFinalCRLF) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "hello");
   EXPECT_EQ(req.buffer_, "0\r\n");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_ExtraDataAfterLastChunk) {
@@ -112,7 +112,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_MissingLastChun
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "hello");
   EXPECT_EQ(req.buffer_, "5\r\nhello\r\n");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_Malformed_NonHexInChunkSize) {
@@ -223,7 +223,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_ChunkSizeAtBufferEnd) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "Hello");
   EXPECT_EQ(req.buffer_, "A");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_CRLFAtBufferEnd) {
@@ -233,7 +233,7 @@ TEST_F(HttpRequestParseUri, AdvanceBodyParsing_Chunked_CRLFAtBufferEnd) {
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.body_, "Hello");
   EXPECT_EQ(req.buffer_, "A\r");
-  EXPECT_EQ(req.progress_, HttpRequest::kParsing);
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
 // =============== Performance considerations ===============
