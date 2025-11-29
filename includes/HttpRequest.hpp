@@ -44,7 +44,7 @@ class HttpRequest {
   size_t
       chunked_parsed_bytes_;  // total bytes parsed in chunked mode
                               // (前回どこまで読んだか。次にbuffer_のどこから読むか)
-  ssize_t pending_chunk_bytes_;  // -1: サイズ行待ち
+  std::ptrdiff_t pending_chunk_bytes_;  // -1: サイズ行待ち
                                  // >=0: そのサイズのデータ待ち
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
