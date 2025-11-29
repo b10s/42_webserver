@@ -7,7 +7,7 @@
  *         - true: finished（progress = kDone ）
  *         - false: not enough data, progress remains kBody, next call needed
  *
- * @throw http::responseStatusException
+ * @throw http::ResponseStatusException
  *        - BAD_REQUEST: malformed chunked encoding
  *        - INTERNAL_SERVER_ERROR: unexpected internal error
  *
