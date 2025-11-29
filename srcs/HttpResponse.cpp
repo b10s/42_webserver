@@ -1,6 +1,9 @@
 #include "HttpResponse.hpp"
 
+#include <ctime>
 #include <sstream>
+
+#include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
     : status_code_(200), reason_phrase_("OK"), version_("HTTP/1.1") {
@@ -15,7 +18,7 @@ void HttpResponse::SetStatus(int status, const std::string& reason_phrase) {
 }
 
 void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
-  headers_[key] = value;
+  headers_[lib::utils::ToLowerAscii(key)] = value;
 }
 
 void HttpResponse::SetBody(const std::string& body) {
@@ -29,14 +32,37 @@ std::string HttpResponse::ToString() const {
   ss << version_ << " " << status_code_ << " " << reason_phrase_ << "\r\n";
 
   // Headers
-  for (std::map<std::string, std::string>::const_iterator it = headers_.begin();
-       it != headers_.end(); ++it) {
-    ss << it->first << ": " << it->second << "\r\n";
+  std::map<std::string, std::string> final_headers = headers_;
+
+  // Date Header
+  bool has_date = final_headers.count("date");
+  if (!has_date) {
+    std::time_t now = std::time(NULL);
+    std::tm* tm = std::gmtime(&now);
+    char buf[100];
+    if (std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", tm)) {
+      final_headers["date"] = std::string(buf);
+    }
   }
 
-  // Content-Length (Auto-calculation)
-  if (headers_.find("Content-Length") == headers_.end()) {
-    ss << "Content-Length: " << body_.length() << "\r\n";
+  // Content-Length
+  bool has_content_length = final_headers.count("content-length");
+  if (!has_content_length) {
+    std::stringstream len_ss;
+    len_ss << body_.length();
+    final_headers["content-length"] = len_ss.str();
+  }
+  if (!has_content_length) {
+    std::stringstream len_ss;
+    len_ss << body_.length();
+    final_headers["Content-Length"] = len_ss.str();
+  }
+
+  // Output Headers
+  for (std::map<std::string, std::string>::const_iterator it =
+           final_headers.begin();
+       it != final_headers.end(); ++it) {
+    ss << it->first << ": " << it->second << "\r\n";
   }
 
   // End of Headers
