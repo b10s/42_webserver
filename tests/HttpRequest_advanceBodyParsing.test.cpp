@@ -11,7 +11,9 @@ class HttpRequestAdvanceBodyParsing : public ::testing::Test {
   HttpRequest req;
 };
 
-// =============== Happy path ===============
+// =============== Happy path: content-length mode ===============
+
+// complete body arrives in one go
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_HappyPath) {
   req.SetBufferForTest("Hello World!");
   req.SetContentLengthForTest(12);
@@ -22,6 +24,24 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_HappyPath
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
 }
 
+// request body size is 11, but data arrives in two parts
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_SizeThenData) {
+  req.SetBufferForTest("Hello");
+  req.SetContentLengthForTest(11);
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.GetBody(), "");
+  EXPECT_EQ(req.GetBufferForTest(), "Hello"); // still waiting for more data
+  // next, the rest of the data arrives
+  req.AppendToBufferForTest(" World");
+  EXPECT_TRUE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.GetBody(), "Hello World");
+  EXPECT_EQ(req.GetBufferForTest(), "");
+  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+}
+
+// ====== Happy path: chunked mode ((content_length_ = -1) ========
+
+// complete chunks arrive in one go
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_HappyPath) {
   req.SetBufferForTest("5\r\nhello\r\n8\r\nworld123\r\n0\r\n\r\n");
   req.SetContentLengthForTest(-1); // chunked
@@ -30,6 +50,41 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_HappyPath) {
   EXPECT_EQ(req.GetBody(), "helloworld123");
   EXPECT_EQ(req.GetBufferForTest(), "");
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+}
+
+// size and data split across multiple recv calls
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeAndDataSplitAcrossBuffers) {
+  // receive first chunk size only
+  req.SetBufferForTest("5\r\n");
+  req.SetContentLengthForTest(-1); // chunked
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.GetBody(), "");
+  EXPECT_EQ(req.GetBufferForTest(), "5\r\n"); // still waiting for more data
+  // next, the rest of the data arrives
+  req.AppendToBufferForTest("hello\r\n0\r\n\r\n");
+  EXPECT_TRUE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.GetBody(), "hello");
+  EXPECT_EQ(req.GetBufferForTest(), "");
+  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+}
+
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_DoesNotDuplicateBody) {
+  req.SetContentLengthForTest(-1);
+  // first recv: first chunk + 2nd chunk partial
+  req.SetBufferForTest("3\r\nabc\r\n3\r\nxy");
+  bool done = req.AdvanceBodyParsing();
+  EXPECT_FALSE(done); // still waiting the second chunk to complete
+  EXPECT_EQ("abc", req.GetBody()); // first chunk "abc" is expected to be in body_
+
+  // second recv: remaining "z\r\n0\r\n\r\n" arrives
+  req.AppendToBufferForTest("z\r\n0\r\n\r\n");
+  done = req.AdvanceBodyParsing();
+  // all chunks are expected to be complete now
+  EXPECT_TRUE(done);
+
+  // 本来の正しい結果は "abcxyz"
+  // （今の実装だと "abcabcxyz" になって、この EXPECT が FAIL するはず）
+  EXPECT_EQ("abcxyz", req.GetBody());
 }
 
 // =============== Need more data ===============
@@ -295,48 +350,5 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterT
         }
       },
       http::ResponseStatusException);
-}
-
-// TCPの特性上、チャンクサイズ行とデータが別々に届くこともある。
-TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeAndDataSplitAcrossBuffers) {
-  // 1回目の受信でチャンクサイズ行だけ受信
-  req.SetBufferForTest("5\r\n");
-  req.SetContentLengthForTest(-1); // chunked
-  EXPECT_FALSE(req.AdvanceBodyParsing());
-  EXPECT_EQ(req.GetBody(), "");
-  EXPECT_EQ(req.GetBufferForTest(), "5\r\n"); // まだ消費されない
-  // 2回目の受信でチャンクデータと終端チャンクを受信
-  req.AppendToBufferForTest("hello\r\n0\r\n\r\n");
-  EXPECT_TRUE(req.AdvanceBodyParsing());
-  EXPECT_EQ(req.GetBody(), "hello");
-  EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
-}
-
-TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_DoesNotDuplicateBody) {
-  // chunked モードを想定（content_length_ < 0）
-  req.SetContentLengthForTest(-1);
-
-  // ◆ 1回目の recv: 1チャンク目 + 2チャンク目の途中まで
-  req.SetBufferForTest("3\r\nabc\r\n3\r\nxy");
-
-  bool done = req.AdvanceBodyParsing();
-  // まだ 2チャンク目が揃っていないので、false のはず
-  EXPECT_FALSE(done);
-
-  // 1チャンク目 "abc" だけが body_ に入っている想定
-  EXPECT_EQ("abc", req.GetBody());
-
-  // ◆ 2回目の recv: 残りの "z\r\n0\r\n\r\n" が届く
-  req.AppendToBufferForTest("z\r\n0\r\n\r\n");
-
-  done = req.AdvanceBodyParsing();
-
-  // ここでは全チャンクが揃うので true になる想定
-  EXPECT_TRUE(done);
-
-  // 本来の正しい結果は "abcxyz"
-  // （今の実装だと "abcabcxyz" になって、この EXPECT が FAIL するはず）
-  EXPECT_EQ("abcxyz", req.GetBody());
 }
 
