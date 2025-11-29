@@ -3,7 +3,7 @@
 #include <ctime>
 #include <sstream>
 
-#include "lib/exception/InvalidHeader.hpp"  // Include the new exception
+#include "lib/exception/InvalidHeader.hpp"
 #include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
@@ -54,7 +54,7 @@ std::string HttpResponse::ToString() const {
 
   // Content-Length
   bool has_content_length = final_headers.count(
-      "content-length");  // Key for content-length may be present from user
+      "content-length");
   // RFC 7230 Section 3.3.2: A sender MUST NOT send a Content-Length header
   // field in any message that contains a Transfer-Encoding header field.
   bool has_transfer_encoding = final_headers.count("transfer-encoding");
