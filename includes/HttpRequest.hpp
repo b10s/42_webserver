@@ -1,10 +1,10 @@
 #ifndef HTTPREQUEST_HPP_
 #define HTTPREQUEST_HPP_
+#include <cstddef>  // for std::ptrdiff_t
 #include <cstring>  // for std::tolower and std::strncmp
 #include <map>
 #include <stdexcept>
 #include <string>
-#include <cstddef>  // for std::ptrdiff_t
 
 #include "enums.hpp"
 
@@ -31,7 +31,8 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
-  // std::string buffer_;
+  // Progress progress_;    // progress is initially kHeader
+  std::string buffer_;
   RequestMethod method_;
   std::string uri_;
   Dict query_;
@@ -39,13 +40,13 @@ class HttpRequest {
   std::string host_port_;
   std::string version_;
   Dict headers_;
-  // std::string body_;
-  // long content_length_;
+  std::string body_;
+  long content_length_;
   size_t
-      chunked_parsed_bytes_;  // total bytes parsed in chunked mode
-                              // (前回どこまで読んだか。次にbuffer_のどこから読むか)
-  std::ptrdiff_t pending_chunk_bytes_;  // -1: サイズ行待ち
-                                 // >=0: そのサイズのデータ待ち
+      chunked_parsed_bytes_;  // (前回どこまで読んだか。次にbuffer_のどこから読むか)
+  std::ptrdiff_t
+      pending_chunk_bytes_;  // -1: サイズ行待ち, >=0: そのサイズのデータ待ち
+  bool keep_alive_;
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
@@ -68,6 +69,12 @@ class HttpRequest {
   bool AppendChunkData(size_t& pos, size_t chunk_size);
 
  public:
+  enum Progress {
+    kHeader = 0,  // initial state, reading header
+    kBody,        // reading body
+    kDone         // finished parsing request
+  };
+
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes
   // (8KB) for simplicity
   static const size_t kMaxHeaderSize = 8192;
@@ -78,17 +85,6 @@ class HttpRequest {
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
   static const std::string kDefaultPort;
-  bool keep_alive;
-
-  enum Progress {
-    kHeader = 0,  // initial state, reading header
-    kBody,        // reading body
-    kDone         // finished parsing request
-  } progress_;    // progress is initially kHeader
-
-  std::string buffer_;
-  std::string body_;
-  long content_length_;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);
@@ -117,13 +113,43 @@ class HttpRequest {
     return content_length_;
   }
 
+  const std::string& GetBufferForTest() const {  // for test purposes
+    return buffer_;
+  }
+
   bool IsKeepAlive() const {
-    return keep_alive;
+    return keep_alive_;
   }
 
   bool IsDone() const {
     return progress_ == kDone;
   }  // for test purposes
+
+  Progress GetProgress() const {  // IsDone だけじゃ足りないとき用
+    return progress_;
+  }
+
+  // テストで buffer_ に擬似データを入れる用
+  void SetBufferForTest(const std::string& s) {
+    buffer_ = s;
+  }
+
+  void AppendToBufferForTest(const std::string& s) {
+    buffer_.append(s);
+  }
+
+  // テストで手動で content_length_ を差し込む用
+  void SetContentLengthForTest(long len) {
+    content_length_ = len;
+  }
+
+  // 必要なら progress_ も（ただし基本はパーサが決めるもの）
+  void SetProgressForTest(Progress p) {
+    progress_ = p;
+  }
+
+ private:
+  Progress progress_;  // progress is initially kHeader
 };
 
 #endif  // HTTPREQUEST_HPP_
