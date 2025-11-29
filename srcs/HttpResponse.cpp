@@ -53,8 +53,7 @@ std::string HttpResponse::ToString() const {
   }
 
   // Content-Length
-  bool has_content_length = final_headers.count(
-      "content-length");
+  bool has_content_length = final_headers.count("content-length");
   // RFC 7230 Section 3.3.2: A sender MUST NOT send a Content-Length header
   // field in any message that contains a Transfer-Encoding header field.
   bool has_transfer_encoding = final_headers.count("transfer-encoding");

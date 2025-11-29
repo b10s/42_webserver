@@ -1,4 +1,5 @@
 #include "lib/exception/BadOptionalAccess.hpp"
+
 #include "lib/exception/messages.hpp"
 
 namespace lib {

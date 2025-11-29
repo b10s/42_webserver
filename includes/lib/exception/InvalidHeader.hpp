@@ -7,7 +7,7 @@ namespace lib {
 namespace exception {
 class InvalidHeader : public std::exception {
  public:
-  virtual const char* what() const throw();
+  const char* what() const throw();
 };
 }  // namespace exception
 }  // namespace lib
