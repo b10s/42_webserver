@@ -3,6 +3,7 @@
 #include <ctime>
 #include <sstream>
 
+#include "lib/exception/InvalidHeader.hpp"  // Include the new exception
 #include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
@@ -18,6 +19,12 @@ void HttpResponse::SetStatus(int status, const std::string& reason_phrase) {
 }
 
 void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
+  if (key.find('\r') != std::string::npos ||
+      key.find('\n') != std::string::npos ||
+      value.find('\r') != std::string::npos ||
+      value.find('\n') != std::string::npos) {
+    throw lib::exception::InvalidHeader();
+  }
   headers_[lib::utils::ToLowerAscii(key)] = value;
 }
 
@@ -46,16 +53,15 @@ std::string HttpResponse::ToString() const {
   }
 
   // Content-Length
-  bool has_content_length = final_headers.count("content-length");
-  if (!has_content_length) {
+  bool has_content_length = final_headers.count(
+      "content-length");  // Key for content-length may be present from user
+  // RFC 7230 Section 3.3.2: A sender MUST NOT send a Content-Length header
+  // field in any message that contains a Transfer-Encoding header field.
+  bool has_transfer_encoding = final_headers.count("transfer-encoding");
+  if (!has_content_length && !has_transfer_encoding) {
     std::stringstream len_ss;
     len_ss << body_.length();
     final_headers["content-length"] = len_ss.str();
-  }
-  if (!has_content_length) {
-    std::stringstream len_ss;
-    len_ss << body_.length();
-    final_headers["Content-Length"] = len_ss.str();
   }
 
   // Output Headers

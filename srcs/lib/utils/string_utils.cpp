@@ -27,4 +27,3 @@ lib::type::Optional<long> StrToLong(const std::string& s) {
 
 }  // namespace utils
 }  // namespace lib
-
