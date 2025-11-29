@@ -30,11 +30,6 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
-  // enum Progress {
-  //   kHeader = 0,  // initial state, reading header
-  //   kBody,        // reading body
-  //   kDone         // finished parsing request
-  // } progress_;    // progress is initially kHeader
 
   // std::string buffer_;
   RequestMethod method_;

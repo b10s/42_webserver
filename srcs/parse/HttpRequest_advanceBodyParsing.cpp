@@ -1,5 +1,22 @@
 #include "HttpRequest.hpp"
 
+/**
+ * @brief handle body parsing advancement, either by content-length or chunked
+ *
+ * @return bool
+ *         - true: finished（progress = kDone ）
+ *         - false: not enough data, progress remains kBody, next call needed
+ *
+ * @throw http::responseStatusException
+ *        - BAD_REQUEST: malformed chunked encoding
+ *        - INTERNAL_SERVER_ERROR: unexpected internal error
+ *
+ * @post
+ *  - body_: appended with newly parsed body data
+ *  - progress_: updated to kDone if finished
+ *  - buffer_: updated to remove consumed data
+ */
+
 bool HttpRequest::AdvanceBodyParsing() {
   try {
     if (content_length_ >= 0) {
@@ -19,34 +36,31 @@ bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
   if (buffer_.size() < need) return false;  // need more data
   body_.assign(buffer_.data(), need);
-  buffer_.erase(0, need);  // ← 忘れずに消費済みデータを削除
+  buffer_.erase(0, need);
   progress_ = kDone;
   return true;
 }
 
-// chunked transfer encoding: return false if more data needed
+// chunked transfer encoding: "size\r\n<data>\r\n ... 0\r\n\r\n"
+// return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
-  // chunked: "size\r\n<data>\r\n ... 0\r\n\r\n"
   size_t pos = 0;
   for (;;) {
-    // 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
     size_t chunk_size = 0;
     if (!ParseChunkSize(pos, chunk_size)) {
-      return false;  // need more data or error
+      return false;
     }
-    // 2) 終端チャンク
     if (chunk_size == 0) {
-      return HandleLastChunk(pos);  // false if need more data
+      return HandleLastChunk(pos);
     }
     if (!AppendChunkData(pos, chunk_size)) {
-      return false;  // need more data or error
+      return false;
     }
-    // 次のサイズ行へ　（まだeraseしないでposのみ前進）
+    // pos is advanced, but buffer_ is not yet erased
   }
 }
 
-/// 1) サイズ行を16進で読む（拡張は未対応：';' は許容しない）
-// <hex>\r\n
+// chunck size: <hex>\r\n
 bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   chunk_size = 0;
   bool saw_digit = false;
@@ -63,8 +77,8 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
       chunk_size = (chunk_size << 4) + (c - 'A' + 10);
       saw_digit = true;
     } else {
-      throw http::ResponseStatusException(
-          kBadRequest);  // 拡張 (";ext") などは未対応 → BAD_REQUEST
+      // disallow extensions(';' is BAD_REQUEST)
+      throw http::ResponseStatusException(kBadRequest);  
     }
     ++pos;
   }
@@ -76,28 +90,33 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   return true;
 }
 
-// this function is called when chunk_sie is zero
-// "0\r\n\r\n" が揃っていたら消費してkDoneにする
+// "0\r\n\r\n"
 bool HttpRequest::HandleLastChunk(size_t& pos) {
-  if (pos + 1 >= buffer_.size()) return false;  // still waiting for "\r\n"
-  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') return false;
+  if (pos + 1 >= buffer_.size()) return false;  // still waiting for "\r\n\r\n"
+  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
+    throw http::ResponseStatusException(kBadRequest);
+  }
   pos += 2;
-  buffer_.erase(0, pos);  // サイズ行＋CRLFを消費
+  // if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
+  //   throw http::ResponseStatusException(kBadRequest);
+  // }
+  // pos += 2;
+  // if (pos > buffer_.size()) {
+  //   throw http::ResponseStatusException(kBadRequest); // extra string after last chunk
+  // }
+  buffer_.erase(0, pos);  // erase consumed data including last chunk
   progress_ = kDone;
   return true;
 }
 
-// chunk_size バイトのデータ＋末尾のCRLFを body_ に追加する
-// pos はその次に進める
+// append "<data>\r\n" and advance pos, but do not erase yet
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
-  const size_t total_needed = chunk_size + 2;  // data + CRLF
+  const size_t total_needed = chunk_size + 2;
   if (pos + total_needed > buffer_.size()) {
-    return false;  // need more data
+    return false;
   }
-  // 5) 本体を body_ に追加
   body_.append(buffer_, pos, chunk_size);
   pos += chunk_size;
-  // 6) 本体直後のCRLF確認
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
     throw http::ResponseStatusException(kBadRequest);
   }
@@ -105,23 +124,6 @@ bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   return true;
 }
 
-/**
- * @brief Content-Length または chunked transfer encoding に対応する。
- * まだbodyが揃っていない場合は false を返し、揃い次第 true を返す。
- *
- * @return bool
- *         - true: 解析完了（progress = DONE）
- *         - false: 未完（再試行）
- *
- * @throw http::responseStatusException
- *        - BAD_REQUEST: 不正なチャンク形式や構文エラー
- *        - INTERNAL_SERVER_ERROR: 予期せぬ内部エラー
- *
- * @post
- *  - body_ に本文データが格納される
- *  - progress が DONE に更新される（完了時）
- *  - buffer_ から消費済みデータが削除される
- */
 // bool HttpRequest::AdvanceBodyParsing() {
 //   // content length mode
 //   if (content_length_ >= 0) {
