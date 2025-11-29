@@ -64,7 +64,7 @@ bool HttpRequest::AdvanceChunkedBody() {
         return false;  // need to wait for size line
       }
       chunked_parsed_bytes_ = pos;
-      pending_chunk_bytes_ = static_cast<ssize_t>(size);
+      pending_chunk_bytes_ = static_cast<ptrdiff_t>(size);
       if (size == 0) {
         bool done = ValidateFinalCRLF(chunked_parsed_bytes_);
         if (done) {

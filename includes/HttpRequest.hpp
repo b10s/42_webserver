@@ -4,6 +4,7 @@
 #include <map>
 #include <stdexcept>
 #include <string>
+#include <cstddef>  // for std::ptrdiff_t
 
 #include "enums.hpp"
 

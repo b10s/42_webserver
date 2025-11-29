@@ -38,6 +38,8 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     headers_ = src.headers_;
     body_ = src.body_;
     content_length_ = src.content_length_;
+    chunked_parsed_bytes_ = src.chunked_parsed_bytes_;
+    pending_chunk_bytes_ = src.pending_chunk_bytes_;
     keep_alive = src.keep_alive;
     progress_ = src.progress_;
   }
