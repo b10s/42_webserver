@@ -193,3 +193,105 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExactBufferSize
   EXPECT_EQ(req.buffer_, "");
   EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
+
+// =============== Content-Length: error / edge paths ===============
+
+// Content-Length がボディより大きい -> 非ブロッキングなので「まだ足りない」として false
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_Incomplete_ReturnsFalse) {
+  req.buffer_ = "Hello";      // 5 bytes
+  req.content_length_ = 10;   // 10 bytes expected
+
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  // まだ何も確定させない
+  EXPECT_EQ(req.body_, "");
+  EXPECT_EQ(req.buffer_, "Hello");
+  // progress_ は kDone になっていないことだけ確認（具体値は実装依存ならチェックしなくてもOK）
+  EXPECT_NE(req.progress_, HttpRequest::kDone);
+}
+
+// Content-Length ぶんだけ消費し、それ以降は次のリクエスト用に残す
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_LeavesExtraDataForNextRequest) {
+  req.buffer_ = "Hello World!NEXT";
+  req.content_length_ = 12;   // "Hello World!" だけ
+
+  EXPECT_TRUE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.body_, "Hello World!");
+  EXPECT_EQ(req.buffer_, "NEXT");  // 余りは残す
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
+}
+
+// =============== Chunked: non-happy paths ===============
+
+// チャンクサイズ行が途中までしか来ていない（例: "5\r" だけ） -> false を返して次の recv を待つ
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_IncompleteChunkSizeLine_ReturnsFalse) {
+  req.buffer_ = "5\r";    // "5\r\n" すら揃ってない
+  req.content_length_ = -1;
+
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.body_, "");
+  EXPECT_EQ(req.buffer_, "5\r");
+  // EXPECT_NE(req.progress_, HttpRequest::kBody);
+}
+
+// チャンクサイズは読めたが、データが足りない -> false
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_IncompleteChunkData_ReturnsFalse) {
+  req.buffer_ = "5\r\nhe";   // size=5, でも "he" しか来ていない
+  req.content_length_ = -1;
+
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.body_, "");
+  EXPECT_EQ(req.buffer_, "5\r\nhe");
+  // EXPECT_NE(req.progress_, HttpRequest::kDone);
+}
+
+// チャンクサイズが 16進数でない -> 400 Bad Request
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_InvalidHexSize_ThrowsBadRequest) {
+  req.buffer_ = "G\r\nhello\r\n0\r\n\r\n";  // 'G' は 0-9,A-F,a-f 以外
+  req.content_length_ = -1;
+
+  EXPECT_THROW(
+      {
+        try {
+          req.AdvanceBodyParsing();
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
+
+// チャンクデータの後に CRLF がない -> 400 Bad Request
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MissingCRLFAfterData_ThrowsBadRequest) {
+  // 本来は "5\r\nhello\r\n" だが、最後の CRLF がない
+  req.buffer_ = "5\r\nhello0\r\n";
+  req.content_length_ = -1;
+
+  EXPECT_THROW(
+      {
+        try {
+          req.AdvanceBodyParsing();
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
+
+// "0\r\n\r\n" のあとに余計なデータがある -> 400 Bad Request
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterTerminator_ThrowsBadRequest) {
+  req.buffer_ = "5\r\nhello\r\n0\r\n\r\nGARBAGE";
+  req.content_length_ = -1;
+
+  EXPECT_THROW(
+      {
+        try {
+          req.AdvanceBodyParsing();
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus()); // HandleLastChunk/FinishChunkedBody で検知
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
