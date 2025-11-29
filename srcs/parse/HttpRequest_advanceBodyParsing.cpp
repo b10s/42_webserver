@@ -85,7 +85,7 @@ bool HttpRequest::AdvanceChunkedBody() {
   }
 }
 
-// chunck size: <hex>\r\n
+// chunk size: <hex>\r\n
 bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   chunk_size = 0;
   bool saw_digit = false;
