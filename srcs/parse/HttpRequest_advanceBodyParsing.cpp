@@ -16,6 +16,8 @@
  *  - progress_: updated to kDone if finished
  *  - buffer_: updated to remove consumed data
  */
+ // TODO: maybe I should not throw bad request for extensions(trailing section)
+ // but just ignore them. For now, we just throw bad request for simplicity.
 
 bool HttpRequest::AdvanceBodyParsing() {
   try {
@@ -34,9 +36,19 @@ bool HttpRequest::AdvanceBodyParsing() {
 // content length mode
 bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
-  if (buffer_.size() < need) return false;  // need more data
-  body_.assign(buffer_.data(), need);
-  buffer_.erase(0, need);
+  const size_t remaining = need - content_received_; // remaining bytes to read
+  if (buffer_.empty()) return false;
+  const size_t to_read = std::min(remaining, buffer_.size());
+  body_.append(buffer_, 0, to_read);
+  buffer_.erase(0, to_read);
+  content_received_ += to_read;
+  if (content_received_ < need) {
+    return false;  // need more data
+  }
+  if (content_received_ > need) {
+    // should not happen if we manage buffer_ correctly
+    throw http::ResponseStatusException(kInternalServerError);
+  }
   progress_ = kDone;
   return true;
 }

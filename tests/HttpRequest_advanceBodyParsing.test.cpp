@@ -156,6 +156,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_LargeChunkSize)
   EXPECT_EQ(req.progress_, HttpRequest::kDone);
 }
 
+// TODO: maybe I should not throw bad request for extensions but just ignore them
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeWithExtensions) {
   req.buffer_ = "5;name=value;foo=bar\r\nhello\r\n0\r\n\r\n"; // chunk size with extensions
   req.content_length_ = -1; // chunked
@@ -295,3 +296,47 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterT
       },
       http::ResponseStatusException);
 }
+
+// TCPの特性上、チャンクサイズ行とデータが別々に届くこともある。
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeAndDataSplitAcrossBuffers) {
+  // 1回目の受信でチャンクサイズ行だけ受信
+  req.buffer_ = "5\r\n";
+  req.content_length_ = -1; // chunked
+  EXPECT_FALSE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.body_, "");
+  EXPECT_EQ(req.buffer_, "5\r\n"); // まだ消費されない
+  // 2回目の受信でチャンクデータと終端チャンクを受信
+  req.buffer_ += "hello\r\n0\r\n\r\n";
+  EXPECT_TRUE(req.AdvanceBodyParsing());
+  EXPECT_EQ(req.body_, "hello");
+  EXPECT_EQ(req.buffer_, "");
+  EXPECT_EQ(req.progress_, HttpRequest::kDone);
+}
+
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_DoesNotDuplicateBody) {
+  // chunked モードを想定（content_length_ < 0）
+  req.content_length_ = -1;
+
+  // ◆ 1回目の recv: 1チャンク目 + 2チャンク目の途中まで
+  req.buffer_ = "3\r\nabc\r\n3\r\nxy";
+
+  bool done = req.AdvanceBodyParsing();
+  // まだ 2チャンク目が揃っていないので、false のはず
+  EXPECT_FALSE(done);
+
+  // 1チャンク目 "abc" だけが body_ に入っている想定
+  EXPECT_EQ("abc", req.body_);
+
+  // ◆ 2回目の recv: 残りの "z\r\n0\r\n\r\n" が届く
+  req.buffer_ += "z\r\n0\r\n\r\n";
+
+  done = req.AdvanceBodyParsing();
+
+  // ここでは全チャンクが揃うので true になる想定
+  EXPECT_TRUE(done);
+
+  // 本来の正しい結果は "abcxyz"
+  // （今の実装だと "abcabcxyz" になって、この EXPECT が FAIL するはず）
+  EXPECT_EQ("abcxyz", req.body_);
+}
+

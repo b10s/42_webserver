@@ -41,6 +41,9 @@ class HttpRequest {
   Dict headers_;
   // std::string body_;
   // long content_length_;
+  size_t content_received_; // total bytes received in content-length mode
+  size_t chunked_parsed_bytes_; // total bytes parsed in chunked mode (前回どこまで読んだか。次にbuffer_のどこから読むか)
+  ssize_t pending_chunk_bytes_; // -1: まだサイズ行を読んでない, >=0: そのサイズのデータを待っている
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);

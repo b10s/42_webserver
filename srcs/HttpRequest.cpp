@@ -13,6 +13,7 @@ HttpRequest::HttpRequest()
       host_port_("8080"),
       version_(),
       headers_(),
+      content_received_(0),
       keep_alive(false),
       progress_(kHeader),
       buffer_(),
