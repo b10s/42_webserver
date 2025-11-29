@@ -50,8 +50,8 @@ bool HttpRequest::AdvanceChunkedBody() {
     if (!ParseChunkSize(pos, chunk_size)) {
       return false;
     }
-    if (chunk_size == 0) {
-      return HandleLastChunk(pos);
+    if (chunk_size == 0) { // parseChunkSize advanced pos past CRLF
+      return ValidateFinalCRLF(pos);
     }
     if (!AppendChunkData(pos, chunk_size)) {
       return false;
@@ -86,24 +86,20 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   if (pos + 1 >= buffer_.size()) return false;  // needs '\n' after '\r'
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
     throw http::ResponseStatusException(kBadRequest);
-  pos += 2;
+  pos += 2; // skip CRLF
   return true;
 }
 
-// "0\r\n\r\n"
-bool HttpRequest::HandleLastChunk(size_t& pos) {
-  if (pos + 1 >= buffer_.size()) return false;  // still waiting for "\r\n\r\n"
+// called after reading "0\r\n"; now expect the final CRLF
+bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
+  if (pos + 1 >= buffer_.size()) return false;  // still waiting the final CRLF
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
     throw http::ResponseStatusException(kBadRequest);
   }
-  pos += 2;
-  // if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
-  //   throw http::ResponseStatusException(kBadRequest);
-  // }
-  // pos += 2;
-  // if (pos > buffer_.size()) {
-  //   throw http::ResponseStatusException(kBadRequest); // extra string after last chunk
-  // }
+  pos += 2;  // skip final CRLF
+  if (pos != buffer_.size()) {
+    throw http::ResponseStatusException(kBadRequest);
+  }
   buffer_.erase(0, pos);  // erase consumed data including last chunk
   progress_ = kDone;
   return true;

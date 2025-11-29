@@ -59,7 +59,7 @@ class HttpRequest {
   bool AdvanceContentLengthBody();
   bool AdvanceChunkedBody();
   bool ParseChunkSize(size_t& pos, size_t& chunk_size);
-  bool HandleLastChunk(size_t& pos);
+  bool ValidateFinalCRLF(size_t& pos);
   bool AppendChunkData(size_t& pos, size_t chunk_size);
 
  public:
