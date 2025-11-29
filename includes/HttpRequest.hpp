@@ -30,7 +30,6 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
-
   // std::string buffer_;
   RequestMethod method_;
   std::string uri_;
@@ -41,9 +40,11 @@ class HttpRequest {
   Dict headers_;
   // std::string body_;
   // long content_length_;
-  size_t content_received_; // total bytes received in content-length mode
-  size_t chunked_parsed_bytes_; // total bytes parsed in chunked mode (前回どこまで読んだか。次にbuffer_のどこから読むか)
-  ssize_t pending_chunk_bytes_; // -1: まだサイズ行を読んでない, >=0: そのサイズのデータを待っている
+  size_t
+      chunked_parsed_bytes_;  // total bytes parsed in chunked mode
+                              // (前回どこまで読んだか。次にbuffer_のどこから読むか)
+  ssize_t pending_chunk_bytes_;  // -1: サイズ行待ち
+                                 // >=0: そのサイズのデータ待ち
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);

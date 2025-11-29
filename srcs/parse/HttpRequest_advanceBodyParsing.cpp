@@ -16,8 +16,8 @@
  *  - progress_: updated to kDone if finished
  *  - buffer_: updated to remove consumed data
  */
- // TODO: maybe I should not throw bad request for extensions(trailing section)
- // but just ignore them. For now, we just throw bad request for simplicity.
+// TODO: maybe I should not throw bad request for extensions(trailing section)
+// but just ignore them. For now, we just throw bad request for simplicity.
 
 bool HttpRequest::AdvanceBodyParsing() {
   try {
@@ -36,19 +36,15 @@ bool HttpRequest::AdvanceBodyParsing() {
 // content length mode
 bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
-  const size_t remaining = need - content_received_; // remaining bytes to read
-  if (buffer_.empty()) return false;
-  const size_t to_read = std::min(remaining, buffer_.size());
-  body_.append(buffer_, 0, to_read);
-  buffer_.erase(0, to_read);
-  content_received_ += to_read;
-  if (content_received_ < need) {
-    return false;  // need more data
+  if (need == 0) {
+    progress_ = kDone;
+    return true;
   }
-  if (content_received_ > need) {
-    // should not happen if we manage buffer_ correctly
-    throw http::ResponseStatusException(kInternalServerError);
+  if (buffer_.size() < need) {
+    return false;
   }
+  body_.assign(buffer_.data(), need);
+  buffer_.erase(0, need);  // erase consumed data
   progress_ = kDone;
   return true;
 }
@@ -56,19 +52,36 @@ bool HttpRequest::AdvanceContentLengthBody() {
 // chunked transfer encoding: "size\r\n<data>\r\n ... 0\r\n\r\n"
 // return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
-  size_t pos = 0;
+  if (chunked_parsed_bytes_ >= buffer_.size()) {
+    throw http::ResponseStatusException(
+        kInternalServerError);  // should not happen
+  }
   for (;;) {
-    size_t chunk_size = 0;
-    if (!ParseChunkSize(pos, chunk_size)) {
+    if (pending_chunk_bytes_ == -1) {
+      size_t size = 0;
+      size_t pos = chunked_parsed_bytes_;
+      if (!ParseChunkSize(pos, size)) {
+        return false;  // need to wait for size line
+      }
+      chunked_parsed_bytes_ = pos;
+      pending_chunk_bytes_ = static_cast<ssize_t>(size);
+      if (size == 0) {
+        bool done = ValidateFinalCRLF(chunked_parsed_bytes_);
+        if (done) {
+          buffer_.erase(0, chunked_parsed_bytes_);  // erase consumed data
+          chunked_parsed_bytes_ = 0;
+          pending_chunk_bytes_ = -1;
+          progress_ = kDone;
+        }
+        return done;
+      }
+    }
+    size_t pos = chunked_parsed_bytes_;
+    if (!AppendChunkData(pos, static_cast<size_t>(pending_chunk_bytes_))) {
       return false;
     }
-    if (chunk_size == 0) { // parseChunkSize advanced pos past CRLF
-      return ValidateFinalCRLF(pos);
-    }
-    if (!AppendChunkData(pos, chunk_size)) {
-      return false;
-    }
-    // pos is advanced, but buffer_ is not yet erased
+    chunked_parsed_bytes_ = pos;
+    pending_chunk_bytes_ = -1;  // read next size line
   }
 }
 
@@ -90,7 +103,7 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
       saw_digit = true;
     } else {
       // disallow extensions(';' is BAD_REQUEST)
-      throw http::ResponseStatusException(kBadRequest);  
+      throw http::ResponseStatusException(kBadRequest);
     }
     ++pos;
   }
@@ -98,7 +111,7 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   if (pos + 1 >= buffer_.size()) return false;  // needs '\n' after '\r'
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
     throw http::ResponseStatusException(kBadRequest);
-  pos += 2; // skip CRLF
+  pos += 2;  // skip CRLF
   return true;
 }
 

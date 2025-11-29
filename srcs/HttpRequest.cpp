@@ -13,13 +13,15 @@ HttpRequest::HttpRequest()
       host_port_("8080"),
       version_(),
       headers_(),
-      content_received_(0),
+      chunked_parsed_bytes_(0),
+      pending_chunk_bytes_(-1),
       keep_alive(false),
       progress_(kHeader),
       buffer_(),
       body_(),
-      content_length_(-1) // default: unknown length, chunked possible
-      {}
+      content_length_(-1)  // default: unknown length, chunked possible
+{
+}
 
 HttpRequest::HttpRequest(const HttpRequest& src) {
   *this = src;
