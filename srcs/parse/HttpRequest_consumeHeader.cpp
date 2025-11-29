@@ -1,21 +1,12 @@
 #include <cctype>   // for std::tolower
 #include <cstdlib>  // for atoi
-#include <sstream>
 
 #include "HttpRequest.hpp"
+#include "lib/utils/string_utils.hpp"
 
 // ============== utils ===============
 bool HttpRequest::IsCRLF(const char* p) const {
   return p != NULL && p[0] == '\r' && p[1] == '\n';
-}
-
-std::string HttpRequest::ToLowerAscii(const std::string& s) {
-  std::string result = s;
-  for (size_t i = 0; i < result.size(); ++i) {
-    result[i] =
-        static_cast<char>(std::tolower(static_cast<unsigned char>(result[i])));
-  }
-  return result;
 }
 
 void HttpRequest::BumpLenOrThrow(size_t& total, size_t inc) const {
@@ -60,7 +51,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
 // We are not keeping original case for simplicity.
 void HttpRequest::StoreHeader(const std::string& raw_key,
                               const std::string& value) {
-  std::string k = ToLowerAscii(raw_key);
+  std::string k = lib::utils::ToLowerAscii(raw_key);
   // Reject all duplicate headers
   if (headers_.count(k) > 0) {
     throw http::ResponseStatusException(kBadRequest);
@@ -109,12 +100,15 @@ void HttpRequest::ValidateBodyHeaders() {
 }
 
 void HttpRequest::ParseContentLength(const std::string& s) {
-  std::stringstream ss(s);
-  ss >> content_length_;
-  if (ss.fail() || content_length_ < 0 ||
-      static_cast<size_t>(content_length_) > kMaxPayloadSize) {
+  lib::type::Optional<long> res = lib::utils::StrToLong(s);
+  if (!res.HasValue()) {
     throw http::ResponseStatusException(kBadRequest);
   }
+  long len = res.Value();
+  if (len < 0 || static_cast<size_t>(len) > kMaxPayloadSize) {
+    throw http::ResponseStatusException(kBadRequest);
+  }
+  content_length_ = len;
 }
 
 // we allow only "chunked" for simplicity

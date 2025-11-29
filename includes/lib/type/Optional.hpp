@@ -1,7 +1,7 @@
 #ifndef LIB_TYPE_OPTIONAL_HPP_
 #define LIB_TYPE_OPTIONAL_HPP_
 
-#include "lib/exception/bad_optional_access.hpp"
+#include "lib/exception/BadOptionalAccess.hpp"
 
 namespace lib {
 namespace type {
