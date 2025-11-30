@@ -371,3 +371,47 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterT
       http::ResponseStatusException);
 }
 
+// chunk size is greater than size_t max (overflow) -> 400 Bad Request
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeOverflow_ThrowsBadRequest) {
+  req.SetContentLengthForTest(-1);
+  // 異常に長い 16 進数のサイズ行を用意（100文字ぐらい全部 'F'）
+  std::string huge_hex(100, 'F');  // FFFFFF... (100個)
+  std::string payload = huge_hex + "\r\n";  // データ本体はなくてOK
+
+  req.SetBufferForTest(payload);
+
+  // ここで AdvanceBodyParsing を呼ぶと、ParseChunkSize 内で
+  // overflow チェックにひっかかって kBadRequest になるはず
+  EXPECT_THROW(
+      {
+        try {
+          req.AdvanceBodyParsing();
+        } catch (const http::ResponseStatusException& e) {
+          EXPECT_EQ(kBadRequest, e.GetStatus());
+          throw;
+        }
+      },
+      http::ResponseStatusException);
+}
+
+// chunk size is huge but valid (no overflow) -> works correctly
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeLargeButValid_WorksCorrectly) {
+  req.SetContentLengthForTest(-1);
+  // パーサと同じ境界値をテスト側でも計算
+  const size_t max_before_shift =
+      std::numeric_limits<size_t>::max() >> 4;
+
+  // それを16進文字列に変換（例: "fffffffffffffff" みたいなやつ）
+  std::ostringstream oss;
+  oss << std::hex << max_before_shift;  // 小文字hexになる
+  std::string hex = oss.str();
+
+  // サイズ行だけ（ボディデータはまだ送らない）
+  std::string payload = hex + "\r\n";
+
+  req.SetBufferForTest(payload);
+  bool done = false;
+  EXPECT_NO_THROW(done = req.AdvanceBodyParsing());
+  EXPECT_FALSE(done); // still waiting for body data
+  EXPECT_EQ("", req.GetBody());
+}

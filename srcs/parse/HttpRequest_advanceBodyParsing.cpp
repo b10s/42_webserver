@@ -92,31 +92,27 @@ bool HttpRequest::AdvanceChunkedBody() {
 bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   chunk_size = 0;
   bool saw_digit = false;
+  const size_t kMaxBeforeShift = std::numeric_limits<size_t>::max() >> 4;
   while (pos < buffer_.size()) {
     char c = buffer_[pos];
     if (c == '\r') break;
+    int digit = -1;
     if (c >= '0' && c <= '9') {
-      if (chunk_size > (SIZE_MAX >> 4)) {
-        throw http::ResponseStatusException(kBadRequest);
-      }
-      chunk_size = (chunk_size << 4) + (c - '0');
-      saw_digit = true;
+      digit = c - '0';
     } else if (c >= 'a' && c <= 'f') {
-      if (chunk_size > (SIZE_MAX >> 4)) {
-        throw http::ResponseStatusException(kBadRequest);
-      }
-      chunk_size = (chunk_size << 4) + (c - 'a' + 10);
-      saw_digit = true;
+      digit = c - 'a' + 10;
     } else if (c >= 'A' && c <= 'F') {
-      if (chunk_size > (SIZE_MAX >> 4)) {
-        throw http::ResponseStatusException(kBadRequest);
-      }
-      chunk_size = (chunk_size << 4) + (c - 'A' + 10);
-      saw_digit = true;
+      digit = c - 'A' + 10;
     } else {
       // disallow extensions(';' is BAD_REQUEST)
       throw http::ResponseStatusException(kBadRequest);
     }
+    if (chunk_size > kMaxBeforeShift) {
+      // overflow
+      throw http::ResponseStatusException(kBadRequest);
+    }
+    chunk_size = (chunk_size << 4) + static_cast<size_t>(digit);
+    saw_digit = true;
     ++pos;
   }
   if (!saw_digit) return false;
