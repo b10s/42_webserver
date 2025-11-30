@@ -52,36 +52,41 @@ bool HttpRequest::AdvanceContentLengthBody() {
 // chunked transfer encoding: "size\r\n<data>\r\n ... 0\r\n\r\n"
 // return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
-  if (chunked_parsed_bytes_ >= buffer_.size()) {
+  if (buffer_read_pos_ > buffer_.size()) {
     throw http::ResponseStatusException(
         kInternalServerError);  // should not happen
   }
+  if (buffer_read_pos_ == buffer_.size()) {
+    return false;  // parsed all available data, need more
+  }
   for (;;) {
-    if (pending_chunk_bytes_ == -1) {
+    if (next_chunk_size_ == -1) {
       size_t size = 0;
-      size_t pos = chunked_parsed_bytes_;
+      size_t pos = buffer_read_pos_;
       if (!ParseChunkSize(pos, size)) {
         return false;  // need to wait for size line
       }
-      chunked_parsed_bytes_ = pos;
-      pending_chunk_bytes_ = static_cast<ptrdiff_t>(size);
+      buffer_read_pos_ = pos;
+      next_chunk_size_ = static_cast<ptrdiff_t>(size);
       if (size == 0) {
-        bool done = ValidateFinalCRLF(chunked_parsed_bytes_);
+        bool done = ValidateFinalCRLF(buffer_read_pos_);
         if (done) {
-          buffer_.erase(0, chunked_parsed_bytes_);  // erase consumed data
-          chunked_parsed_bytes_ = 0;
-          pending_chunk_bytes_ = -1;
+          buffer_.erase(0, buffer_read_pos_);  // erase consumed data
+          buffer_read_pos_ = 0;
+          next_chunk_size_ = -1;
           progress_ = kDone;
         }
         return done;
       }
     }
-    size_t pos = chunked_parsed_bytes_;
-    if (!AppendChunkData(pos, static_cast<size_t>(pending_chunk_bytes_))) {
+    size_t pos = buffer_read_pos_;
+    if (!AppendChunkData(pos, static_cast<size_t>(next_chunk_size_))) {
       return false;
     }
-    chunked_parsed_bytes_ = pos;
-    pending_chunk_bytes_ = -1;  // read next size line
+    // buffer_read_pos_ = pos;
+    buffer_.erase(0, pos);  // erase consumed data
+    buffer_read_pos_ = 0;
+    next_chunk_size_ = -1;  // reset state, read next size line
   }
 }
 

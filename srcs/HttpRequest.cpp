@@ -16,8 +16,8 @@ HttpRequest::HttpRequest()
       headers_(),
       body_(),
       content_length_(-1),  // default: unknown length, chunked possible
-      chunked_parsed_bytes_(0),
-      pending_chunk_bytes_(-1),
+      buffer_read_pos_(0),
+      next_chunk_size_(-1),
       keep_alive_(false),
       progress_(kHeader) {
 }
@@ -37,8 +37,8 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     headers_ = src.headers_;
     body_ = src.body_;
     content_length_ = src.content_length_;
-    chunked_parsed_bytes_ = src.chunked_parsed_bytes_;
-    pending_chunk_bytes_ = src.pending_chunk_bytes_;
+    buffer_read_pos_ = src.buffer_read_pos_;
+    next_chunk_size_ = src.next_chunk_size_;
     keep_alive_ = src.keep_alive_;
     progress_ = src.progress_;
   }

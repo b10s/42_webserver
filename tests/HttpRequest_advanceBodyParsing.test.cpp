@@ -81,9 +81,6 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_Doe
   done = req.AdvanceBodyParsing();
   // all chunks are expected to be complete now
   EXPECT_TRUE(done);
-
-  // 本来の正しい結果は "abcxyz"
-  // （今の実装だと "abcabcxyz" になって、この EXPECT が FAIL するはず）
   EXPECT_EQ("abcxyz", req.GetBody());
 }
 
@@ -104,7 +101,8 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_NeedMoreData) {
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n8\r\nworld12");
+  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n8\r\nworld12");
+  EXPECT_EQ(req.GetBufferForTest(), "8\r\nworld12");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 
@@ -149,7 +147,8 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_NoFin
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n0\r\n");
+  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n0\r\n");
+  EXPECT_EQ(req.GetBufferForTest(), "0\r\n");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 
@@ -166,7 +165,8 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_Missi
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n");
+  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n");
+  EXPECT_EQ(req.GetBufferForTest(), "");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 

@@ -43,9 +43,9 @@ class HttpRequest {
   std::string body_;
   long content_length_;
   size_t
-      chunked_parsed_bytes_;  // (前回どこまで読んだか。次にbuffer_のどこから読むか)
+      buffer_read_pos_;  // the position in buffer_ which has been read
   std::ptrdiff_t
-      pending_chunk_bytes_;  // -1: サイズ行待ち, >=0: そのサイズのデータ待ち
+      next_chunk_size_;  // -1: waiting for chunk size line
   bool keep_alive_;
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
@@ -129,7 +129,6 @@ class HttpRequest {
     return progress_;
   }
 
-  // テストで buffer_ に擬似データを入れる用
   void SetBufferForTest(const std::string& s) {
     buffer_ = s;
   }
@@ -138,12 +137,10 @@ class HttpRequest {
     buffer_.append(s);
   }
 
-  // テストで手動で content_length_ を差し込む用
   void SetContentLengthForTest(long len) {
     content_length_ = len;
   }
 
-  // 必要なら progress_ も（ただし基本はパーサが決めるもの）
   void SetProgressForTest(Progress p) {
     progress_ = p;
   }
