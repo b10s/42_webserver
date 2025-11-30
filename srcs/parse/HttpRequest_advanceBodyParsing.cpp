@@ -96,12 +96,21 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
     char c = buffer_[pos];
     if (c == '\r') break;
     if (c >= '0' && c <= '9') {
+      if (chunk_size > (SIZE_MAX >> 4)) {
+        throw http::ResponseStatusException(kBadRequest);
+      }
       chunk_size = (chunk_size << 4) + (c - '0');
       saw_digit = true;
     } else if (c >= 'a' && c <= 'f') {
+      if (chunk_size > (SIZE_MAX >> 4)) {
+        throw http::ResponseStatusException(kBadRequest);
+      }
       chunk_size = (chunk_size << 4) + (c - 'a' + 10);
       saw_digit = true;
     } else if (c >= 'A' && c <= 'F') {
+      if (chunk_size > (SIZE_MAX >> 4)) {
+        throw http::ResponseStatusException(kBadRequest);
+      }
       chunk_size = (chunk_size << 4) + (c - 'A' + 10);
       saw_digit = true;
     } else {
