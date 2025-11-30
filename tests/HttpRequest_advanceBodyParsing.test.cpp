@@ -84,6 +84,28 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_Doe
   EXPECT_EQ("abcxyz", req.GetBody());
 }
 
+TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MultipleRecvs) {
+  req.SetContentLengthForTest(-1);
+  // first recv: first chunk
+  req.SetBufferForTest("4\r\ntest\r\n");
+  bool done = req.AdvanceBodyParsing();
+  EXPECT_FALSE(done); // still waiting for more chunks
+  EXPECT_EQ("test", req.GetBody());
+
+  // second recv: second chunk
+  req.AppendToBufferForTest("3\r\n123\r\n");
+  done = req.AdvanceBodyParsing();
+  EXPECT_FALSE(done); // still waiting for last chunk
+  EXPECT_EQ("test123", req.GetBody());
+
+  // third recv: 
+  req.AppendToBufferForTest("2\r\n45\r\n0\r\n\r\n");
+  done = req.AdvanceBodyParsing();
+  EXPECT_TRUE(done); // all chunks complete
+  EXPECT_EQ("test12345", req.GetBody());
+}
+
+
 // =============== Need more data ===============
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_NeedMoreData) {
   req.SetBufferForTest("Hello");
@@ -101,8 +123,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_NeedMoreData) {
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n8\r\nworld12");
-  EXPECT_EQ(req.GetBufferForTest(), "8\r\nworld12");
+  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n8\r\nworld12");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 
@@ -147,8 +168,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_NoFin
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n0\r\n");
-  EXPECT_EQ(req.GetBufferForTest(), "0\r\n");
+  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n0\r\n");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 
@@ -165,8 +185,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_Missi
 
   EXPECT_FALSE(req.AdvanceBodyParsing());
   EXPECT_EQ(req.GetBody(), "hello");
-  // EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n");
-  EXPECT_EQ(req.GetBufferForTest(), "");
+  EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n");
   // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
 }
 

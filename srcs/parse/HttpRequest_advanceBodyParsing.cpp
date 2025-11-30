@@ -83,9 +83,7 @@ bool HttpRequest::AdvanceChunkedBody() {
     if (!AppendChunkData(pos, static_cast<size_t>(next_chunk_size_))) {
       return false;
     }
-    // buffer_read_pos_ = pos;
-    buffer_.erase(0, pos);  // erase consumed data
-    buffer_read_pos_ = 0;
+    buffer_read_pos_ = pos;
     next_chunk_size_ = -1;  // reset state, read next size line
   }
 }
