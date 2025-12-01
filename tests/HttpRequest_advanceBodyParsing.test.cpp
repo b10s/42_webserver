@@ -280,7 +280,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_Incomplet
   // まだ何も確定させない
   EXPECT_EQ(req.GetBody(), "");
   EXPECT_EQ(req.GetBufferForTest(), "Hello");
-  // progress_ は kDone になっていないことだけ確認（具体値は実装依存ならチェックしなくてもOK）
+  // only verify that progress_ is not kDone (no need to check specific value if it's implementation-dependent)
   EXPECT_NE(req.GetProgress(), HttpRequest::kDone);
 }
 
