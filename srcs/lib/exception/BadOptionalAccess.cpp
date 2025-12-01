@@ -1,4 +1,4 @@
-#include "lib/exception/bad_optional_access.hpp"
+#include "lib/exception/BadOptionalAccess.hpp"
 
 #include "lib/exception/messages.hpp"
 

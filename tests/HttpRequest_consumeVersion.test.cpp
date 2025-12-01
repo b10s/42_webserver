@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <stdexcept>
 #include <string>
 
 #include "HttpRequest.hpp"
-#include "enums.hpp"
+#include "lib/http/Status.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 
 class HttpRequestParse : public ::testing::Test {
  protected:
@@ -37,12 +37,12 @@ TEST_F(HttpRequestParse, ConsumeVersion_UnsupportedVersion20_ThrowsBadRequest) {
       {
         try {
           req.ConsumeVersion(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParse,
@@ -52,12 +52,12 @@ TEST_F(HttpRequestParse,
       {
         try {
           req.ConsumeVersion(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParse, ConsumeVersion_NonAsciiCharacter_ThrowsBadRequest) {
@@ -66,12 +66,12 @@ TEST_F(HttpRequestParse, ConsumeVersion_NonAsciiCharacter_ThrowsBadRequest) {
       {
         try {
           req.ConsumeVersion(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParse, ConsumeVersion_MissingCRLF_ThrowsBadRequest) {
@@ -80,10 +80,10 @@ TEST_F(HttpRequestParse, ConsumeVersion_MissingCRLF_ThrowsBadRequest) {
       {
         try {
           req.ConsumeVersion(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }

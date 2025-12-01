@@ -32,7 +32,8 @@ void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
       token.find(url_constants::kHttpPrefix) != 0 && token[0] != '/') {
     token = "/" + token;
   }
-  server_config->SetErrorPage(static_cast<HttpStatus>(error_code), token);
+  server_config->SetErrorPage(static_cast<lib::http::Status>(error_code),
+                              token);
   token = Tokenize(content);
   if (token != ";") {
     throw std::runtime_error(

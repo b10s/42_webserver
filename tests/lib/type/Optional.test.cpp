@@ -2,7 +2,7 @@
 
 #include <gtest/gtest.h>
 
-#include "lib/exception/bad_optional_access.hpp"
+#include "lib/exception/BadOptionalAccess.hpp"
 
 TEST(OptionalTest, ValueMethodReturnsValue) {
   lib::type::Optional<int> test1 = 1;

@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "lib/http/Method.hpp"
 
 void ConfigParser::ParseMethods(Location* location) {
   if (location->HasAllowMethods()) {
@@ -11,11 +12,11 @@ void ConfigParser::ParseMethods(Location* location) {
     token = Tokenize(content);
     if (token == ";") break;
     if (token == "GET")
-      location->AddMethod(kGet);
+      location->AddMethod(lib::http::kGet);
     else if (token == "POST")
-      location->AddMethod(kPost);
+      location->AddMethod(lib::http::kPost);
     else if (token == "DELETE")
-      location->AddMethod(kDelete);
+      location->AddMethod(lib::http::kDelete);
     else
       throw std::runtime_error("Invalid method in allow_methods: " + token);
     is_method_empty = false;

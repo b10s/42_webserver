@@ -1,5 +1,7 @@
 #include "HttpRequest.hpp"
 
+#include "lib/http/Method.hpp"
+
 // 外部定義（初期化子なし）
 const size_t HttpRequest::kMaxHeaderSize;
 const size_t HttpRequest::kMaxPayloadSize;
@@ -48,11 +50,11 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
 HttpRequest::~HttpRequest() {
 }
 
-RequestMethod HttpRequest::GetMethod() const {
+lib::http::Method HttpRequest::GetMethod() const {
   return method_;
 }
 
-void HttpRequest::SetMethod(RequestMethod method) {
+void HttpRequest::SetMethod(lib::http::Method method) {
   method_ = method;
 }
 

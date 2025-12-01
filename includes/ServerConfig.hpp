@@ -5,7 +5,6 @@
 
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
 #include <map>
 #include <sstream>
 #include <stdexcept>
@@ -13,7 +12,7 @@
 #include <vector>
 
 #include "Location.hpp"
-#include "enums.hpp"
+#include "lib/http/Status.hpp"
 
 class ServerConfig {
  private:
@@ -21,7 +20,7 @@ class ServerConfig {
   std::string port_;
   std::string server_name_;
   int max_body_size_;
-  std::map<HttpStatus, std::string> errors_;
+  std::map<lib::http::Status, std::string> errors_;
   std::vector<Location> locations_;
   bool has_listen_;
   bool has_server_name_;
@@ -35,7 +34,7 @@ class ServerConfig {
   void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
 
-  void SetErrorPage(HttpStatus status, const std::string& path) {
+  void SetErrorPage(lib::http::Status status, const std::string& path) {
     errors_[status] = path;
   }
 
@@ -55,13 +54,14 @@ class ServerConfig {
     return max_body_size_;
   }
 
-  const std::map<HttpStatus, std::string>& GetErrorPages() const {
+  const std::map<lib::http::Status, std::string>& GetErrorPages() const {
     return errors_;
   }
 
   std::string GetErrorPagesString() const {
     std::string result;
-    for (std::map<HttpStatus, std::string>::const_iterator it = errors_.begin();
+    for (std::map<lib::http::Status, std::string>::const_iterator it =
+             errors_.begin();
          it != errors_.end(); ++it) {
       std::ostringstream oss;
       oss << it->first;
