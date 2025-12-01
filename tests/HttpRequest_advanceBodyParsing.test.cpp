@@ -338,7 +338,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_InvalidHexSize_
 
 // チャンクデータの後に CRLF がない -> 400 Bad Request
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MissingCRLFAfterData_ThrowsBadRequest) {
-  // 本来は "5\r\nhello\r\n" だが、最後の CRLF がない
+  // should be "5\r\nhello\r\n" but missing the final CRLF
   req.SetBufferForTest("5\r\nhello0\r\n");
   req.SetContentLengthForTest(-1);
 
