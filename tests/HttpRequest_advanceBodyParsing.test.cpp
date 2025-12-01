@@ -271,7 +271,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExactBufferSize
 
 // =============== Content-Length: error / edge paths ===============
 
-// Content-Length がボディより大きい -> 非ブロッキングなので「まだ足りない」として false
+// Content-Length is greater than body -> non-blocking so returns false as "not enough data yet"
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_Incomplete_ReturnsFalse) {
   req.SetBufferForTest("Hello");      // 5 bytes
   req.SetContentLengthForTest(10);   // 10 bytes expected
