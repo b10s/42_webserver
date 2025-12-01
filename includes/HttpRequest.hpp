@@ -2,10 +2,10 @@
 #define HTTPREQUEST_HPP_
 #include <cstddef>  // for std::ptrdiff_t
 #include <cstring>  // for std::tolower and std::strncmp
+#include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
 #include <map>
 #include <stdexcept>
 #include <string>
-#include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
 
 #include "enums.hpp"
 
@@ -43,10 +43,8 @@ class HttpRequest {
   Dict headers_;
   std::string body_;
   long content_length_;
-  size_t
-      buffer_read_pos_;  // the position in buffer_ which has been read
-  std::ptrdiff_t
-      next_chunk_size_;  // -1: waiting for chunk size line
+  size_t buffer_read_pos_;  // the position in buffer_ which has been read
+  std::ptrdiff_t next_chunk_size_;  // -1: waiting for chunk size line
   bool keep_alive_;
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);

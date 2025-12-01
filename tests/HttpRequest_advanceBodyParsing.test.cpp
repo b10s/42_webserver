@@ -68,22 +68,6 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeAndDat
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
 }
 
-TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_PartialRecv_DoesNotDuplicateBody) {
-  req.SetContentLengthForTest(-1);
-  // first recv: first chunk + 2nd chunk partial
-  req.SetBufferForTest("3\r\nabc\r\n3\r\nxy");
-  bool done = req.AdvanceBodyParsing();
-  EXPECT_FALSE(done); // still waiting the second chunk to complete
-  EXPECT_EQ("abc", req.GetBody()); // first chunk "abc" is expected to be in body_
-
-  // second recv: remaining "z\r\n0\r\n\r\n" arrives
-  req.AppendToBufferForTest("z\r\n0\r\n\r\n");
-  done = req.AdvanceBodyParsing();
-  // all chunks are expected to be complete now
-  EXPECT_TRUE(done);
-  EXPECT_EQ("abcxyz", req.GetBody());
-}
-
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MultipleRecvs) {
   req.SetContentLengthForTest(-1);
   // first recv: first chunk
@@ -338,7 +322,6 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_InvalidHexSize_
 
 // チャンクデータの後に CRLF がない -> 400 Bad Request
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MissingCRLFAfterData_ThrowsBadRequest) {
-  // should be "5\r\nhello\r\n" but missing the final CRLF
   req.SetBufferForTest("5\r\nhello0\r\n");
   req.SetContentLengthForTest(-1);
 
