@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+
 #include "lib/http/Method.hpp"
 
 // 外部定義（初期化子なし）
