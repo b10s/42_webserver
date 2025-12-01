@@ -354,7 +354,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MissingCRLFAfte
       http::ResponseStatusException);
 }
 
-// "0\r\n\r\n" のあとに余計なデータがある -> 400 Bad Request
+// extra data after "0\r\n\r\n" -> 400 Bad Request
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterTerminator_ThrowsBadRequest) {
   req.SetBufferForTest("5\r\nhello\r\n0\r\n\r\nGARBAGE");
   req.SetContentLengthForTest(-1);
