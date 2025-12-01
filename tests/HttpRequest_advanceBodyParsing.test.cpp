@@ -397,7 +397,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeOverfl
 // chunk size is huge but valid (no overflow) -> works correctly
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeLargeButValid_WorksCorrectly) {
   req.SetContentLengthForTest(-1);
-  // パーサと同じ境界値をテスト側でも計算
+  // calculate the same boundary value as the parser on the test side
   const size_t max_before_shift =
       std::numeric_limits<size_t>::max() >> 4;
 
