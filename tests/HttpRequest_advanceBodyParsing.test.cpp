@@ -284,7 +284,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_Incomplet
   EXPECT_NE(req.GetProgress(), HttpRequest::kDone);
 }
 
-// Content-Length ぶんだけ消費し、それ以降は次のリクエスト用に残す
+// consume only Content-Length bytes, leaving the rest for the next request
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_LeavesExtraDataForNextRequest) {
   req.SetBufferForTest("Hello World!NEXT");
   req.SetContentLengthForTest(12);   // "Hello World!" だけ
