@@ -297,7 +297,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_ContentLength_LeavesExt
 
 // =============== Chunked: non-happy paths ===============
 
-// チャンクサイズ行が途中までしか来ていない（例: "5\r" だけ） -> false を返して次の recv を待つ
+// incomplete chunk size line (e.g., only "5\r") -> returns false to wait for next recv
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_IncompleteChunkSizeLine_ReturnsFalse) {
   req.SetBufferForTest("5\r");    // "5\r\n" すら揃ってない
   req.SetContentLengthForTest(-1);
