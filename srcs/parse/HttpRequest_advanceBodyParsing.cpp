@@ -7,7 +7,7 @@
  *         - true: finished（progress = kDone ）
  *         - false: not enough data, progress remains kBody, next call needed
  *
- * @throw http::ResponseStatusException
+ * @throw lib::exception::ResponseStatusException
  *        - BAD_REQUEST: malformed chunked encoding
  *        - INTERNAL_SERVER_ERROR: unexpected internal error
  *
@@ -26,10 +26,11 @@ bool HttpRequest::AdvanceBodyParsing() {
     } else {
       return AdvanceChunkedBody();
     }
-  } catch (http::ResponseStatusException&) {
+  } catch (lib::exception::ResponseStatusException&) {
     throw;  // rethrow
   } catch (...) {
-    throw http::ResponseStatusException(kInternalServerError);
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);
   }
 }
 
@@ -53,8 +54,8 @@ bool HttpRequest::AdvanceContentLengthBody() {
 // return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
   if (buffer_read_pos_ > buffer_.size()) {
-    throw http::ResponseStatusException(
-        kInternalServerError);  // should not happen
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);  // should not happen
   }
   if (buffer_read_pos_ == buffer_.size()) {
     return false;  // parsed all available data, need more
@@ -105,11 +106,11 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
       digit = c - 'A' + 10;
     } else {
       // disallow extensions(';' is BAD_REQUEST)
-      throw http::ResponseStatusException(kBadRequest);
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     if (chunk_size > k_max_before_shift) {
       // overflow
-      throw http::ResponseStatusException(kBadRequest);
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     chunk_size = (chunk_size << 4) + static_cast<size_t>(digit);
     saw_digit = true;
@@ -118,7 +119,7 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   if (!saw_digit) return false;
   if (pos + 1 >= buffer_.size()) return false;  // needs '\n' after '\r'
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-    throw http::ResponseStatusException(kBadRequest);
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   pos += 2;  // skip CRLF
   return true;
 }
@@ -127,11 +128,11 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
 bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
   if (pos + 1 >= buffer_.size()) return false;  // still waiting the final CRLF
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
-    throw http::ResponseStatusException(kBadRequest);
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   pos += 2;  // skip final CRLF
   if (pos != buffer_.size()) {
-    throw http::ResponseStatusException(kBadRequest);
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   buffer_.erase(0, pos);  // erase consumed data including last chunk
   progress_ = kDone;
@@ -147,7 +148,7 @@ bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   body_.append(buffer_, pos, chunk_size);
   pos += chunk_size;
   if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
-    throw http::ResponseStatusException(kBadRequest);
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   pos += 2;
   return true;

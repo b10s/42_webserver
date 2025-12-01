@@ -7,7 +7,7 @@ ResponseStatusException::ResponseStatusException(lib::http::Status status)
     : std::runtime_error(lib::http::StatusToString(status)), status_(status) {
 }
 
-lib::http::Status ResponseStatusException::GetStatus() const {
+lib::http::Status lib::exception::ResponseStatusException::GetStatus() const {
   return status_;
 }
 

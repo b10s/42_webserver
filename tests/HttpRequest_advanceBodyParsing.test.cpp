@@ -121,7 +121,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_Chunk
   req.SetBufferForTest("G\r\nhello\r\n"); // invalid hex 'G'
   req.SetContentLengthForTest(-1); // chunked
 
-  EXPECT_THROW(req.AdvanceBodyParsing(), http::ResponseStatusException);
+  EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 } 
 
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_NoFinalCRLF) {
@@ -138,7 +138,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_Extra
   req.SetBufferForTest("5\r\nhello\r\n0\r\n\r\nEXTRA"); // extra data after last chunk
   req.SetContentLengthForTest(-1); // chunked
 
-  EXPECT_THROW(req.AdvanceBodyParsing(), http::ResponseStatusException);
+  EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 }
 
 // TODO: maybe I should not throw bad request for extensions but just ignore them
@@ -146,7 +146,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeWithEx
   req.SetBufferForTest("5;name=value;foo=bar\r\nhello\r\n0\r\n\r\n"); // chunk size with extensions
   req.SetContentLengthForTest(-1); // chunked
 
-  EXPECT_THROW(req.AdvanceBodyParsing(), http::ResponseStatusException);
+  EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 }
 
 // =============== Edge cases ===============
@@ -175,7 +175,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterT
   req.SetBufferForTest("5\r\nhello\r\n0\r\n\r\nGARBAGE");
   req.SetContentLengthForTest(-1);
 
-  EXPECT_THROW(req.AdvanceBodyParsing(), http::ResponseStatusException);
+  EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 }
 
 // chunk size is greater than size_t max (overflow) -> 400 Bad Request
@@ -185,7 +185,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeOverfl
   std::string payload = huge_hex + "\r\n";
 
   req.SetBufferForTest(payload);
-  EXPECT_THROW(req.AdvanceBodyParsing(), http::ResponseStatusException);
+  EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 }
 
 // chunk size is huge but valid (no overflow) -> works correctly

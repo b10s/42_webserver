@@ -23,7 +23,6 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest {
  private:
-  // Progress progress_;    // progress is initially kHeader
   std::string buffer_;
   lib::http::Method method_;
   std::string uri_;
