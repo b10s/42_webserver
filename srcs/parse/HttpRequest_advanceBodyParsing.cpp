@@ -92,7 +92,7 @@ bool HttpRequest::AdvanceChunkedBody() {
 bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
   chunk_size = 0;
   bool saw_digit = false;
-  const size_t kMaxBeforeShift = std::numeric_limits<size_t>::max() >> 4;
+  const size_t k_max_before_shift = std::numeric_limits<size_t>::max() >> 4;
   while (pos < buffer_.size()) {
     char c = buffer_[pos];
     if (c == '\r') break;
@@ -107,7 +107,7 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
       // disallow extensions(';' is BAD_REQUEST)
       throw http::ResponseStatusException(kBadRequest);
     }
-    if (chunk_size > kMaxBeforeShift) {
+    if (chunk_size > k_max_before_shift) {
       // overflow
       throw http::ResponseStatusException(kBadRequest);
     }
