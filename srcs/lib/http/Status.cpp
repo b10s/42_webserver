@@ -1,7 +1,9 @@
-#include "HttpRequest.hpp"
+#include "lib/http/Status.hpp"
 
+namespace lib {
 namespace http {
-std::string StatusToString(HttpStatus status) {
+
+std::string StatusToString(Status status) {
   switch (status) {
     case kOk:
       return "OK";
@@ -42,28 +44,5 @@ std::string StatusToString(HttpStatus status) {
   }
 }
 
-ResponseStatusException::ResponseStatusException(HttpStatus status)
-    : std::runtime_error(StatusToString(status)), status_(status) {
-}
-
-HttpStatus ResponseStatusException::GetStatus() const {
-  return status_;
-}
-
-std::string MethodToString(RequestMethod method) {
-  switch (method) {
-    case kGet:
-      return "GET";
-    case kHead:
-      return "HEAD";
-    case kPost:
-      return "POST";
-    case kDelete:
-      return "DELETE";
-    case kUnknownMethod:
-      return "UNKNOWN_METHOD";
-    default:
-      return "kNone";
-  }
-}
 }  // namespace http
+}  // namespace lib

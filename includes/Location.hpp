@@ -6,12 +6,12 @@
 #include <string>
 #include <vector>
 
-#include "enums.hpp"
+#include "lib/http/Method.hpp"
 
 class Location {
  private:
   // parsed
-  std::set<RequestMethod> methods_;  // methods can be multiple
+  std::set<lib::http::Method> methods_;  // methods can be multiple
   std::string name_;
   std::string root_;
   bool autoindex_;
@@ -32,15 +32,15 @@ class Location {
  public:
   Location();
 
-  void AddMethod(RequestMethod method) {
+  void AddMethod(lib::http::Method method) {
     methods_.insert(method);
   }
 
-  bool IsMethodAllowed(RequestMethod method) const {
+  bool IsMethodAllowed(lib::http::Method method) const {
     return methods_.count(method) > 0;
   }
 
-  std::set<RequestMethod> GetMethods() const {
+  std::set<lib::http::Method> GetMethods() const {
     return methods_;
   }
 

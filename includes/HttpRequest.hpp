@@ -6,24 +6,15 @@
 #include <string>
 
 #include "enums.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
+#include "lib/http/Method.hpp"
+#include "lib/http/Status.hpp"
 
 // http
 namespace http {
-std::string StatusToString(HttpStatus status);
-std::string MethodToString(RequestMethod method);
-
 inline bool IsVisibleAscii(char c) {
   return c >= '!' && c <= '~';
 }
-
-class ResponseStatusException : public std::runtime_error {
- private:
-  HttpStatus status_;
-
- public:
-  ResponseStatusException(HttpStatus status);
-  HttpStatus GetStatus() const;
-};
 }  // namespace http
 
 typedef std::map<std::string, std::string> Dict;
@@ -37,7 +28,7 @@ class HttpRequest {
   } progress_;    // progress is initially kHeader
 
   std::string buffer_;
-  RequestMethod method_;
+  lib::http::Method method_;
   std::string uri_;
   Dict query_;
   std::string host_name_;
@@ -86,8 +77,8 @@ class HttpRequest {
   const char* ConsumeUri(const char* req);
   const char* ConsumeQuery(const char* req, std::size_t& len);
   const char* ConsumeHeader(const char* req);
-  RequestMethod GetMethod() const;
-  void SetMethod(RequestMethod method);  // for test purposes
+  lib::http::Method GetMethod() const;
+  void SetMethod(lib::http::Method method);  // for test purposes
   const std::string& GetUri() const;
   const std::string& GetHostName() const;
   const std::string& GetHostPort() const;
