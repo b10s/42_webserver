@@ -319,7 +319,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_IncompleteChunk
   // EXPECT_NE(req.GetProgress(), HttpRequest::kDone);
 }
 
-// チャンクサイズが 16進数でない -> 400 Bad Request
+// chunk size is not hexadecimal -> 400 Bad Request
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_InvalidHexSize_ThrowsBadRequest) {
   req.SetBufferForTest("G\r\nhello\r\n0\r\n\r\n");  // 'G' は 0-9,A-F,a-f 以外
   req.SetContentLengthForTest(-1);
