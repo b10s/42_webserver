@@ -364,7 +364,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ExtraDataAfterT
         try {
           req.AdvanceBodyParsing();
         } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus()); // HandleLastChunk/FinishChunkedBody で検知
+          EXPECT_EQ(kBadRequest, e.GetStatus()); // detected by HandleLastChunk/FinishChunkedBody
           throw;
         }
       },
