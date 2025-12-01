@@ -1,10 +1,9 @@
 #include <gtest/gtest.h>
 
-#include <stdexcept>
 #include <string>
 
 #include "HttpRequest.hpp"
-#include "enums.hpp"
+#include "lib/http/Method.hpp"
 
 class HttpRequestParse : public ::testing::Test {
  protected:
@@ -18,7 +17,7 @@ TEST_F(HttpRequestParse, consumeMethod_GET_SetsAndAdvances) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeMethod(s.c_str()));
-  EXPECT_EQ(RequestMethod::kGet, req.GetMethod());
+  EXPECT_EQ(lib::http::kGet, req.GetMethod());
   // "GET " の4文字分だけ進む
   EXPECT_EQ(s.c_str() + 4, p);
 }
@@ -28,7 +27,7 @@ TEST_F(HttpRequestParse, consumeMethod_HEAD_SetsAndAdvances) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeMethod(s.c_str()));
-  EXPECT_EQ(RequestMethod::kHead, req.GetMethod());
+  EXPECT_EQ(lib::http::kHead, req.GetMethod());
   EXPECT_EQ(s.c_str() + 5, p);  // "HEAD "
 }
 
@@ -37,7 +36,7 @@ TEST_F(HttpRequestParse, consumeMethod_POST_SetsAndAdvances) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeMethod(s.c_str()));
-  EXPECT_EQ(RequestMethod::kPost, req.GetMethod());
+  EXPECT_EQ(lib::http::kPost, req.GetMethod());
   EXPECT_EQ(s.c_str() + 5, p);  // "POST "
 }
 
@@ -46,7 +45,7 @@ TEST_F(HttpRequestParse, consumeMethod_DELETESetsAndAdvances) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeMethod(s.c_str()));
-  EXPECT_EQ(RequestMethod::kDelete, req.GetMethod());
+  EXPECT_EQ(lib::http::kDelete, req.GetMethod());
   EXPECT_EQ(s.c_str() + 7, p);  // "DELETE "
 }
 
@@ -58,10 +57,10 @@ TEST_F(HttpRequestParse, consumeMethod_UnsupportedMethod_ThrowsNotImplemented) {
       {
         try {
           req.ConsumeMethod(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kNotImplemented, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kNotImplemented, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }

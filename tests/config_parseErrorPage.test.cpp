@@ -7,9 +7,9 @@
 
 static void expectErrorPageEq(const ServerConfig& sc, int code,
                               const std::string& expected) {
-  const std::map<HttpStatus, std::string>& pages = sc.GetErrorPages();
-  HttpStatus key = static_cast<HttpStatus>(code);
-  std::map<HttpStatus, std::string>::const_iterator it = pages.find(key);
+  const std::map<lib::http::Status, std::string>& pages = sc.GetErrorPages();
+  lib::http::Status key = static_cast<lib::http::Status>(code);
+  std::map<lib::http::Status, std::string>::const_iterator it = pages.find(key);
   ASSERT_NE(it, pages.end()) << "error page for code " << code << " not found";
   EXPECT_EQ(it->second, expected);
 }
