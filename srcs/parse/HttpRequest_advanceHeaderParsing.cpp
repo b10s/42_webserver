@@ -5,7 +5,7 @@
 // size_type is used here because string::npos is of that type
 std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
 {
-  const std::string delimiter = "\r\n\r\n";
+  static const std::string delimiter = "\r\n\r\n";
   const size_t len = payload.size();
 
   for (size_t i = 0; i + 3 < len; i++)
