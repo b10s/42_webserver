@@ -24,7 +24,8 @@ bool HttpRequest::AdvanceBodyParsing() {
     // Transfer-Encoding: chunked があるかどうか
     const bool has_te = headers_.count("transfer-encoding");
 
-    // ① ボディ無し（CLもTEも無し → ValidateBodyHeaders が content_length_ = 0 にしてくれている）
+    // ① ボディ無し（CLもTEも無し → ValidateBodyHeaders が content_length_ = 0
+    // にしてくれている）
     if (content_length_ == 0 && !has_te) {
       progress_ = kDone;
       return true;

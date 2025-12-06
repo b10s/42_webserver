@@ -3,8 +3,8 @@
 // \r\n\r\n indicates the end of the header section
 // size_t and size_type are used to avoid signed/unsigned comparison warnings
 // size_type is used here because string::npos is of that type
-std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
-{
+std::string::size_type HttpRequest::FindEndOfHeader(
+    const std::string& payload) {
   static const std::string delimiter = "\r\n\r\n";
   const size_t len = payload.size();
 
@@ -12,7 +12,7 @@ std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
   if (pos != std::string::npos) {
     return pos + delimiter.size(); // position after the delimiter
   }
-  return std::string::npos; // not found
+  return std::string::npos;  // not found
 }
 
 /**
@@ -35,22 +35,23 @@ std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
 bool HttpRequest::AdvanceHeaderParsing() {
   std::string::size_type endOfHeader = FindEndOfHeader(buffer_);
   if (endOfHeader == std::string::npos) {
-    return false; // need more data
+    return false;  // need more data
   }
-  std::string headerSection = buffer_.substr(0, endOfHeader); // includes "\r\n\r\n"
+  std::string headerSection =
+      buffer_.substr(0, endOfHeader);  // includes "\r\n\r\n"
   try {
     const char* cur = headerSection.c_str();
     cur = this->ConsumeMethod(cur);
     cur = this->ConsumeUri(cur);
     cur = this->ConsumeVersion(cur);
     cur = this->ConsumeHeader(cur);
-  } catch (lib::exception::ResponseStatusException& e) { 
-    throw; 
+  } catch (lib::exception::ResponseStatusException& e) {
+    throw;
   } catch (std::exception&) {
-    throw lib::exception::ResponseStatusException(lib::http::kInternalServerError);
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);
   }
   buffer_ = buffer_.substr(endOfHeader);
   progress_ = kBody;
   return true;
 }
-
