@@ -8,11 +8,9 @@ std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
   static const std::string delimiter = "\r\n\r\n";
   const size_t len = payload.size();
 
-  for (size_t i = 0; i + 3 < len; i++)
-  {
-    if (payload.compare(i, delimiter.size(), delimiter) == 0){
-      return i + delimiter.size(); // position after the delimiter
-    }
+  std::string::size_type pos = payload.find(delimiter);
+  if (pos != std::string::npos) {
+    return pos + delimiter.size(); // position after the delimiter
   }
   return std::string::npos; // not found
 }
