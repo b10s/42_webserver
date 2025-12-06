@@ -26,7 +26,7 @@ std::string::size_type HttpRequest::FindEndOfHeader(const std::string& payload)
  *         - true: ヘッダー解析が完了　progress = BODY に更新
  *         - false: ヘッダーが未完（再試行）
  *
- * @throw http::responseStatusException
+ * @throw lib::exception::ResponseStatusException
  *        - BAD_REQUEST: 不正な構文
  *        - INTERNAL_SERVER_ERROR: 想定外の例外
  *
