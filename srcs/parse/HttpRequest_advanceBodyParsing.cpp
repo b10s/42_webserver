@@ -21,6 +21,10 @@
 
 bool HttpRequest::AdvanceBodyParsing() {
   try {
+    // if (content_length_ < 0 && next_chunk_size_ == -1) {
+    //   progress_ = kDone;
+    //   return true; // no body to parse
+    // }
     if (content_length_ >= 0) {
       return AdvanceContentLengthBody();
     } else {

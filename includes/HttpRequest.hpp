@@ -80,6 +80,7 @@ class HttpRequest {
   ~HttpRequest();
 
   void ParseRequest(const char* payload);
+  bool AdvanceHeaderParsing();
   bool AdvanceBodyParsing();
   const char* ConsumeMethod(const char* req);
   const char* ConsumeVersion(const char* req);
@@ -119,6 +120,12 @@ class HttpRequest {
 
   void SetBufferForTest(const std::string& s) {
     buffer_ = s;
+    // progress_ = kHeader;
+    // headers_.clear();
+    // body_.clear();
+    // content_length_ = -1;
+    // buffer_read_pos_ = 0;
+    // next_chunk_size_ = -1;
   }
 
   void AppendToBufferForTest(const std::string& s) {
