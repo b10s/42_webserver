@@ -29,11 +29,21 @@ TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_NeedMoreData) {
   req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: example.com\r\n"); // incomplete header
   EXPECT_FALSE(req.AdvanceHeaderParsing());
   EXPECT_EQ(req.GetBufferForTest(), "GET /index.html HTTP/1.1\r\nHost: example.com\r\n");
-  // EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
+  EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
 }
 
 // =============== Malformed requests ===============
 TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_Malformed_RequestLine_ThrowsBadRequest) {
   req.SetBufferForTest("GET /index.html\r\nHost: example.com\r\n\r\n"); // missing version 
+  EXPECT_THROW(req.AdvanceHeaderParsing(), lib::exception::ResponseStatusException);
+}
+
+TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_Malformed_HeaderLine_ThrowsBadRequest) {
+  req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost example.com\r\n\r\n"); // missing colon
+  EXPECT_THROW(req.AdvanceHeaderParsing(), lib::exception::ResponseStatusException);
+}
+
+TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_Malformed_NonAsciiInHeader_ThrowsBadRequest) {
+  req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: exam\x01ple.com\r\n\r\n"); // non-ASCII char
   EXPECT_THROW(req.AdvanceHeaderParsing(), lib::exception::ResponseStatusException);
 }
