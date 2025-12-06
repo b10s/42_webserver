@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include <stdexcept>
 #include <string>
 
 #include "HttpRequest.hpp"
-#include "enums.hpp"
+#include "lib/http/Status.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 
 class HttpRequestParseUri : public ::testing::Test {
  protected:
@@ -71,12 +71,12 @@ TEST_F(HttpRequestParseUri, EmptyPath_ThrowsBadRequest) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
@@ -85,12 +85,12 @@ TEST_F(HttpRequestParseUri, MissingSpaceAfterUri_ThrowsBadRequest) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
@@ -99,12 +99,12 @@ TEST_F(HttpRequestParseUri, NonVisibleAsciiInPath_ThrowsBadRequest) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
@@ -113,12 +113,12 @@ TEST_F(HttpRequestParseUri, FragmentInRequest_ThrowsBadRequest) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // origin-form has to start with '/'
@@ -128,12 +128,12 @@ TEST_F(HttpRequestParseUri, PathMustStartWithSlash_ThrowsBadRequest) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Length boundary (kMaxUriSize) ===============
@@ -153,12 +153,12 @@ TEST_F(HttpRequestParseUri, UriTooLong_Throws414_WhenReachesLimitExactly) {
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kUriTooLong, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kUriTooLong, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseUri, UriMaxMinusOne_OK_ButMax_EXACT_Throws) {
@@ -197,10 +197,11 @@ TEST_F(HttpRequestParseUri,
       {
         try {
           req.ConsumeUri(s.c_str());
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
+

@@ -1,18 +1,17 @@
 #include <gtest/gtest.h>
 
-#include <stdexcept>
 #include <sstream>
 #include <string>
 
 #include "HttpRequest.hpp"
-#include "enums.hpp"
-#include "HttpRequest.hpp"
+#include "lib/http/Method.hpp"
+#include "lib/http/Status.hpp"
 
 // ============== HeaderStart struct and helper ==============
 struct HeaderStart {
   std::string reqbuf;    // start line (request line) + headers + body
   const char* p_headers; // points to the beginning of headers in reqbuf
-  RequestMethod method;
+  lib::http::Method method;
 };
 
 static HeaderStart makeHeaderStart(const std::string& method,
@@ -23,11 +22,11 @@ static HeaderStart makeHeaderStart(const std::string& method,
   std::string startLine = method + " " + uri + " " + version + "\r\n";
   hs.reqbuf = startLine + headers_and_after;
   hs.p_headers = hs.reqbuf.c_str() + startLine.size();
-  if (method == "GET") hs.method = kGet;
-  else if (method == "HEAD") hs.method = kHead;
-  else if (method == "POST") hs.method = kPost;
-  else if (method == "DELETE") hs.method = kDelete;
-  else hs.method = kUnknownMethod;
+  if (method == "GET") hs.method = lib::http::kGet;
+  else if (method == "HEAD") hs.method = lib::http::kHead;
+  else if (method == "POST") hs.method = lib::http::kPost;
+  else if (method == "DELETE") hs.method = lib::http::kDelete;
+  else hs.method = lib::http::kUnknownMethod;
   return hs;
 }
 
@@ -91,12 +90,12 @@ TEST_F(HttpRequestConsumeHeader, MissingHost_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, EmptyHost_ThrowsBadRequest) {
@@ -109,12 +108,12 @@ TEST_F(HttpRequestConsumeHeader, EmptyHost_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Content-Length / Transfer-Encoding ===============
@@ -130,12 +129,12 @@ TEST_F(HttpRequestConsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // if method is POST and neither Content-Length nor Transfer-Encoding is present, throw kLengthRequired
@@ -150,12 +149,12 @@ TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kLengthRequired, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kLengthRequired, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Content-Length の検証 ===============
@@ -184,12 +183,12 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
@@ -205,12 +204,12 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Transfer-Encoding ===============
@@ -237,12 +236,12 @@ TEST_F(HttpRequestConsumeHeader, TransferEncoding_Unknown_ThrowsNotImplemented) 
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kNotImplemented, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kNotImplemented, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Connection ===============
@@ -280,12 +279,12 @@ TEST_F(HttpRequestConsumeHeader, Connection_InvalidToken_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== Bad requests ===============
@@ -299,12 +298,12 @@ TEST_F(HttpRequestConsumeHeader, MissingColon_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
@@ -317,12 +316,12 @@ TEST_F(HttpRequestConsumeHeader, NoSpaceAfterColon_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, MissingCRLF_ThrowsBadRequest) {
@@ -335,12 +334,12 @@ TEST_F(HttpRequestConsumeHeader, MissingCRLF_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTooLarge) {
@@ -355,12 +354,12 @@ TEST_F(HttpRequestConsumeHeader, ExceedMaxHeaderSize_ThrowsRequestHeaderFieldsTo
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kRequestHeaderFieldsTooLarge, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kRequestHeaderFieldsTooLarge, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, MultipleHost_ThrowsBadRequest) {
@@ -374,12 +373,12 @@ TEST_F(HttpRequestConsumeHeader, MultipleHost_ThrowsBadRequest) {
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 // =============== error: duplicate headers ===============
@@ -395,12 +394,12 @@ TEST_F(HttpRequestConsumeHeader, DuplicateHeader_IgnoringCase_ThrowsBadRequest) 
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_MixedCase_ThrowsBadRequest) {
@@ -416,12 +415,12 @@ TEST_F(HttpRequestConsumeHeader, DuplicateContentLength_MixedCase_ThrowsBadReque
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestConsumeHeader, DuplicateTransferEncoding_DifferentCase_ThrowsBadRequest) {
@@ -437,10 +436,10 @@ TEST_F(HttpRequestConsumeHeader, DuplicateTransferEncoding_DifferentCase_ThrowsB
       {
         try {
           req.ConsumeHeader(hs.p_headers);
-        } catch (const http::ResponseStatusException& e) {
-          EXPECT_EQ(kBadRequest, e.GetStatus());
+        } catch (const lib::exception::ResponseStatusException& e) {
+          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
           throw;
         }
       },
-      http::ResponseStatusException);
+      lib::exception::ResponseStatusException);
 }

@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "host_validation.hpp"
 
 /*
 "host:port" must be written without spaces (e.g., "127.0.0.1:8080").
@@ -6,6 +7,16 @@ Spaces around ':' are a syntax error.
 Default values for port and host are set in the ServerConfig constructor:
   - Port defaults to 80
   - Host/address defaults to 0.0.0.0 (listen on all interfaces)
+
+Valid forms of the listen directive in Nginx are:
+  - listen <port>;
+  - listen <address>;
+  - listen <address>:<port>;
+In nginx, the address can be a
+  - domain name
+  - a hostname (localhost, etc.)
+  - IPV4 or IPv6
+In webserv, we don't support IPv6 for simplicity.
 */
 void ConfigParser ::ParseListen(ServerConfig* server_config) {
   std::string token1 = Tokenize(content);
@@ -17,6 +28,8 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
   if (colon_pos != std::string::npos) {
     std::string host = token1.substr(0, colon_pos);
     std::string port = token1.substr(colon_pos + 1);
+    if (!host_validation::IsValidHost(host))
+      throw std::runtime_error("Invalid host in listen directive: " + host);
     if (!IsValidPortNumber(port))
       throw std::runtime_error(
           "Invalid port number after ':' in listen directive: " + port);
@@ -39,12 +52,9 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
                                token1);
     server_config->SetPort(token1);
   } else {
+    if (!host_validation::IsValidHost(token1))
+      throw std::runtime_error("Invalid host in listen directive: " + token1);
     server_config->SetHost(token1);
   }
   return;
 }
-
-// TODO: We should not allow hostnames like "http;".
-// Introduce a validation function (e.g., isValidHost())
-// to check whether the given hostname is valid (IPv4, localhost, or domain
-// name).

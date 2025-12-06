@@ -4,6 +4,7 @@
 #include <string>
 
 #include "ConfigParser.hpp"
+#include "lib/http/Method.hpp"
 
 // set up a helper to call ParseAutoIndex
 static void callParseMethods(const std::string& input, Location* loc) {
@@ -17,16 +18,16 @@ static void callParseMethods(const std::string& input, Location* loc) {
 TEST(ConfigParser, parseMethod_SingleMethod_GET_OK) {
   Location loc;
   EXPECT_NO_THROW(callParseMethods("GET;", &loc));
-  EXPECT_TRUE(loc.IsMethodAllowed(kGet));
+  EXPECT_TRUE(loc.IsMethodAllowed(lib::http::kGet));
 }
 
 TEST(ConfigParser, parseMethods_State_Set) {
   Location loc;
   ASSERT_NO_THROW(callParseMethods("GET POST DELETE;", &loc));
-  const std::set<RequestMethod>& methods = loc.GetMethods();
-  EXPECT_EQ(methods.count(kGet), 1u);
-  EXPECT_EQ(methods.count(kPost), 1u);
-  EXPECT_EQ(methods.count(kDelete), 1u);
+  const std::set<lib::http::Method>& methods = loc.GetMethods();
+  EXPECT_EQ(methods.count(lib::http::kGet), 1u);
+  EXPECT_EQ(methods.count(lib::http::kPost), 1u);
+  EXPECT_EQ(methods.count(lib::http::kDelete), 1u);
   EXPECT_EQ(methods.size(), 3u);
 }
 
