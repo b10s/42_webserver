@@ -5,7 +5,7 @@
  * 
  * @param payload 新しく受信したデータ（NULL終端文字列）
  * 
- * @throw http::responseStatusException
+ * @throw lib::exception::ResponseStatusException
  *        - BAD_REQUEST: リクエスト完了後にさらに入力が来た場合など
  *        - INTERNAL_SERVER_ERROR: 解析処理中の想定外エラー
  * 
