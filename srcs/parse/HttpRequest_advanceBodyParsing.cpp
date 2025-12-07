@@ -19,14 +19,20 @@
 // TODO: maybe I should not throw bad request for extensions(trailing section)
 // but just ignore them. For now, we just throw bad request for simplicity.
 
+/*
+ValidateBodyHeaders in ConsumeBodyHeaders ensures the following conditions:
+  - If both Content-Length and Transfer-Encoding are present, throw BAD_REQUEST.
+  - If no body is expected:
+      content_length_ == 0 and there is no "transfer-encoding" header.
+  - If Content-Length is present:
+      content_length_ >= 0 and there is no "transfer-encoding" header.
+  - If "Transfer-Encoding: chunked" is present:
+      content_length_ == -1 and the "transfer-encoding" header exists.
+*/
 bool HttpRequest::AdvanceBodyParsing() {
   try {
-    // Transfer-Encoding: chunked があるかどうか
-    const bool has_te = headers_.count("transfer-encoding");
-
-    // ① ボディ無し（CLもTEも無し → ValidateBodyHeaders が content_length_ = 0
-    // にしてくれている）
-    if (content_length_ == 0 && !has_te) {
+    const bool has_transfer_encoding = headers_.count("transfer-encoding");
+    if (content_length_ == 0 && !has_transfer_encoding) {
       progress_ = kDone;
       return true;
     }
@@ -36,7 +42,7 @@ bool HttpRequest::AdvanceBodyParsing() {
       return AdvanceChunkedBody();
     }
   } catch (lib::exception::ResponseStatusException&) {
-    throw;  // rethrow
+    throw;
   } catch (...) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
