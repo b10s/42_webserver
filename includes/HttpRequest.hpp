@@ -14,8 +14,15 @@
 
 // http
 namespace http {
+// for ConsumeHeader
+inline bool IsValidHeaderChar(char c) {
+  unsigned char uc = static_cast<unsigned char>(c);
+  return uc >= ' ' && uc <= '~';  // printable ASCII (32-126) only
+}
+
+// for URI and query parameters
 inline bool IsVisibleAscii(char c) {
-  return c >= '!' && c <= '~';
+  return c >= '!' && c <= '~';  // 33-126 only
 }
 }  // namespace http
 
@@ -80,6 +87,7 @@ class HttpRequest {
   ~HttpRequest();
 
   void ParseRequest(const char* payload);
+  bool AdvanceHeaderParsing();
   bool AdvanceBodyParsing();
   const char* ConsumeMethod(const char* req);
   const char* ConsumeVersion(const char* req);

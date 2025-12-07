@@ -26,6 +26,9 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
                                         std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
+    if (!http::IsValidHeaderChar(req[i])) {
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+    }
     BumpLenOrThrow(total_len, 1);
     ++i;
   }
@@ -40,6 +43,9 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   req += i;
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
+    if (!http::IsValidHeaderChar(req[vlen])) {
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+    }
     BumpLenOrThrow(total_len, 1);
     ++vlen;
   }
@@ -150,7 +156,7 @@ const char* HttpRequest::ConsumeHeader(const char* req) {
     req = ReadHeaderLine(req, key, value, total_len);
     StoreHeader(key, value);
   }
-  if (!IsCRLF(req)) {
+  if (!IsCRLF(req)) {  // empty line with CRLF should follow after headers
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   BumpLenOrThrow(total_len, 2);
