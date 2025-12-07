@@ -156,7 +156,7 @@ const char* HttpRequest::ConsumeHeader(const char* req) {
     req = ReadHeaderLine(req, key, value, total_len);
     StoreHeader(key, value);
   }
-  if (!IsCRLF(req)) {
+  if (!IsCRLF(req)) {  // empty line with CRLF should follow after headers
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   BumpLenOrThrow(total_len, 2);

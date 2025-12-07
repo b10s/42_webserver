@@ -1,8 +1,7 @@
 #include "HttpRequest.hpp"
 
-// \r\n\r\n indicates the end of the header section
-// size_t and size_type are used to avoid signed/unsigned comparison warnings
-// size_type is used here because string::npos is of that type
+// "\r\n\r\n" indicates the end of the header section.
+// size_type is used because string::npos has that type.
 std::string::size_type HttpRequest::FindEndOfHeader(
     const std::string& payload) {
   static const std::string kDelimiter = "\r\n\r\n";
@@ -14,43 +13,39 @@ std::string::size_type HttpRequest::FindEndOfHeader(
 }
 
 /**
- * @brief ヘッダー終了文字列（"\r\n\r\n"）が現れるまで待機し、
- * 揃った時点でリクエストライン（メソッド・URI・バージョン）と
- * 各ヘッダー行を順に解析する。
+ * @brief Wait until the header terminator ("\r\n\r\n") appears, then parse
+ * the request line (method, URI, version) and each header field in order.
  *
- * @return bool
- *         - true: ヘッダー解析が完了　progress = BODY に更新
- *         - false: ヘッダーが未完（再試行）
+ * @return
+ *   - true if header parsing is complete (progress is set to BODY),
+ *   - false if more data is needed.
  *
  * @throw lib::exception::ResponseStatusException
- *        - BAD_REQUEST: 不正な構文
- *        - INTERNAL_SERVER_ERROR: 想定外の例外
+ *        - BAD_REQUEST: malformed request
+ *        - INTERNAL_SERVER_ERROR: unexpected exception
  *
  * @post
- *  - buffer_ から消費済みデータが削除される
- *  - progress が BODY に更新される（ヘッダー完了時）
+ *  - consumed data is removed from buffer_
+ *  - progress is updated to BODY when header parsing completes
  */
 bool HttpRequest::AdvanceHeaderParsing() {
   std::string::size_type end_of_header = FindEndOfHeader(buffer_);
   if (end_of_header == std::string::npos) {
     return false;  // need more data
   }
-  std::string header_section =
-      buffer_.substr(0, end_of_header);  // includes "\r\n\r\n"
   try {
-    const char* cur = header_section.c_str();
+    const char* begin = buffer_.c_str();
+    const char* cur = begin;
     cur = this->ConsumeMethod(cur);
     cur = this->ConsumeUri(cur);
     cur = this->ConsumeVersion(cur);
     cur = this->ConsumeHeader(cur);
     (void)cur;  // suppress unused variable warning
-  } catch (lib::exception::ResponseStatusException& e) {
-    throw;
   } catch (std::exception&) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
   }
-  buffer_ = buffer_.substr(end_of_header);
+  buffer_.erase(0, end_of_header);
   progress_ = kBody;
   return true;
 }

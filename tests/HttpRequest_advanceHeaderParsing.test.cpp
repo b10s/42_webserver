@@ -25,8 +25,18 @@ TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_HappyPath) {
 }
 
 // =============== Need more data ===============
-TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_NeedMoreData) {
-  req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: example.com\r\n"); // incomplete header
+// header line is split across multiple calls
+TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_HeaderLine_split_NeedMoreData) {
+  req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: exam");
+
+  EXPECT_FALSE(req.AdvanceHeaderParsing());
+  EXPECT_EQ(req.GetBufferForTest(),
+            "GET /index.html HTTP/1.1\r\nHost: exam");
+  EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
+}
+
+TEST_F(HttpRequestAdvanceHeaderParsing, AdvanceHeaderParsing_PartialHeaderLine_NeedMoreData) {
+  req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: example.com\r\n");
   EXPECT_FALSE(req.AdvanceHeaderParsing());
   EXPECT_EQ(req.GetBufferForTest(), "GET /index.html HTTP/1.1\r\nHost: example.com\r\n");
   EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
