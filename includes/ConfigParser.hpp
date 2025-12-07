@@ -95,16 +95,3 @@ void ConfigParser::ParseSimpleDirective(T* obj, Setter setter,
 }
 
 #endif  // CONFIG_PARSER_HPP_
-
-// array of array of string and int
-
-// [
-//   {127.0.0.1, 8080},
-//   {192.168.0.1, 80},
-//   ...
-// ]
-
-// test_conf new ServerConfig();
-
-// test_conf.host_ == "asdsad"
-// test_conf.port_ == "8080"
