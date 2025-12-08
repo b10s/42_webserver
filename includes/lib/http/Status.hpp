@@ -19,6 +19,7 @@ enum Status {
   kNotFound = 404,
   kMethodNotAllowed = 405,
   kLengthRequired = 411,
+  kPayloadTooLarge = 413,
   kUriTooLong = 414,
   kRequestHeaderFieldsTooLarge = 431,
   kInternalServerError = 500,

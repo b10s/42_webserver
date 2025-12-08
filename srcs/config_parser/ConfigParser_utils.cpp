@@ -76,3 +76,11 @@ bool ConfigParser::IsAllDigits(const std::string& str) const {
 bool ConfigParser::IsDirective(const std::string& token) const {
   return ToTokenType(token) != kTokenUnknown;
 }
+
+void ConfigParser::ConsumeExpectedSemicolon(const std::string& directive_name) {
+  std::string token = Tokenize(content);
+  if (token != ";") {
+    throw std::runtime_error("Expected ';' after " + directive_name +
+                             " directive");
+  }
+}

@@ -47,6 +47,7 @@ class ConfigParser {
   bool IsDirective(const std::string& token) const;
   TokenType ToTokenType(const std::string& token) const;
   std::string Tokenize(const std::string& content);
+  void ConsumeExpectedSemicolon(const std::string& directive_name);
 
  public:
   std::string content;  // Made public for easier access in parsing functions
@@ -88,23 +89,7 @@ void ConfigParser::ParseSimpleDirective(T* obj, Setter setter,
     throw std::runtime_error("Syntax error: expected " + error_msg);
   }
   (obj->*setter)(token);
-  token = Tokenize(content);
-  if (token != ";") {
-    throw std::runtime_error("Syntax error: expected ';' after " + error_msg);
-  }
+  ConsumeExpectedSemicolon(error_msg);
 }
 
 #endif  // CONFIG_PARSER_HPP_
-
-// array of array of string and int
-
-// [
-//   {127.0.0.1, 8080},
-//   {192.168.0.1, 80},
-//   ...
-// ]
-
-// test_conf new ServerConfig();
-
-// test_conf.host_ == "asdsad"
-// test_conf.port_ == "8080"
