@@ -5,11 +5,8 @@ void ConfigParser::ParseExtensions(Location* location) {
 
   token = Tokenize(content);
   location->SetExtension(token);
-  token = Tokenize(content);
   // we are not doing bonus so only one extension is allowed here
-  if (token != ";")
-    throw std::runtime_error(
-        "Syntax error: expected ';' after extension value" + token);
+  ConsumeExpectedSemicolon("extensions");
 }
 
 // I think I should handle the case where multiple extensions are given

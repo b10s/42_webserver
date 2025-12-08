@@ -66,7 +66,7 @@ TEST_F(ConfigParserTest, ErrorMessage_InvalidValue_Semicolon) {
 
 TEST_F(ConfigParserTest, ErrorMessage_MissingSemicolon_On) {
   EXPECT_THROW_WHAT_CONTAINS(CallParseAutoIndex("on"), std::runtime_error,
-                             "expected ';' after autoindex value");
+                             "Expected ';' after autoindex directive");
 }
 
 TEST_F(ConfigParserTest, ErrorMessage_MissingValue_EmptyInput) {

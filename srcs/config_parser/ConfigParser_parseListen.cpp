@@ -44,7 +44,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
   std::string token2 = Tokenize(content);
   if (token2 != ";") {
     throw std::runtime_error("Syntax error: expected ';' after listen value: " +
-                             token2);
+                            token2);
   }
   if (IsAllDigits(token1)) {
     if (!IsValidPortNumber(token1))

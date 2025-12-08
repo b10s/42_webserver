@@ -11,8 +11,5 @@ void ConfigParser::ParseAutoIndex(Location* location) {
   }
   bool value = (token == "on");
   location->SetAutoIndex(value);
-  token = Tokenize(content);
-  if (token != ";")
-    throw std::runtime_error(
-        "Syntax error: expected ';' after autoindex value" + token);
+  ConsumeExpectedSemicolon("autoindex");
 }
