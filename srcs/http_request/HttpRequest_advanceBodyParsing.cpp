@@ -52,6 +52,9 @@ bool HttpRequest::AdvanceBodyParsing() {
 // content length mode
 bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
+  if (need > kMaxPayloadSize) {
+    throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
+  }
   if (need == 0) {
     progress_ = kDone;
     return true;
@@ -156,6 +159,10 @@ bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
 
 // append "<data>\r\n" and advance pos, but do not erase yet
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
+  if (body_.size() + chunk_size > kMaxPayloadSize) {
+    throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
+  }
+
   const size_t total_needed = chunk_size + 2;
   if (pos + total_needed > buffer_.size()) {
     return false;

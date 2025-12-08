@@ -80,6 +80,7 @@ bool ConfigParser::IsDirective(const std::string& token) const {
 void ConfigParser::ConsumeExpectedSemicolon(const std::string& directive_name) {
   std::string token = Tokenize(content);
   if (token != ";") {
-    throw std::runtime_error("Expected ';' after " + directive_name + " directive");
+    throw std::runtime_error("Expected ';' after " + directive_name +
+                             " directive");
   }
 }

@@ -188,14 +188,13 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeOverfl
   EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
 }
 
-// chunk size is huge but valid (no overflow) -> works correctly
+// chunk size is huge but valid -> works correctly
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_ChunkSizeLargeButValid_WorksCorrectly) {
   req.SetContentLengthForTest(-1);
   // calculate the same boundary value as the parser on the test side
-  const size_t max_before_shift =
-      std::numeric_limits<size_t>::max() >> 4;
+  const size_t large_but_valid = HttpRequest::kMaxPayloadSize;
   std::ostringstream oss;
-  oss << std::hex << max_before_shift;  // smallcase hex
+  oss << std::hex << large_but_valid;  // smallcase hex
   std::string hex = oss.str();
   std::string payload = hex + "\r\n";
   req.SetBufferForTest(payload);

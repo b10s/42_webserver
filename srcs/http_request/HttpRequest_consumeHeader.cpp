@@ -70,12 +70,10 @@ void HttpRequest::StoreHeader(const std::string& raw_key,
 }
 
 void HttpRequest::ValidateAndExtractHost() {
-  std::string host_value;
-  if (headers_.count("host"))
-    host_value = headers_["host"];
-  else
+  Dict::const_iterator it = headers_.find("host");
+  if (it == headers_.end())
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-
+  const std::string& host_value = it->second;
   if (host_value.empty())
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   size_t i = 0;
