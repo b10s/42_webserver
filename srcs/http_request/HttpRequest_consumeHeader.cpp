@@ -37,7 +37,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   key.assign(req, i);
-  // ": " を飛ばす
+  // skip": "
   i += 2;
   BumpLenOrThrow(total_len, 2);
   req += i;

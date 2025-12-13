@@ -47,6 +47,16 @@ class HttpRequest {
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
   bool IsCRLF(const char* p) const;
+
+  bool ValidateAndSkipCRLF(size_t& pos) {
+    if (pos + 1 >= buffer_.size()) return false;
+    if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+    }
+    pos += 2;
+    return true;
+  }
+
   void BumpLenOrThrow(size_t& total, size_t inc) const;
   const char* ReadHeaderLine(const char* req, std::string& key,
                              std::string& value, size_t& total_len);
