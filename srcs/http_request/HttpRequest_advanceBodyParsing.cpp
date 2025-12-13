@@ -135,24 +135,17 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
     ++pos;
   }
   if (!saw_digit) return false;
-  if (pos + 1 >= buffer_.size()) return false;  // needs '\n' after '\r'
-  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n')
-    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-  pos += 2;  // skip CRLF
-  return true;
+  return ValidateAndSkipCRLF(pos);
 }
 
 // called after reading "0\r\n"; now expect the final CRLF
 bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
-  if (pos + 1 >= buffer_.size()) return false;  // still waiting the final CRLF
-  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
-    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-  }
-  pos += 2;  // skip final CRLF
+  if (!ValidateAndSkipCRLF(pos)) return false;
+  // ensure no extra data after final CRLF
   if (pos != buffer_.size()) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
-  buffer_.erase(0, pos);  // erase consumed data including last chunk
+  buffer_.clear();  // erase consumed data including last chunk
   progress_ = kDone;
   return true;
 }
@@ -169,9 +162,5 @@ bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   }
   body_.append(buffer_, pos, chunk_size);
   pos += chunk_size;
-  if (buffer_[pos] != '\r' || buffer_[pos + 1] != '\n') {
-    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-  }
-  pos += 2;
-  return true;
+  return ValidateAndSkipCRLF(pos);
 }
