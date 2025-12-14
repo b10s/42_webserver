@@ -85,7 +85,7 @@ void Webserv::HandleRequest(int client_fd, const std::string& port) {
 void Webserv::TestConfiguration() {
   std::cout << "\n=== Testing Webserver Configuration ===" << std::endl;
 
-  // 1. 設定の総数を確認
+  // 1. Check the total number of configurations
   const std::map<std::string, ServerConfig>& configs = GetPortConfigs();
   std::cout << "Total server configurations loaded: " << configs.size()
             << std::endl;
