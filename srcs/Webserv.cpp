@@ -1,4 +1,6 @@
 #include "Webserv.hpp"
+#include <csignal>    // For signal(), SIGPIPE, SIG_IGN
+#include <iostream>   // For std::cout, std::cerr
 
 Webserv::Webserv() {
   // Default constructor (could initialize defaults if needed)
@@ -50,7 +52,7 @@ const ServerConfig* Webserv::FindServerConfigByPort(
   if (it != port_to_server_configs_.end()) {
     return &it->second;
   }
-  return nullptr;  // Not found
+  return NULL;  // Not found
 }
 
 // for debugging purposes
