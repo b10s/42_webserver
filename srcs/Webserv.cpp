@@ -95,7 +95,7 @@ void Webserv::TestConfiguration() {
     return;
   }
 
-  // 2. 各設定を表示
+  // 2. Display each configuration
   std::cout << "\nServer configurations:" << std::endl;
   for (std::map<std::string, ServerConfig>::const_iterator it = configs.begin();
        it != configs.end(); ++it) {
