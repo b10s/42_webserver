@@ -4,7 +4,7 @@
 #include <iostream>  // For std::cout, std::cerr
 
 Webserv::Webserv() {
-  // Default constructor (could initialize defaults if needed)
+  // Default constructor
 }
 
 Webserv::~Webserv() {

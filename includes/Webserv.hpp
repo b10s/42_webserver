@@ -21,12 +21,13 @@ class Webserv {
   std::map<int, bool> client_fd_to_keep_alive_;
   std::set<int> keep_alive_fds_;
 
-  void InitServersFromConfigs(const std::vector<ServerConfig>& server_configs);
-
  public:
   Webserv();
   Webserv(const std::string& config_file);
   ~Webserv();
+
+  // InitServersFromConfigs should be private but made public for testing
+  void InitServersFromConfigs(const std::vector<ServerConfig>& server_configs);
 
   // utility methods for accessing server configurations
   const std::map<std::string, ServerConfig>& GetPortConfigs() const;
