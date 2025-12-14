@@ -97,7 +97,8 @@ const ServerConfig* Webserv::FindServerConfigByPort(
 
 //   // 2. Display each configuration
 //   std::cout << "\nServer configurations:" << std::endl;
-//   for (std::map<std::string, ServerConfig>::const_iterator it = configs.begin();
+//   for (std::map<std::string, ServerConfig>::const_iterator it =
+//   configs.begin();
 //        it != configs.end(); ++it) {
 //     const std::string& port = it->first;
 //     const ServerConfig& config = it->second;
@@ -116,7 +117,8 @@ const ServerConfig* Webserv::FindServerConfigByPort(
 
 //   // 3. Test HandleRequest
 //   std::cout << "=== Testing HandleRequest ===" << std::endl;
-//   for (std::map<std::string, ServerConfig>::const_iterator it = configs.begin();
+//   for (std::map<std::string, ServerConfig>::const_iterator it =
+//   configs.begin();
 //        it != configs.end(); ++it) {
 //     const std::string& port = it->first;
 
