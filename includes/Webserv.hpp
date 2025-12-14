@@ -10,7 +10,6 @@
 
 class Webserv {
  private:
-  Webserv();
   std::map<std::string, ServerConfig> port_to_server_configs_;
 
   // for event loop
@@ -23,6 +22,7 @@ class Webserv {
   std::set<int> keep_alive_fds_;
 
  public:
+  Webserv(); // should be private but made public for testing
   Webserv(const std::string& config_file);
   ~Webserv();
 
