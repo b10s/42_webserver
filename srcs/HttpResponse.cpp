@@ -32,6 +32,30 @@ void HttpResponse::SetBody(const std::string& body) {
   body_ = body;
 }
 
+void HttpResponse::EnsureDefaultBodyIfEmpty() {
+  if (!body_.empty()) {
+    return;
+  }
+  if (status_code_ < 400) {
+    return;
+  }
+  body_ = MakeDefaultErrorPage(status_code_, reason_phrase_);
+  headers_["content-type"] = "text/html";
+}
+
+std::string HttpResponse::MakeDefaultErrorPage(int status_code, const std::string& reason_phrase) {
+  std::stringstream ss;
+  ss << "<html>\n"
+     << "<head><title>" << status_code << " " << reason_phrase << "</title></head>\n"
+     << "<body>\n"
+     << "<h1>" << status_code << " " << reason_phrase << "</h1>\n"
+     << "<hr>\n"
+     << "<em>42 Web Server</em>\n"
+     << "</body>\n"
+     << "</html>\n";
+  return ss.str();
+}
+
 std::string HttpResponse::ToString() const {
   std::stringstream ss;
 

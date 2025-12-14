@@ -14,6 +14,9 @@ class HttpResponse {
   void SetBody(const std::string& body);
   std::string ToString() const;
 
+  void EnsureDefaultBodyIfEmpty();
+  static std::string MakeDefaultErrorPage(int status_code, const std::string& reason_phrase);
+
  private:
   int status_code_;
   std::string reason_phrase_;
