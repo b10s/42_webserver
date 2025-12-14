@@ -38,7 +38,7 @@ class ServerConfig {
     errors_[status] = path;
   }
 
-  const std::string GetHost() const {
+  const std::string& GetHost() const {
     return host_;
   }
 
@@ -46,7 +46,7 @@ class ServerConfig {
     return port_;
   }
 
-  const std::string GetServerName() const {
+  const std::string& GetServerName() const {
     return server_name_;
   }
 

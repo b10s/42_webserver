@@ -66,8 +66,9 @@ TEST_F(WebservConfigTest, FindServerConfigByPort_FoundAndNotFound) {
 
 // Finding non-existing port configuration
 TEST_F(WebservConfigTest, FindServerConfigByPort_NotFound) {
-  std::vector<ServerConfig> configs;
-  configs.push_back(MakeServerConfig("8080"));
+  std::vector<ServerConfig> configs = ParseConfigs(
+      "server { listen 8080; }\n"
+  );
   ws.InitServersFromConfigs(configs);
 
   EXPECT_EQ(ws.FindServerConfigByPort("9999"), (const ServerConfig*)NULL);
@@ -75,9 +76,10 @@ TEST_F(WebservConfigTest, FindServerConfigByPort_NotFound) {
 
 // GetPortConfigs returns the current map
 TEST_F(WebservConfigTest, GetPortConfigs_ReturnsCurrentMap) {
-  std::vector<ServerConfig> configs;
-  configs.push_back(MakeServerConfig("8080"));
-  configs.push_back(MakeServerConfig("8000"));
+  std::vector<ServerConfig> configs = ParseConfigs(
+      "server { listen 8080; }\n"
+      "server { listen 8000; }\n"
+  );
   ws.InitServersFromConfigs(configs);
 
   const std::map<std::string, ServerConfig>& m = ws.GetPortConfigs();
