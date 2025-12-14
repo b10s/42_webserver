@@ -125,7 +125,7 @@ void Webserv::TestConfiguration() {
     HandleRequest(999, port);  // 999はダミーのclient_fd
   }
 
-  // 4. 存在しないポートのテスト
+  // 4. Test with non-existent port
   std::cout << "\n=== Testing Invalid Port ===" << std::endl;
   std::cout << "Testing HandleRequest for invalid port 9999:" << std::endl;
   HandleRequest(999, "9999");
