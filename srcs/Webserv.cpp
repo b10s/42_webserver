@@ -62,8 +62,12 @@ void Webserv::HandleRequest(int client_fd, const std::string& port) {
   const ServerConfig* server_config = FindServerConfigByPort(port);
   if (server_config) {
     std::cout << "Found server config for port " << port << std::endl;
-    std::cout << "  Root: " << server_config->GetLocations().front().GetRoot()
-              << std::endl;
+    const std::vector<LocationConfig>& locations = server_config->GetLocations();
+    if (!locations.empty()) {
+      std::cout << "  Root: " << locations.front().GetRoot() << std::endl;
+    } else {
+      std::cout << "  Root: (no locations defined)" << std::endl;
+    }
     std::cout << "  MaxBodySize: " << server_config->GetMaxBodySize()
               << std::endl;
     std::cout << "  Host: " << server_config->GetHost() << std::endl;
