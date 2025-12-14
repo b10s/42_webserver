@@ -14,7 +14,7 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loading configuration from: " << config_file << std::endl;
 
-    // Webserverを初期化
+    // Initialize webserver
     Webserv webserver(config_file);
 
     // テスト実行
