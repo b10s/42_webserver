@@ -22,7 +22,7 @@ class Webserv {
   std::set<int> keep_alive_fds_;
 
  public:
-  Webserv(); // should be private but made public for testing
+  Webserv();  // should be private but made public for testing
   Webserv(const std::string& config_file);
   ~Webserv();
 
