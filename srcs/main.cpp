@@ -9,7 +9,8 @@
 
 int main(int argc, char* argv[]) {
   try {
-    std::string config_file = (argc > 1) ? argv[1] : "sample_config/server_multiple_port.conf";
+    std::string config_file =
+        (argc > 1) ? argv[1] : "sample_config/server_multiple_port.conf";
 
     std::cout << "Loading configuration from: " << config_file << std::endl;
 

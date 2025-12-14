@@ -1,6 +1,7 @@
 #include "Webserv.hpp"
-#include <csignal>    // For signal(), SIGPIPE, SIG_IGN
-#include <iostream>   // For std::cout, std::cerr
+
+#include <csignal>   // For signal(), SIGPIPE, SIG_IGN
+#include <iostream>  // For std::cout, std::cerr
 
 Webserv::Webserv() {
   // Default constructor (could initialize defaults if needed)
