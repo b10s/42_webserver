@@ -114,7 +114,7 @@ void Webserv::TestConfiguration() {
     std::cout << std::endl;
   }
 
-  // 3. HandleRequestをテスト
+  // 3. Test HandleRequest
   std::cout << "=== Testing HandleRequest ===" << std::endl;
   for (std::map<std::string, ServerConfig>::const_iterator it = configs.begin();
        it != configs.end(); ++it) {
