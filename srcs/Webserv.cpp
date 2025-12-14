@@ -62,7 +62,7 @@ void Webserv::HandleRequest(int client_fd, const std::string& port) {
   const ServerConfig* server_config = FindServerConfigByPort(port);
   if (server_config) {
     std::cout << "Found server config for port " << port << std::endl;
-    const std::vector<LocationConfig>& locations = server_config->GetLocations();
+    const std::vector<Location>& locations = server_config->GetLocations();
     if (!locations.empty()) {
       std::cout << "  Root: " << locations.front().GetRoot() << std::endl;
     } else {
