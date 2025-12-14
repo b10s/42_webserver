@@ -106,7 +106,7 @@ void Webserv::TestConfiguration() {
     std::cout << "    Host: " << config.GetHost() << std::endl;
     std::cout << "    MaxBodySize: " << config.GetMaxBodySize() << std::endl;
 
-    // Locationがある場合
+    // If locations exist
     const std::vector<Location>& locations = config.GetLocations();
     if (!locations.empty()) {
       std::cout << "    Root: " << locations.front().GetRoot() << std::endl;
