@@ -68,9 +68,6 @@ void Webserv::HandleRequest(int client_fd, const std::string& port) {
               << std::endl;
     std::cout << "  Host: " << server_config->GetHost() << std::endl;
 
-    size_t max_body_size = server_config->GetMaxBodySize();
-    std::cout << "  Using max_body_size: " << max_body_size << std::endl;
-
     // TODO: Process request with these settings...
   } else {
     std::cout << "ERROR: No server configuration found for port " << port
