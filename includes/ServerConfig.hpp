@@ -42,7 +42,7 @@ class ServerConfig {
     return host_;
   }
 
-  const std::string GetPort() const {
+  const std::string& GetPort() const {
     return port_;
   }
 
