@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     Webserv webserver(config_file);
 
     // Run test
-    webserver.TestConfiguration();
+    // webserver.TestConfiguration();
 
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
