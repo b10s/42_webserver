@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     // Initialize webserver
     Webserv webserver(config_file);
 
-    // テスト実行
+    // Run test
     webserver.TestConfiguration();
 
   } catch (const std::exception& e) {
