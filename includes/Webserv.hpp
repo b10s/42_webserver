@@ -1,8 +1,9 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
-#include <iostream>
 #include <sys/epoll.h>
+
+#include <iostream>
 
 #include "ConfigParser.hpp"
 #include "Epoll.hpp"

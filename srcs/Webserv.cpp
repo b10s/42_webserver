@@ -22,7 +22,8 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
-  unsigned short port = lib::utils::StrToUnsignedShort(configs[0].GetPort()).Value();
+  unsigned short port =
+      lib::utils::StrToUnsignedShort(configs[0].GetPort()).Value();
 
   epoll_.CreateSocket();
   epoll_.SetServerAddr(port);
@@ -43,10 +44,10 @@ void Webserv::Run() {
       if (events_[i].data.fd == epoll_.GetServerFd()) {
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
-        int client_fd =
-            accept(epoll_.GetServerFd(), (sockaddr *)&client_addr, &client_addr_len);
+        int client_fd = accept(epoll_.GetServerFd(), (sockaddr*)&client_addr,
+                               &client_addr_len);
         if (client_fd == -1) {
-	  // throw error;
+          // throw error;
         }
         epoll_.AddSocketToInstance(client_fd);
       } else {
@@ -55,7 +56,7 @@ void Webserv::Run() {
         ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
 
         if (bytes_received <= 0) {
-	  // throw error;
+          // throw error;
         } else {
           HttpResponse res;
           res.SetStatus(200, "OK");

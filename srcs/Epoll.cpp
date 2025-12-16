@@ -1,11 +1,14 @@
 #include "Epoll.hpp"
-#include "HttpResponse.hpp"
-#include "lib/utils/Bzero.hpp"
+
 #include <netinet/in.h>
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <sys/epoll.h>
+
 #include <iostream>
+
+#include "HttpResponse.hpp"
+#include "lib/utils/Bzero.hpp"
 
 Epoll::Epoll() {
   lib::utils::Bzero(&server_addr_, sizeof(server_addr_));
@@ -75,4 +78,3 @@ sockaddr_in *Epoll::GetServerAddr() {
 int Epoll::GetEpollFd() {
   return epoll_fd_;
 }
-

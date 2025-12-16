@@ -5,7 +5,7 @@
 #include <sys/epoll.h>
 
 class Epoll {
-public:
+ public:
   Epoll();
   ~Epoll();
   void CreateSocket();
@@ -20,7 +20,7 @@ public:
 
   static const int kMaxEvents = 10;
 
-private:
+ private:
   int server_fd_;
   int epoll_fd_;
   sockaddr_in server_addr_;

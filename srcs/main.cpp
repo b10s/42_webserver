@@ -5,10 +5,10 @@
 #include <string>
 
 #include "ConfigParser.hpp"
+#include "Epoll.hpp"
 #include "ServerConfig.hpp"
 #include "Webserv.hpp"
 #include "lib/utils/Bzero.hpp"
-#include "Epoll.hpp"
 
 int main(int argc, char* argv[]) {
   try {
