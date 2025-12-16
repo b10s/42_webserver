@@ -29,7 +29,40 @@ Webserv::Webserv(const std::string& config_file) {
 }
 
 void Webserv::Run() {
-  epoll_.Loop();
+  while (true) {
+    int nfds = epoll_wait(epoll_.GetEpollFd(), events_, Epoll::kMaxEvents, -1);
+    if (nfds == -1) {
+      // throw error;
+    }
+
+    for (int i = 0; i < nfds; ++i) {
+      if (events_[i].data.fd == epoll_.GetServerFd()) {
+        sockaddr_in client_addr;
+        socklen_t client_addr_len = sizeof(client_addr);
+        int client_fd =
+            accept(epoll_.GetServerFd(), (sockaddr *)&client_addr, &client_addr_len);
+        if (client_fd == -1) {
+	  // throw error;
+        }
+        epoll_.AddSocketToInstance(client_fd);
+      } else {
+        int client_fd = events_[i].data.fd;
+        char buffer[1024];
+        ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
+
+        if (bytes_received <= 0) {
+	  // throw error;
+        } else {
+          HttpResponse res;
+          res.SetStatus(200, "OK");
+          res.AddHeader("Content-Type", "text/plain");
+          res.SetBody("Hello, world\n");
+          std::string res_str = res.ToString();
+          send(client_fd, res_str.c_str(), res_str.length(), 0);
+        }
+      }
+    }
+  }
 }
 
 // creates one server instance per port configuration

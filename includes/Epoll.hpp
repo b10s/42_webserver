@@ -14,20 +14,17 @@ public:
   void ListenSocket();
   void CreateInstance();
   void AddSocketToInstance(int socket_fd);
-
   int GetServerFd();
   int GetEpollFd();
   sockaddr_in *GetServerAddr();
 
-  void Loop();
+  static const int kMaxEvents = 10;
 
 private:
   static const int kPort = 8000;
-  static const int kMaxEvents = 10;
   int server_fd_;
-  sockaddr_in server_addr_;
   int epoll_fd_;
-  epoll_event events_[kMaxEvents];
+  sockaddr_in server_addr_;
 };
 
 #endif
