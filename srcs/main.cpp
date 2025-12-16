@@ -10,9 +10,6 @@
 #include "lib/utils/Bzero.hpp"
 #include "Epoll.hpp"
 
-const int kMaxEvents = 10;
-const int kBufferSize = 10240;
-
 int main(int argc, char* argv[]) {
   try {
     std::string config_file =
