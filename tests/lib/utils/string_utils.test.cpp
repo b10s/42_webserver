@@ -35,3 +35,21 @@ TEST(StringUtilsTest, StrToLong_Invalid) {
   EXPECT_FALSE(lib::utils::StrToLong("   ").HasValue());
   EXPECT_FALSE(lib::utils::StrToLong("12 34").HasValue());
 }
+
+TEST(StringUtilsTest, StrToUnsignedShort_Valid) {
+  lib::type::Optional<unsigned short> res = lib::utils::StrToUnsignedShort("123");
+  EXPECT_TRUE(res.HasValue());
+  EXPECT_EQ(res.Value(), 123);
+
+  res = lib::utils::StrToUnsignedShort("0");
+  EXPECT_TRUE(res.HasValue());
+  EXPECT_EQ(res.Value(), 0);
+}
+
+TEST(StringUtilsTest, StrToUnsignedShort_Invalid) {
+  EXPECT_FALSE(lib::utils::StrToUnsignedShort("abc").HasValue());
+  EXPECT_FALSE(lib::utils::StrToUnsignedShort("12a").HasValue());
+  EXPECT_FALSE(lib::utils::StrToUnsignedShort("").HasValue());
+  EXPECT_FALSE(lib::utils::StrToUnsignedShort("   ").HasValue());
+  EXPECT_FALSE(lib::utils::StrToUnsignedShort("12 34").HasValue());
+}
