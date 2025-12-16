@@ -1,9 +1,11 @@
 #include "Epoll.hpp"
+#include "HttpResponse.hpp"
 #include "lib/utils/Bzero.hpp"
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <iostream>
 
 Epoll::Epoll() {
   lib::utils::Bzero(&server_addr_, sizeof(server_addr_));
@@ -97,8 +99,13 @@ void Epoll::Loop() {
 	if (bytes_received <= 0) {
 	  // throw error;
 	}
-	// send http response here
-	send(client_fd, buffer, bytes_received, 0);
+
+	HttpResponse res;
+	res.SetStatus(200, "OK");
+	res.AddHeader("Content-Type", "text/plain");
+	res.SetBody("Hello, world\n");
+	std::string res_str = res.ToString();
+	send(client_fd, res_str.c_str(), res_str.length(), 0);
       }
     }
   }
