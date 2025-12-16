@@ -3,6 +3,8 @@
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
 
+#include "lib/utils/string_utils.hpp"
+
 Webserv::Webserv() {
   // Default constructor
 }
@@ -20,8 +22,10 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
+  unsigned short port = lib::utils::StrToUnsignedShort(configs[0].GetPort()).Value();
+
   epoll_.CreateSocket();
-  epoll_.SetServerAddr();
+  epoll_.SetServerAddr(port);
   epoll_.BindSocket();
   epoll_.ListenSocket();
   epoll_.CreateInstance();

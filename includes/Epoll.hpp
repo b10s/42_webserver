@@ -9,7 +9,7 @@ public:
   Epoll();
   ~Epoll();
   void CreateSocket();
-  void SetServerAddr();
+  void SetServerAddr(unsigned short port);
   void BindSocket();
   void ListenSocket();
   void CreateInstance();
@@ -21,7 +21,6 @@ public:
   static const int kMaxEvents = 10;
 
 private:
-  static const int kPort = 8000;
   int server_fd_;
   int epoll_fd_;
   sockaddr_in server_addr_;

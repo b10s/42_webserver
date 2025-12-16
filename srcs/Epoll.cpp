@@ -23,10 +23,10 @@ void Epoll::CreateSocket() {
   }
 }
 
-void Epoll::SetServerAddr() {
+void Epoll::SetServerAddr(unsigned short port) {
   server_addr_.sin_family = AF_INET;
   server_addr_.sin_addr.s_addr = INADDR_ANY;
-  server_addr_.sin_port = htons(kPort);
+  server_addr_.sin_port = htons(port);
 }
 
 void Epoll::BindSocket() {
