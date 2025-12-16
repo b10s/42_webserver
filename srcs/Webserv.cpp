@@ -29,16 +29,16 @@ void Webserv::InitServersFromConfigs(const std::vector<ServerConfig>& configs) {
   port_to_server_configs_.clear();
 
   // Group configurations by port
-  for (std::vector<ServerConfig>::const_iterator it = configs.begin();
-       it != configs.end(); ++it) {
-    const std::string& port = it->GetPort();
+  for (std::vector<ServerConfig>::const_iterator server = configs.begin();
+       server != configs.end(); ++server) {
+    const std::string& port = server->GetPort();
     if (port_to_server_configs_.find(port) != port_to_server_configs_.end()) {
       // Port already exists - warn or throw an error?
       std::cerr << "Warning: Multiple server blocks for port " << port
                 << ", using first one only" << std::endl;
       continue;
     }
-    port_to_server_configs_[port] = *it;
+    port_to_server_configs_[port] = *server;
   }
 }
 
