@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -6,6 +7,11 @@
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
 #include "Webserv.hpp"
+#include "lib/utils/Bzero.hpp"
+#include "Epoll.hpp"
+
+const int kMaxEvents = 10;
+const int kBufferSize = 10240;
 
 int main(int argc, char* argv[]) {
   try {
@@ -16,6 +22,17 @@ int main(int argc, char* argv[]) {
 
     // Initialize webserver
     Webserv webserver(config_file);
+
+    // init epoll
+    Epoll epoll;
+
+    epoll.CreateSocket();
+    epoll.SetServerAddr();
+    epoll.BindSocket();
+    epoll.ListenSocket();
+    epoll.CreateInstance();
+    epoll.AddSocketToInstance(epoll.GetServerFd());
+    epoll.Loop();
 
     // Run test
     // webserver.TestConfiguration();
