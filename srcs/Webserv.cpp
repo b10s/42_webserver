@@ -20,7 +20,16 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
-  // TODO: Initialize sockets and other server setup here
+  epoll_.CreateSocket();
+  epoll_.SetServerAddr();
+  epoll_.BindSocket();
+  epoll_.ListenSocket();
+  epoll_.CreateInstance();
+  epoll_.AddSocketToInstance(epoll_.GetServerFd());
+}
+
+void Webserv::Run() {
+  epoll_.Loop();
 }
 
 // creates one server instance per port configuration
