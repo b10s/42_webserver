@@ -5,70 +5,25 @@
 
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
+#include "Webserv.hpp"
 
-// int main() {
-//     // config_sample_files/sample.conf を読み込む例
-//     std::ifstream file("sample_config/server_localhost.conf");
-//     if (!file) {
-//         std::cerr << "Failed to open config file." << std::endl;
-//         return 1;
-//     }
-
-//     std::stringstream buffer;
-//     buffer << file.rdbuf();
-//     std::string content = buffer.str();
-
-//     std::string token;
-//     Config config("sample_config/server_localhost.conf");
-//     while (!(token = config.Tokenize(content)).empty()) {
-//         std::cout << token << std::endl;
-//     }
-
-//     return 0;
-// }
-
-int main() {
+int main(int argc, char* argv[]) {
   try {
-    ConfigParser config;
-    config.LoadFile("sample_config/server_test_for_parse.conf");
-    config.Parse();
-    const std::vector<ServerConfig>& servers = config.GetServerConfigs();
-    for (size_t i = 0; i < servers.size(); ++i) {
-      std::cout << "Server " << i << ":\n";
-      std::cout << "  Host: " << servers[i].GetHost() << "\n";
-      std::cout << "  Port: " << servers[i].GetPort() << "\n";
-      std::cout << "  Server Name: " << servers[i].GetServerName() << "\n";
-      std::cout << "  Max Body Size: " << servers[i].GetMaxBodySize() << "\n";
-      std::cout << "  Error Pages:\n"
-                << servers[i].GetErrorPagesString() << "\n";
+    std::string config_file =
+        (argc > 1) ? argv[1] : "sample_config/server_multiple_port.conf";
 
-      std::cout << "  Locations:\n";
-      const std::vector<Location>& locations = servers[i].GetLocations();
-      for (size_t j = 0; j < locations.size(); ++j) {
-        std::cout << "    Location " << j << ":\n";
-        std::cout << "      Name: " << locations[j].GetName() << "\n";
-        std::cout << "      Root: " << locations[j].GetRoot() << "\n";
-        std::cout << "      Autoindex: "
-                  << (locations[j].GetAutoIndex() ? "on" : "off") << "\n";
-        std::cout << "      Index Files: ";
-        const std::vector<std::string>& index_files =
-            locations[j].GetIndexFiles();
-        for (size_t k = 0; k < index_files.size(); ++k) {
-          std::cout << index_files[k] << " ";
-        }
-        std::cout << "\n";
-        std::cout << "      Extensions: " << locations[j].GetExtensions();
-        std::cout << "\n";
-        std::cout << "      Upload Path: " << locations[j].GetUploadPath()
-                  << "\n";
-        std::cout << "      Redirect: " << locations[j].GetRedirect() << "\n";
-        std::cout << "      CGI Path: " << locations[j].GetCgiPath() << "\n";
-      }
-      std::cout << "\n";
-    }
+    std::cout << "Loading configuration from: " << config_file << std::endl;
+
+    // Initialize webserver
+    Webserv webserver(config_file);
+
+    // Run test
+    // webserver.TestConfiguration();
+
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
     return 1;
   }
+
   return 0;
 }
