@@ -35,7 +35,7 @@ Webserv::Webserv(const std::string& config_file) {
 
 void Webserv::Run() {
   while (true) {
-    int nfds = epoll_wait(epoll_.GetEpollFd(), events_, Epoll::kMaxEvents, -1);
+    int nfds = epoll_.Wait();
     if (nfds == -1) {
       // throw error;
     }

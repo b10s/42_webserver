@@ -67,6 +67,10 @@ void Epoll::AddSocketToInstance(int socket_fd) {
   }
 }
 
+int Epoll::Wait() {
+  return epoll_wait(GetEpollFd(), events_, kMaxEvents, -1);
+}
+
 int Epoll::GetServerFd() {
   return server_fd_;
 }
