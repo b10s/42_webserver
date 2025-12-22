@@ -11,41 +11,39 @@
 #include "lib/utils/Bzero.hpp"
 
 Epoll::Epoll() {
-  lib::utils::Bzero(&server_addr_, sizeof(server_addr_));
 }
 
 Epoll::~Epoll() {
-  close(server_fd_);
+  for (std::vector<int>::iterator it = server_fds_.begin(); it != server_fds_.end(); ++it) {
+    close(*it);
+  }
   close(epoll_fd_);
 }
 
-void Epoll::CreateSocket() {
-  server_fd_ = socket(PF_INET, SOCK_STREAM, 0);
-  if (server_fd_ == -1) {
+void Epoll::AddServer(unsigned short port) {
+  int server_fd = socket(PF_INET, SOCK_STREAM, 0);
+  if (server_fd == -1) {
     // throw error;
   }
-}
 
-void Epoll::SetServerAddr(unsigned short port) {
-  server_addr_.sin_family = AF_INET;
-  server_addr_.sin_addr.s_addr = INADDR_ANY;
-  server_addr_.sin_port = htons(port);
-}
+  sockaddr_in server_addr;
+  lib::utils::Bzero(&server_addr, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = INADDR_ANY;
+  server_addr.sin_port = htons(port);
 
-void Epoll::BindSocket() {
-  int ret;
-  ret = bind(server_fd_, (sockaddr *)&server_addr_, sizeof(sockaddr_in));
+  int ret = bind(server_fd, (sockaddr *)&server_addr, sizeof(sockaddr_in));
   if (ret == -1) {
     // throw error;
   }
-}
 
-void Epoll::ListenSocket() {
-  int ret;
-  ret = listen(server_fd_, SOMAXCONN);
+  ret = listen(server_fd, SOMAXCONN);
   if (ret == -1) {
     // throw error;
   }
+
+  AddSocketToInstance(server_fd);
+  server_fds_.push_back(server_fd);
 }
 
 void Epoll::CreateInstance() {
@@ -68,17 +66,18 @@ void Epoll::AddSocketToInstance(int socket_fd) {
 }
 
 int Epoll::Wait() {
-  return epoll_wait(GetEpollFd(), events_, kMaxEvents, -1);
+  return epoll_wait(epoll_fd_, events_, kMaxEvents, -1);
 }
 
-int Epoll::GetServerFd() {
-  return server_fd_;
+bool Epoll::IsServerFd(int fd) {
+  for (std::vector<int>::iterator it = server_fds_.begin(); it != server_fds_.end(); ++it) {
+    if (*it == fd) {
+      return true;
+    }
+  }
+  return false;
 }
 
-sockaddr_in *Epoll::GetServerAddr() {
-  return &server_addr_;
-}
-
-int Epoll::GetEpollFd() {
-  return epoll_fd_;
+epoll_event* Epoll::GetEvents() {
+  return events_;
 }
