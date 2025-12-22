@@ -62,7 +62,7 @@ void Webserv::Run() {
           res.SetStatus(200, "OK");
           res.AddHeader("Content-Type", "text/plain");
           res.SetBody("Hello, world\n");
-          std::string res_str = res.ToString();
+          std::string res_str = res.ToHttpString();
           send(client_fd, res_str.c_str(), res_str.length(), 0);
         }
       }
