@@ -1,5 +1,6 @@
 #include "ConfigParser.hpp"
 #include "host_validation.hpp"
+#include "lib/utils/string_utils.hpp"
 
 /*
 "host:port" must be written without spaces (e.g., "127.0.0.1:8080").
@@ -37,7 +38,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     if (end != ";")
       throw std::runtime_error(
           "Syntax error: expected ';' after listen directive " + end);
-    server_config->SetListen(host, port);
+    server_config->SetListen(host, lib::utils::StrToUnsignedShort(port).Value());
     return;
   }
   // host only or port only
@@ -50,7 +51,7 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     if (!IsValidPortNumber(token1))
       throw std::runtime_error("Invalid port number in listen directive: " +
                                token1);
-    server_config->SetPort(token1);
+    server_config->SetPort(lib::utils::StrToUnsignedShort(token1).Value());
   } else {
     if (!host_validation::IsValidHost(token1))
       throw std::runtime_error("Invalid host in listen directive: " + token1);

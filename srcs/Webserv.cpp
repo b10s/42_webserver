@@ -24,10 +24,10 @@ Webserv::Webserv(const std::string& config_file) {
 
   epoll_.CreateInstance();
 
-  for (std::map<std::string, ServerConfig>::const_iterator it =
+  for (std::map<unsigned short, ServerConfig>::const_iterator it =
            port_to_server_configs_.begin();
        it != port_to_server_configs_.end(); ++it) {
-    unsigned short port_num = lib::utils::StrToUnsignedShort(it->first).Value();
+    unsigned short port_num = it->first;
     epoll_.AddServer(port_num);
   }
 }
@@ -79,7 +79,7 @@ void Webserv::InitServersFromConfigs(const std::vector<ServerConfig>& configs) {
   // Group configurations by port
   for (std::vector<ServerConfig>::const_iterator server = configs.begin();
        server != configs.end(); ++server) {
-    const std::string& port = server->GetPort();
+    const unsigned short& port = server->GetPort();
     if (port_to_server_configs_.find(port) != port_to_server_configs_.end()) {
       // Port already exists - warn or throw an error?
       std::cerr << "Warning: Multiple server blocks for port " << port
@@ -90,13 +90,13 @@ void Webserv::InitServersFromConfigs(const std::vector<ServerConfig>& configs) {
   }
 }
 
-const std::map<std::string, ServerConfig>& Webserv::GetPortConfigs() const {
+const std::map<unsigned short, ServerConfig>& Webserv::GetPortConfigs() const {
   return port_to_server_configs_;
 }
 
 const ServerConfig* Webserv::FindServerConfigByPort(
-    const std::string& port) const {
-  std::map<std::string, ServerConfig>::const_iterator it =
+    const unsigned short& port) const {
+  std::map<unsigned short, ServerConfig>::const_iterator it =
       port_to_server_configs_.find(port);
   if (it != port_to_server_configs_.end()) {
     return &it->second;

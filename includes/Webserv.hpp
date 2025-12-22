@@ -13,7 +13,7 @@
 
 class Webserv {
  private:
-  std::map<std::string, ServerConfig> port_to_server_configs_;
+  std::map<unsigned short, ServerConfig> port_to_server_configs_;
   Epoll epoll_;
 
   // for event loop
@@ -36,9 +36,9 @@ class Webserv {
   void InitServersFromConfigs(const std::vector<ServerConfig>& server_configs);
 
   // utility methods for accessing server configurations
-  const std::map<std::string, ServerConfig>& GetPortConfigs() const;
-  const ServerConfig* FindServerConfigByPort(const std::string& port) const;
-  void HandleRequest(int client_fd, const std::string& port);
+  const std::map<unsigned short, ServerConfig>& GetPortConfigs() const;
+  const ServerConfig* FindServerConfigByPort(const unsigned short& port) const;
+  void HandleRequest(int client_fd, const unsigned short& port);
 
   // for testing purposes
   void TestConfiguration();
