@@ -16,7 +16,6 @@ class Webserv {
   std::map<std::string, ServerConfig> port_to_server_configs_;
   Epoll epoll_;
 
-
   // for event loop
   std::map<int, time_t> client_last_activity_;  // for timeouts
   std::map<int, std::pair<HttpResponse, bool> >

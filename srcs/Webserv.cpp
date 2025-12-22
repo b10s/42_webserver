@@ -24,7 +24,8 @@ Webserv::Webserv(const std::string& config_file) {
 
   epoll_.CreateInstance();
 
-  for (std::map<std::string, ServerConfig>::const_iterator it = port_to_server_configs_.begin();
+  for (std::map<std::string, ServerConfig>::const_iterator it =
+           port_to_server_configs_.begin();
        it != port_to_server_configs_.end(); ++it) {
     unsigned short port_num = lib::utils::StrToUnsignedShort(it->first).Value();
     epoll_.AddServer(port_num);

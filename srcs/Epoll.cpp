@@ -14,7 +14,8 @@ Epoll::Epoll() {
 }
 
 Epoll::~Epoll() {
-  for (std::vector<int>::iterator it = server_fds_.begin(); it != server_fds_.end(); ++it) {
+  for (std::vector<int>::iterator it = server_fds_.begin();
+       it != server_fds_.end(); ++it) {
     close(*it);
   }
   close(epoll_fd_);
@@ -32,7 +33,7 @@ void Epoll::AddServer(unsigned short port) {
   server_addr.sin_addr.s_addr = INADDR_ANY;
   server_addr.sin_port = htons(port);
 
-  int ret = bind(server_fd, (sockaddr *)&server_addr, sizeof(sockaddr_in));
+  int ret = bind(server_fd, (sockaddr*)&server_addr, sizeof(sockaddr_in));
   if (ret == -1) {
     // throw error;
   }
@@ -70,7 +71,8 @@ int Epoll::Wait() {
 }
 
 bool Epoll::IsServerFd(int fd) {
-  for (std::vector<int>::iterator it = server_fds_.begin(); it != server_fds_.end(); ++it) {
+  for (std::vector<int>::iterator it = server_fds_.begin();
+       it != server_fds_.end(); ++it) {
     if (*it == fd) {
       return true;
     }
