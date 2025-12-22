@@ -12,22 +12,22 @@ TEST(HttpResponse, SetStatus_DoesNotGenerateBody) {
   EXPECT_EQ(res.GetBody(), "");
 }
 
-// EnsureDefaultBodyIfEmpty sets a default error body if the body is empty and status is error
+// EnsureDefaultErrorContent sets a default error body if the body is empty and status is error
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
   HttpResponse res;
   res.SetBody("");
   res.SetStatus(404, "Not Found");
-  res.EnsureDefaultBodyIfEmpty();
+  res.EnsureDefaultErrorContent();
   EXPECT_FALSE(res.GetBody().empty());
   EXPECT_NE(res.GetBody().find("404 Not Found"), std::string::npos);
 }
 
-// EnsureDefaultBodyIfEmpty does not set a body for non-error status codes
+// EnsureDefaultErrorContent does not set a body for non-error status codes
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_DoesNotOverrideExistingBody) {
   HttpResponse res;
   res.SetBody("custom");
   res.SetStatus(500, "Internal Server Error");
-  res.EnsureDefaultBodyIfEmpty();
+  res.EnsureDefaultErrorContent();
   EXPECT_EQ(res.GetBody(), "custom");
 }
 

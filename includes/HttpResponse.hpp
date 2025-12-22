@@ -4,9 +4,6 @@
 #include <map>
 #include <string>
 
-#include "HttpRequest.hpp"
-#include "lib/http/Method.hpp"
-
 class HttpResponse {
  public:
   HttpResponse();
@@ -18,7 +15,7 @@ class HttpResponse {
   std::string GetBody() const;
   std::string ToHttpString() const;
 
-  void EnsureDefaultBodyIfEmpty();  // sugar
+  void EnsureDefaultErrorContent();  // sugar
   static std::string MakeDefaultErrorPage(int status_code,
                                           const std::string& reason_phrase);
 

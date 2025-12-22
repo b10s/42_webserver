@@ -8,16 +8,6 @@
 
 HttpResponse::HttpResponse()
     : status_code_(200), reason_phrase_("OK"), version_("HTTP/1.1") {
-  SetCurrentDateHeader();
-}
-
-void HttpResponse::SetCurrentDateHeader() {
-  std::time_t now = std::time(NULL);
-  std::tm* tm = std::gmtime(&now);
-  char buf[100];
-  if (std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", tm)) {
-    headers_["date"] = std::string(buf);
-  }
 }
 
 HttpResponse::~HttpResponse() {
@@ -46,12 +36,9 @@ std::string HttpResponse::GetBody() const {
   return body_;
 }
 
-void HttpResponse::EnsureDefaultBodyIfEmpty() {
+void HttpResponse::EnsureDefaultErrorContent() {
   if (!body_.empty()) return;
   if (status_code_ < 400) return;
-  if (headers_.count("content-type") == 0) {
-    headers_["content-type"] = "text/html";
-  }
   body_ = MakeDefaultErrorPage(status_code_, reason_phrase_);
 }
 
@@ -65,15 +52,14 @@ std::string HttpResponse::MakeDefaultErrorPage(
      << "<center><h1>" << status_code << " " << reason_phrase
      << "</h1></center>\n"
      << "<hr>\n"
-     /*  << "<em>" << "HTTP/1.1" << "/em>\n" */
      << "</body>\n"
      << "</html>\n";
 
   // friendly error page padding
   ss << "<!-- ";
-  for (int i = static_cast<int>(ss.str().length()); i < 512; ++i) {
+  int initial_length = static_cast<int>(ss.str().length());
+  for (int i = initial_length; i < 512; i += 7) {
     ss << "webserv";
-    i += 7;
   }
   ss << " -->\n";
   return ss.str();
@@ -89,15 +75,15 @@ std::string HttpResponse::ToHttpString() const {
   std::map<std::string, std::string> final_headers = headers_;
 
   // Date Header
-  // bool has_date = final_headers.count("date");
-  // if (!has_date) {
-  //   std::time_t now = std::time(NULL);
-  //   std::tm* tm = std::gmtime(&now);
-  //   char buf[100];
-  //   if (std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", tm)) {
-  //     final_headers["date"] = std::string(buf);
-  //   }
-  // }
+  bool has_date = final_headers.count("date");
+  if (!has_date) {
+    std::time_t now = std::time(NULL);
+    std::tm* tm = std::gmtime(&now);
+    char buf[100];
+    if (std::strftime(buf, sizeof(buf), "%a, %d %b %Y %H:%M:%S GMT", tm)) {
+      final_headers["date"] = std::string(buf);
+    }
+  }
 
   // Content-Length
   bool has_content_length = final_headers.count("content-length");
