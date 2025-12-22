@@ -10,6 +10,7 @@ namespace utils {
 
 std::string ToLowerAscii(const std::string& s);
 lib::type::Optional<long> StrToLong(const std::string& s);
+lib::type::Optional<unsigned short> StrToUnsignedShort(const std::string& s);
 
 }  // namespace utils
 }  // namespace lib

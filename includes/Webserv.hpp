@@ -1,9 +1,12 @@
 #ifndef WEBSERV_HPP
 #define WEBSERV_HPP
 
+#include <sys/epoll.h>
+
 #include <iostream>
 
 #include "ConfigParser.hpp"
+#include "Epoll.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
@@ -11,6 +14,8 @@
 class Webserv {
  private:
   std::map<std::string, ServerConfig> port_to_server_configs_;
+  Epoll epoll_;
+  epoll_event events_[Epoll::kMaxEvents];
 
   // for event loop
   std::map<int, time_t> client_last_activity_;  // for timeouts
@@ -25,6 +30,8 @@ class Webserv {
   Webserv();  // should be private but made public for testing
   Webserv(const std::string& config_file);
   ~Webserv();
+
+  void Run();
 
   // InitServersFromConfigs should be private but made public for testing
   void InitServersFromConfigs(const std::vector<ServerConfig>& server_configs);

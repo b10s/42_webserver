@@ -25,5 +25,15 @@ lib::type::Optional<long> StrToLong(const std::string& s) {
   return lib::type::Optional<long>(result);
 }
 
+lib::type::Optional<unsigned short> StrToUnsignedShort(const std::string& s) {
+  std::stringstream ss(s);
+  unsigned short result;
+  ss >> result;
+  if (ss.fail() || !ss.eof()) {
+    return lib::type::Optional<unsigned short>();
+  }
+  return lib::type::Optional<unsigned short>(result);
+}
+
 }  // namespace utils
 }  // namespace lib

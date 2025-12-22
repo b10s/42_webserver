@@ -1,11 +1,14 @@
+#include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <string>
 
 #include "ConfigParser.hpp"
+#include "Epoll.hpp"
 #include "ServerConfig.hpp"
 #include "Webserv.hpp"
+#include "lib/utils/Bzero.hpp"
 
 int main(int argc, char* argv[]) {
   try {
@@ -16,6 +19,7 @@ int main(int argc, char* argv[]) {
 
     // Initialize webserver
     Webserv webserver(config_file);
+    webserver.Run();
 
     // Run test
     // webserver.TestConfiguration();
