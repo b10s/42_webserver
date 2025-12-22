@@ -12,7 +12,7 @@ TEST(ConfigParser, Server_MinimalEmptyBlock_AddsServerConfig) {
   EXPECT_NO_THROW(parser.ParseServer());
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   EXPECT_EQ(parser.GetServerConfigs().size(), 1u);
-  EXPECT_EQ(servers[0].GetPort(), "80");       // default port
+  EXPECT_EQ(servers[0].GetPort(), 80);       // default port
   EXPECT_EQ(servers[0].GetHost(), "0.0.0.0");  // default host
 }
 
@@ -22,7 +22,7 @@ TEST(ConfigParser, Server_WithListenDirective) {
   EXPECT_NO_THROW(parser.ParseServer());
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   ASSERT_EQ(servers.size(), 1u);
-  EXPECT_EQ(servers[0].GetPort(), "8080");
+  EXPECT_EQ(servers[0].GetPort(), 8080);
 }
 
 // ==================== error cases ====================
