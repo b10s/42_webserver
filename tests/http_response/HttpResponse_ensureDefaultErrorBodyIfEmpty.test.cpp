@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <algorithm>
+#include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "enums.hpp"
 
@@ -8,7 +9,7 @@ TEST(HttpResponse, SetStatus_DoesNotGenerateBody) {
   HttpResponse res;
   res.SetBody("");
   res.SetStatus(404, "Not Found");
-  EXPECT_TRUE(res.GetBody().empty());
+  EXPECT_EQ(res.GetBody(), "");
 }
 
 // EnsureDefaultBodyIfEmpty sets a default error body if the body is empty and status is error
@@ -16,7 +17,7 @@ TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
   HttpResponse res;
   res.SetBody("");
   res.SetStatus(404, "Not Found");
-  res.EnsureDefaultErrorBodyIfEmpty();
+  res.EnsureDefaultBodyIfEmpty();
   EXPECT_FALSE(res.GetBody().empty());
   EXPECT_NE(res.GetBody().find("404 Not Found"), std::string::npos);
 }
@@ -26,7 +27,7 @@ TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_DoesNotOverrideExistingBody) {
   HttpResponse res;
   res.SetBody("custom");
   res.SetStatus(500, "Internal Server Error");
-  res.EnsureDefaultErrorBodyIfEmpty();
+  res.EnsureDefaultBodyIfEmpty();
   EXPECT_EQ(res.GetBody(), "custom");
 }
 
@@ -35,7 +36,7 @@ TEST(HttpResponse, ToString_AddsContentLengthIfMissingAndNoTransferEncoding) {
   HttpResponse res;
   res.SetBody("hello");
   res.SetStatus(200, "OK");
-  std::string s = res.ToString();
+  std::string s = res.ToHttpString();
   EXPECT_NE(s.find("content-length: 5\r\n"), std::string::npos);
 }
 
@@ -44,8 +45,7 @@ TEST(HttpResponse, ToString_DoesNotAddContentLengthWhenTransferEncodingExists) {
   HttpResponse res;
   res.SetBody("hello");
   res.SetStatus(200, "OK");
-  res.SetHeader("transfer-encoding", "chunked");
-  std::string s = res.ToString();
+  res.AddHeader("transfer-encoding", "chunked");
+  std::string s = res.ToHttpString();
   EXPECT_EQ(s.find("content-length:"), std::string::npos);
 }
-
