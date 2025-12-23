@@ -18,8 +18,7 @@ class Webserv {
 
   // for event loop
   std::map<int, time_t> client_last_activity_;  // for timeouts
-  std::map<int, std::pair<HttpResponse, bool> >
-      outbound_responses_;  // response and whether headers sent
+  std::map<int, std::string> output_buffers_;
   std::map<int, pid_t> cgi_fd_to_pid_;
   std::map<int, int> cgi_fd_to_client_fd_;
   std::map<int, bool> client_fd_to_keep_alive_;

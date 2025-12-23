@@ -52,19 +52,45 @@ void Webserv::Run() {
         }
         epoll_.Addsocket(client_fd);
       } else {
-        int client_fd = events[i].data.fd;
-        char buffer[1024];
-        ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
+        if (events[i].events & EPOLLIN) {
+          char buffer[1024];
+          ssize_t bytes_received =
+              recv(events[i].data.fd, buffer, sizeof(buffer), 0);
 
-        if (bytes_received <= 0) {
-          // throw error;
-        } else {
-          HttpResponse res;
-          res.SetStatus(200, "OK");
-          res.AddHeader("Content-Type", "text/plain");
-          res.SetBody("Hello, world\n");
-          std::string res_str = res.ToString();
-          send(client_fd, res_str.c_str(), res_str.length(), 0);
+          if (bytes_received <= 0) {
+            epoll_.RemoveSocket(events[i].data.fd);
+            close(events[i].data.fd);
+            output_buffers_.erase(events[i].data.fd);
+            // throw error;
+          } else {
+            HttpResponse res;
+            res.SetStatus(200, "OK");
+            res.AddHeader("Content-Type", "text/plain");
+            res.SetBody("Hello, world\n");
+
+            output_buffers_[events[i].data.fd] = res.ToString();
+            epoll_.ModSocket(events[i].data.fd, EPOLLOUT);
+          }
+        }
+        if (events[i].events & EPOLLOUT) {
+          if (output_buffers_.count(events[i].data.fd)) {
+            std::string& buffer = output_buffers_[events[i].data.fd];
+            ssize_t bytes_sent =
+                send(events[i].data.fd, buffer.c_str(), buffer.length(), 0);
+
+            if (bytes_sent == -1) {
+              epoll_.RemoveSocket(events[i].data.fd);
+              close(events[i].data.fd);
+              output_buffers_.erase(events[i].data.fd);
+              // throw error;
+            } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
+              buffer = buffer.substr(bytes_sent);
+            } else {
+              output_buffers_.erase(events[i].data.fd);
+              epoll_.RemoveSocket(events[i].data.fd);
+              close(events[i].data.fd);
+            }
+          }
         }
       }
     }
