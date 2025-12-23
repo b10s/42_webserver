@@ -5,17 +5,18 @@
 
 TEST(HttpResponseTest, DefaultConstructor) {
   HttpResponse response;
-  std::string output = response.ToString();
+  std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 200 OK"), std::string::npos);
   EXPECT_NE(output.find("content-length: 0"), std::string::npos);
   EXPECT_NE(output.find("date: "), std::string::npos);
+  EXPECT_NE(output.find("\r\n\r\n"), std::string::npos);  // End of headers
 }
 
 TEST(HttpResponseTest, SetStatus) {
   HttpResponse response;
   response.SetStatus(404, "Not Found");
-  std::string output = response.ToString();
+  std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 404 Not Found"), std::string::npos);
 }
@@ -26,7 +27,7 @@ TEST(HttpResponseTest, AddHeader) {
   response.AddHeader("X-Custom-Header", "MyValue");
   response.AddHeader("content-type", "text/html");
 
-  std::string output = response.ToString();
+  std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("content-type: text/html"), std::string::npos);
   EXPECT_NE(output.find("x-custom-header: MyValue"), std::string::npos);
@@ -47,7 +48,7 @@ TEST(HttpResponseTest, SetBody) {
   response.SetBody(body);
   response.AddHeader("content-length", std::to_string(body.length()));
 
-  std::string output = response.ToString();
+  std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find(body), std::string::npos);
   
@@ -71,7 +72,7 @@ TEST(HttpResponseTest, FullResponse) {
   std::string body = "Created Successfully";
   response.SetBody(body);
   
-  std::string output = response.ToString();
+  std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 201 Created\r\n"), std::string::npos);
   EXPECT_NE(output.find("content-type: text/plain\r\n"), std::string::npos);
