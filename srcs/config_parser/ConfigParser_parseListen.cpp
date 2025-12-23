@@ -38,7 +38,8 @@ void ConfigParser ::ParseListen(ServerConfig* server_config) {
     if (end != ";")
       throw std::runtime_error(
           "Syntax error: expected ';' after listen directive " + end);
-    server_config->SetListen(host, lib::utils::StrToUnsignedShort(port).Value());
+    server_config->SetListen(host,
+                             lib::utils::StrToUnsignedShort(port).Value());
     return;
   }
   // host only or port only

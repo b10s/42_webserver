@@ -99,4 +99,4 @@ class ServerConfig {
 // test_conf new ServerConfig();
 
 // test_conf.host_ == "asdsad"
-// test_conf.port_ == "8080"
+// test_conf.port_ == 8080

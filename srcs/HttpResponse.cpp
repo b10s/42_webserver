@@ -32,7 +32,40 @@ void HttpResponse::SetBody(const std::string& body) {
   body_ = body;
 }
 
-std::string HttpResponse::ToString() const {
+std::string HttpResponse::GetBody() const {
+  return body_;
+}
+
+void HttpResponse::EnsureDefaultErrorContent() {
+  if (!body_.empty()) return;
+  if (status_code_ < 400) return;
+  body_ = MakeDefaultErrorPage(status_code_, reason_phrase_);
+}
+
+std::string HttpResponse::MakeDefaultErrorPage(
+    int status_code, const std::string& reason_phrase) {
+  std::stringstream ss;
+  ss << "<html>\n"
+     << "<head><title>" << status_code << " " << reason_phrase
+     << "</title></head>\n"
+     << "<body>\n"
+     << "<center><h1>" << status_code << " " << reason_phrase
+     << "</h1></center>\n"
+     << "<hr>\n"
+     << "</body>\n"
+     << "</html>\n";
+
+  // friendly error page padding
+  ss << "<!-- ";
+  int initial_length = static_cast<int>(ss.str().length());
+  for (int i = initial_length; i < 512; i += 7) {
+    ss << "webserv";
+  }
+  ss << " -->\n";
+  return ss.str();
+}
+
+std::string HttpResponse::ToHttpString() const {
   std::stringstream ss;
 
   // Status Line

@@ -18,21 +18,21 @@ TEST(ConfigParser, Listen_HostColonPort) {
   ServerConfig sc;  // default: host=0.0.0.0, port=80
   EXPECT_NO_THROW(callParseListen("127.0.0.1:8080;", &sc));
   EXPECT_EQ(sc.GetHost(), "127.0.0.1");
-  EXPECT_EQ(sc.GetPort(), "8080");
+  EXPECT_EQ(sc.GetPort(), 8080);
 }
 
 TEST(ConfigParser, Listen_PortOnly) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseListen("8081;", &sc));
   EXPECT_EQ(sc.GetHost(), "0.0.0.0");  // default host
-  EXPECT_EQ(sc.GetPort(), "8081");
+  EXPECT_EQ(sc.GetPort(), 8081);
 }
 
 TEST(ConfigParser, Listen_HostOnly) {
   ServerConfig sc;
   EXPECT_NO_THROW(callParseListen("10.0.0.5;", &sc));
   EXPECT_EQ(sc.GetHost(), "10.0.0.5");
-  EXPECT_EQ(sc.GetPort(), "80");  // default port
+  EXPECT_EQ(sc.GetPort(), 80);  // default port
 }
 
 // ==================== error cases ====================

@@ -14,7 +14,8 @@ ServerConfig::ServerConfig()
       has_max_body_(false) {
 }
 
-void ServerConfig::SetListen(const std::string& host, const unsigned short& port) {
+void ServerConfig::SetListen(const std::string& host,
+                             const unsigned short& port) {
   if (has_listen_) {
     throw std::runtime_error("Duplicate listen directive");
   }
