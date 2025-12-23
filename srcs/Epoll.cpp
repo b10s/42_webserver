@@ -43,7 +43,7 @@ void Epoll::AddServer(unsigned short port) {
     // throw error;
   }
 
-  AddSocketToInstance(server_fd);
+  Addsocket(server_fd);
   server_fds_.push_back(server_fd);
 }
 
@@ -54,7 +54,7 @@ void Epoll::CreateInstance() {
   }
 }
 
-void Epoll::AddSocketToInstance(int socket_fd) {
+void Epoll::Addsocket(int socket_fd) {
   int ret;
   epoll_event ev;
 

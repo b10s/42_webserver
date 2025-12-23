@@ -12,7 +12,7 @@ class Epoll {
   ~Epoll();
   void CreateInstance();
   void AddServer(unsigned short port);
-  void AddSocketToInstance(int socket_fd);
+  void Addsocket(int socket_fd);
   int Wait();
   bool IsServerFd(int fd);
   epoll_event* GetEvents();

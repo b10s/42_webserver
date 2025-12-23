@@ -50,7 +50,7 @@ void Webserv::Run() {
         if (client_fd == -1) {
           // throw error;
         }
-        epoll_.AddSocketToInstance(client_fd);
+        epoll_.Addsocket(client_fd);
       } else {
         int client_fd = events[i].data.fd;
         char buffer[1024];
