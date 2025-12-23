@@ -82,7 +82,7 @@ void Webserv::HandleEpollIn(int fd) {
         HttpResponse res;
         res.SetStatus(200, "OK");
         res.AddHeader("Content-Type", "text/plain");
-        res.SetBody(req.GetBody());
+        res.SetBody(req.GetHostName() + ":" + req.GetHostPort());
 
         output_buffers_[fd] = res.ToHttpString();
         epoll_.ModSocket(fd, EPOLLOUT);
@@ -105,7 +105,7 @@ void Webserv::HandleEpollOut(int fd) {
     std::string& buffer = output_buffers_[fd];
     ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 
-    if (bytes_sent == -1) {
+    if (bytes_sent <= 0) {
       epoll_.RemoveSocket(fd);
       close(fd);
       output_buffers_.erase(fd);

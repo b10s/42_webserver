@@ -25,7 +25,7 @@ class Webserv {
   std::set<int> keep_alive_fds_;
   std::map<int, HttpRequest> requests_;
 
-  static const size_t kBufferSize = 4096;
+  static const size_t kBufferSize = 1024;
 
   void HandleEpollIn(int fd);
   void HandleEpollOut(int fd);
