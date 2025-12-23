@@ -90,7 +90,8 @@ void Webserv::HandleEpollIn(int fd) {
         requests_.erase(fd);
       }
     } catch (const std::exception& e) {
-      std::cerr << "Request handling error for fd " << fd << ": " << e.what() << std::endl;
+      std::cerr << "Request handling error for fd " << fd << ": " << e.what()
+                << std::endl;
       // TODO: Send an appropriate error response to the client
       requests_.erase(fd);
       epoll_.RemoveSocket(fd);
