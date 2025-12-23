@@ -4,26 +4,25 @@
 #include <netinet/in.h>
 #include <sys/epoll.h>
 
+#include <vector>
+
 class Epoll {
  public:
   Epoll();
   ~Epoll();
-  void CreateSocket();
-  void SetServerAddr(unsigned short port);
-  void BindSocket();
-  void ListenSocket();
   void CreateInstance();
+  void AddServer(unsigned short port);
   void AddSocketToInstance(int socket_fd);
-  int GetServerFd();
-  int GetEpollFd();
-  sockaddr_in *GetServerAddr();
+  int Wait();
+  bool IsServerFd(int fd);
+  epoll_event* GetEvents();
 
   static const int kMaxEvents = 10;
 
  private:
-  int server_fd_;
+  std::vector<int> server_fds_;
   int epoll_fd_;
-  sockaddr_in server_addr_;
+  epoll_event events_[kMaxEvents];
 };
 
 #endif

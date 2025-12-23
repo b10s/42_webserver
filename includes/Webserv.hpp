@@ -15,7 +15,6 @@ class Webserv {
  private:
   std::map<std::string, ServerConfig> port_to_server_configs_;
   Epoll epoll_;
-  epoll_event events_[Epoll::kMaxEvents];
 
   // for event loop
   std::map<int, time_t> client_last_activity_;  // for timeouts

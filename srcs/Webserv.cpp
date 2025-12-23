@@ -22,36 +22,37 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
-  unsigned short port =
-      lib::utils::StrToUnsignedShort(configs[0].GetPort()).Value();
-
-  epoll_.CreateSocket();
-  epoll_.SetServerAddr(port);
-  epoll_.BindSocket();
-  epoll_.ListenSocket();
   epoll_.CreateInstance();
-  epoll_.AddSocketToInstance(epoll_.GetServerFd());
+
+  for (std::map<std::string, ServerConfig>::const_iterator it =
+           port_to_server_configs_.begin();
+       it != port_to_server_configs_.end(); ++it) {
+    unsigned short port_num = lib::utils::StrToUnsignedShort(it->first).Value();
+    epoll_.AddServer(port_num);
+  }
 }
 
 void Webserv::Run() {
   while (true) {
-    int nfds = epoll_wait(epoll_.GetEpollFd(), events_, Epoll::kMaxEvents, -1);
+    int nfds = epoll_.Wait();
     if (nfds == -1) {
       // throw error;
     }
 
+    epoll_event* events = epoll_.GetEvents();
+
     for (int i = 0; i < nfds; ++i) {
-      if (events_[i].data.fd == epoll_.GetServerFd()) {
+      if (epoll_.IsServerFd(events[i].data.fd)) {
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
-        int client_fd = accept(epoll_.GetServerFd(), (sockaddr*)&client_addr,
+        int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
                                &client_addr_len);
         if (client_fd == -1) {
           // throw error;
         }
         epoll_.AddSocketToInstance(client_fd);
       } else {
-        int client_fd = events_[i].data.fd;
+        int client_fd = events[i].data.fd;
         char buffer[1024];
         ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
 
