@@ -43,7 +43,7 @@ void Webserv::Run() {
 
     for (int i = 0; i < nfds; ++i) {
       if (epoll_.IsServerFd(events[i].data.fd)) {
-	// server fd
+        // server fd
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
         int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
@@ -53,7 +53,7 @@ void Webserv::Run() {
         }
         epoll_.Addsocket(client_fd);
       } else {
-	// client fd
+        // client fd
         if (events[i].events & EPOLLIN) {
           char buffer[buffer_size_];
           ssize_t bytes_received =
@@ -64,7 +64,7 @@ void Webserv::Run() {
             close(events[i].data.fd);
             output_buffers_.erase(events[i].data.fd);
             raw_requests_.erase(events[i].data.fd);
-	  } else {
+          } else {
             raw_requests_[events[i].data.fd] = buffer;
             HttpResponse res;
             res.SetStatus(200, "OK");
