@@ -43,6 +43,7 @@ void Webserv::Run() {
 
     for (int i = 0; i < nfds; ++i) {
       if (epoll_.IsServerFd(events[i].data.fd)) {
+        // server fd
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
         int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
@@ -50,23 +51,58 @@ void Webserv::Run() {
         if (client_fd == -1) {
           // throw error;
         }
-        epoll_.AddSocketToInstance(client_fd);
+        epoll_.Addsocket(client_fd);
       } else {
-        int client_fd = events[i].data.fd;
-        char buffer[1024];
-        ssize_t bytes_received = recv(client_fd, buffer, sizeof(buffer), 0);
-
-        if (bytes_received <= 0) {
-          // throw error;
-        } else {
-          HttpResponse res;
-          res.SetStatus(200, "OK");
-          res.AddHeader("Content-Type", "text/plain");
-          res.SetBody("Hello, world\n");
-          std::string res_str = res.ToHttpString();
-          send(client_fd, res_str.c_str(), res_str.length(), 0);
+        // client fd
+        if (events[i].events & EPOLLIN) {
+          HandleEpollIn(events[i].data.fd);
+        }
+        if (events[i].events & EPOLLOUT) {
+          HandleEpollOut(events[i].data.fd);
         }
       }
+    }
+  }
+}
+
+void Webserv::HandleEpollIn(int fd) {
+  char buffer[kBufferSize];
+  ssize_t bytes_received = recv(fd, buffer, sizeof(buffer), 0);
+
+  if (bytes_received == -1) {
+    epoll_.RemoveSocket(fd);
+    close(fd);
+    output_buffers_.erase(fd);
+    raw_requests_.erase(fd);
+  } else {
+    raw_requests_[fd] = buffer;
+    HttpResponse res;
+    res.SetStatus(200, "OK");
+    res.AddHeader("Content-Type", "text/plain");
+    res.SetBody(raw_requests_[fd]);
+
+    output_buffers_[fd] = res.ToHttpString();
+    epoll_.ModSocket(fd, EPOLLOUT);
+
+    raw_requests_[fd].clear();
+  }
+}
+
+void Webserv::HandleEpollOut(int fd) {
+  if (output_buffers_.count(fd)) {
+    std::string& buffer = output_buffers_[fd];
+    ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
+
+    if (bytes_sent == -1) {
+      epoll_.RemoveSocket(fd);
+      close(fd);
+      output_buffers_.erase(fd);
+    } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
+      buffer = buffer.substr(bytes_sent);
+    } else {
+      output_buffers_.erase(fd);
+      epoll_.RemoveSocket(fd);
+      close(fd);
     }
   }
 }

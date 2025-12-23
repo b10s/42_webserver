@@ -43,7 +43,7 @@ void Epoll::AddServer(unsigned short port) {
     // throw error;
   }
 
-  AddSocketToInstance(server_fd);
+  Addsocket(server_fd);
   server_fds_.push_back(server_fd);
 }
 
@@ -54,13 +54,33 @@ void Epoll::CreateInstance() {
   }
 }
 
-void Epoll::AddSocketToInstance(int socket_fd) {
+void Epoll::Addsocket(int socket_fd) {
   int ret;
   epoll_event ev;
 
   ev.events = EPOLLIN;
   ev.data.fd = socket_fd;
   ret = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket_fd, &ev);
+  if (ret == -1) {
+    // throw error;
+  }
+}
+
+void Epoll::ModSocket(int socket_fd, uint32_t events) {
+  int ret;
+  epoll_event ev;
+
+  ev.events = events;
+  ev.data.fd = socket_fd;
+  ret = epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, socket_fd, &ev);
+  if (ret == -1) {
+    // throw error;
+  }
+}
+
+void Epoll::RemoveSocket(int socket_fd) {
+  int ret;
+  ret = epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket_fd, NULL);
   if (ret == -1) {
     // throw error;
   }
