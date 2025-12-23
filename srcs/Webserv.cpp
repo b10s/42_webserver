@@ -55,48 +55,54 @@ void Webserv::Run() {
       } else {
         // client fd
         if (events[i].events & EPOLLIN) {
-          char buffer[kBufferSize];
-          ssize_t bytes_received =
-              recv(events[i].data.fd, buffer, sizeof(buffer), 0);
-
-          if (bytes_received == -1) {
-            epoll_.RemoveSocket(events[i].data.fd);
-            close(events[i].data.fd);
-            output_buffers_.erase(events[i].data.fd);
-            raw_requests_.erase(events[i].data.fd);
-          } else {
-            raw_requests_[events[i].data.fd] = buffer;
-            HttpResponse res;
-            res.SetStatus(200, "OK");
-            res.AddHeader("Content-Type", "text/plain");
-            res.SetBody(raw_requests_[events[i].data.fd]);
-
-            output_buffers_[events[i].data.fd] = res.ToHttpString();
-            epoll_.ModSocket(events[i].data.fd, EPOLLOUT);
-
-            raw_requests_[events[i].data.fd].clear();
-          }
+          HandleEpollIn(events[i].data.fd);
         }
         if (events[i].events & EPOLLOUT) {
-          if (output_buffers_.count(events[i].data.fd)) {
-            std::string& buffer = output_buffers_[events[i].data.fd];
-            ssize_t bytes_sent =
-                send(events[i].data.fd, buffer.c_str(), buffer.length(), 0);
-
-            if (bytes_sent == -1) {
-              epoll_.RemoveSocket(events[i].data.fd);
-              close(events[i].data.fd);
-              output_buffers_.erase(events[i].data.fd);
-            } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
-              buffer = buffer.substr(bytes_sent);
-            } else {
-              output_buffers_.erase(events[i].data.fd);
-              epoll_.RemoveSocket(events[i].data.fd);
-              close(events[i].data.fd);
-            }
-          }
+          HandleEpollOut(events[i].data.fd);
         }
       }
+    }
+  }
+}
+
+void Webserv::HandleEpollIn(int fd) {
+  char buffer[kBufferSize];
+  ssize_t bytes_received = recv(fd, buffer, sizeof(buffer), 0);
+
+  if (bytes_received == -1) {
+    epoll_.RemoveSocket(fd);
+    close(fd);
+    output_buffers_.erase(fd);
+    raw_requests_.erase(fd);
+  } else {
+    raw_requests_[fd] = buffer;
+    HttpResponse res;
+    res.SetStatus(200, "OK");
+    res.AddHeader("Content-Type", "text/plain");
+    res.SetBody(raw_requests_[fd]);
+
+    output_buffers_[fd] = res.ToHttpString();
+    epoll_.ModSocket(fd, EPOLLOUT);
+
+    raw_requests_[fd].clear();
+  }
+}
+
+void Webserv::HandleEpollOut(int fd) {
+  if (output_buffers_.count(fd)) {
+    std::string& buffer = output_buffers_[fd];
+    ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
+
+    if (bytes_sent == -1) {
+      epoll_.RemoveSocket(fd);
+      close(fd);
+      output_buffers_.erase(fd);
+    } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
+      buffer = buffer.substr(bytes_sent);
+    } else {
+      output_buffers_.erase(fd);
+      epoll_.RemoveSocket(fd);
+      close(fd);
     }
   }
 }

@@ -27,6 +27,9 @@ class Webserv {
 
   static const size_t kBufferSize = 4096;
 
+  void HandleEpollIn(int fd);
+  void HandleEpollOut(int fd);
+
  public:
   Webserv();  // should be private but made public for testing
   Webserv(const std::string& config_file);
