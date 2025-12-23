@@ -25,7 +25,7 @@ class Webserv {
   std::set<int> keep_alive_fds_;
   std::map<int, std::string> raw_requests_;
 
-  static const size_t kBufferSize_ = 4096;
+  static const size_t kBufferSize = 4096;
 
  public:
   Webserv();  // should be private but made public for testing
