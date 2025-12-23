@@ -55,7 +55,7 @@ void Webserv::Run() {
       } else {
         // client fd
         if (events[i].events & EPOLLIN) {
-          char buffer[buffer_size_];
+          char buffer[kBufferSize_];
           ssize_t bytes_received =
               recv(events[i].data.fd, buffer, sizeof(buffer), 0);
 
