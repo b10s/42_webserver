@@ -87,7 +87,6 @@ void Webserv::Run() {
               epoll_.RemoveSocket(events[i].data.fd);
               close(events[i].data.fd);
               output_buffers_.erase(events[i].data.fd);
-              // throw error;
             } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
               buffer = buffer.substr(bytes_sent);
             } else {
