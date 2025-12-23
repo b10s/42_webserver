@@ -61,15 +61,20 @@ void Webserv::Run() {
             epoll_.RemoveSocket(events[i].data.fd);
             close(events[i].data.fd);
             output_buffers_.erase(events[i].data.fd);
-            // throw error;
+            raw_requests_.erase(events[i].data.fd);
           } else {
+            std::string received_chunk(buffer, bytes_received);
+            raw_requests_[events[i].data.fd].append(received_chunk);
+
             HttpResponse res;
             res.SetStatus(200, "OK");
             res.AddHeader("Content-Type", "text/plain");
-            res.SetBody("Hello, world\n");
+            res.SetBody(raw_requests_[events[i].data.fd]);
 
             output_buffers_[events[i].data.fd] = res.ToString();
             epoll_.ModSocket(events[i].data.fd, EPOLLOUT);
+
+            raw_requests_[events[i].data.fd].clear();
           }
         }
         if (events[i].events & EPOLLOUT) {

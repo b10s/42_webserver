@@ -23,6 +23,7 @@ class Webserv {
   std::map<int, int> cgi_fd_to_client_fd_;
   std::map<int, bool> client_fd_to_keep_alive_;
   std::set<int> keep_alive_fds_;
+  std::map<int, std::string> raw_requests_;
 
  public:
   Webserv();  // should be private but made public for testing
