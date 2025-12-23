@@ -35,6 +35,7 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   while (true) {
     int nfds = epoll_.Wait();
+    std::cout << "nfds: " << nfds << std::endl;
     if (nfds == -1) {
       // throw error;
     }
@@ -42,7 +43,9 @@ void Webserv::Run() {
     epoll_event* events = epoll_.GetEvents();
 
     for (int i = 0; i < nfds; ++i) {
+      std::cout << "test" << std::endl;
       if (epoll_.IsServerFd(events[i].data.fd)) {
+	// server fd
         sockaddr_in client_addr;
         socklen_t client_addr_len = sizeof(client_addr);
         int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
@@ -52,29 +55,36 @@ void Webserv::Run() {
         }
         epoll_.Addsocket(client_fd);
       } else {
+	// client fd
+	std::cout << "events: " << events[i].events << std::endl;
         if (events[i].events & EPOLLIN) {
-          char buffer[1024];
+          char buffer[buffer_size_];
           ssize_t bytes_received =
               recv(events[i].data.fd, buffer, sizeof(buffer), 0);
+	  std::cout << bytes_received << std::endl;
 
-          if (bytes_received <= 0) {
+          if (bytes_received == -1) {
             epoll_.RemoveSocket(events[i].data.fd);
             close(events[i].data.fd);
             output_buffers_.erase(events[i].data.fd);
             raw_requests_.erase(events[i].data.fd);
-          } else {
-            std::string received_chunk(buffer, bytes_received);
-            raw_requests_[events[i].data.fd].append(received_chunk);
+          } else if (bytes_received == 0) {
+	    // parse request here;
+	    // debug
+	    std::cout << raw_requests_[events[i].data.fd] << std::endl;
 
             HttpResponse res;
             res.SetStatus(200, "OK");
             res.AddHeader("Content-Type", "text/plain");
             res.SetBody(raw_requests_[events[i].data.fd]);
 
-            output_buffers_[events[i].data.fd] = res.ToString();
+            output_buffers_[events[i].data.fd] = res.ToHttpString();
             epoll_.ModSocket(events[i].data.fd, EPOLLOUT);
 
             raw_requests_[events[i].data.fd].clear();
+	  } else {
+            std::string received_chunk(buffer, bytes_received);
+            raw_requests_[events[i].data.fd].append(received_chunk);
           }
         }
         if (events[i].events & EPOLLOUT) {
