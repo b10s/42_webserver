@@ -14,7 +14,8 @@ RequestHandler::RequestHandler() {
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
   // very simple file path sample
-  full_path_ = conf.GetLocations()[0].GetRoot() + req.GetUri() + conf.GetLocations()[0].GetIndexFiles()[0];
+  full_path_ = conf.GetLocations()[0].GetRoot() + req.GetUri() +
+               conf.GetLocations()[0].GetIndexFiles()[0];
 }
 
 RequestHandler::~RequestHandler() {
