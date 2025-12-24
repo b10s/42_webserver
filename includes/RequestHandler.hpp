@@ -22,8 +22,6 @@ class RequestHandler {
   void HandleGet();
   void HandlePost();
   void HandleDelete();
-
-  std::string ReadFile(std::string& filename);
 };
 
 #endif
