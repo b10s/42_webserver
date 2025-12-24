@@ -68,6 +68,7 @@ void Webserv::HandleEpollIn(int fd) {
   ssize_t bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 
   if (bytes_received <= 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK) return;
     epoll_.RemoveSocket(fd);
     close(fd);
     output_buffers_.erase(fd);
@@ -103,7 +104,8 @@ void Webserv::HandleEpollOut(int fd) {
     std::string& buffer = output_buffers_[fd];
     ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 
-    if (bytes_sent <= 0) {
+    if (bytes_sent == -1) {
+      if (errno == EAGAIN || errno == EWOULDBLOCK) return;
       epoll_.RemoveSocket(fd);
       close(fd);
       output_buffers_.erase(fd);
