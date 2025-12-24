@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include "lib/http/Status.hpp"
 
 class HttpResponse {
  public:
@@ -11,7 +12,7 @@ class HttpResponse {
   HttpResponse(const HttpResponse& other);
   HttpResponse& operator=(const HttpResponse& other);
 
-  void SetStatus(int status, const std::string& reason_phrase);
+  void SetStatus(lib::http::Status status);
   void AddHeader(const std::string& key, const std::string& value);
   void SetBody(const std::string& body);
   std::string GetBody() const;
