@@ -1,4 +1,4 @@
-#include "Webserv.hpp"
+\#include "Webserv.hpp"
 
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
@@ -108,7 +108,7 @@ void Webserv::HandleEpollOut(int fd) {
     ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 
     if (bytes_sent == -1) {
-      if (errno == EAGAIN || errno = EWOULDBLOCK)
+      if (errno == EAGAIN || errno == EWOULDBLOCK)
         return;
       epoll_.RemoveSocket(fd);
       close(fd);
