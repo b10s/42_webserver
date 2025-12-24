@@ -4,7 +4,7 @@
 
 #include "lib/utils/string_utils.hpp"
 
-    Webserv::Webserv() {
+Webserv::Webserv() {
   // Default constructor
 }
 
