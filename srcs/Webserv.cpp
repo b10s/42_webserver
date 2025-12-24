@@ -105,7 +105,7 @@ void Webserv::HandleEpollOut(int fd) {
     std::string& buffer = output_buffers_[fd];
     ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 
-    if (bytes_sent <= 0) {
+    if (bytes_sent == -1) {
       epoll_.RemoveSocket(fd);
       close(fd);
       output_buffers_.erase(fd);
