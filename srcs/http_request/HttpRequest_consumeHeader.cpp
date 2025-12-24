@@ -82,9 +82,10 @@ void HttpRequest::ValidateAndExtractHost() {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   host_name_ = host_value.substr(0, i);
   if (i == host_value.size()) {
-    host_port_ = kDefaultPort;
+    host_port_ = static_cast<unsigned short>(kDefaultPort);
   } else {
-    host_port_ = host_value.substr(i + 1);
+    host_port_ =
+        lib::utils::StrToUnsignedShort(host_value.substr(i + 1)).Value();
   }
 }
 
