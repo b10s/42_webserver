@@ -61,7 +61,7 @@ TEST_F(HttpRequestConsumeHeader, HostWithPort_ParsesHostnameAndPort) {
   const char* ret = NULL;
   ASSERT_NO_THROW(ret = req.ConsumeHeader(hs.p_headers));
   EXPECT_EQ("example.com", req.GetHostName());
-  EXPECT_EQ("8080", req.GetHostPort());
+  EXPECT_EQ(8080, req.GetHostPort());
   EXPECT_EQ(0, req.GetContentLength());
 }
 
