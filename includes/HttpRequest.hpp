@@ -86,7 +86,7 @@ class HttpRequest {
   HttpRequest& operator=(const HttpRequest& src);
   ~HttpRequest();
 
-  void ParseRequest(const char* payload);
+  void ParseRequest(const char* data, size_t len);
   bool AdvanceHeaderParsing();
   bool AdvanceBodyParsing();
   const char* ConsumeMethod(const char* req);

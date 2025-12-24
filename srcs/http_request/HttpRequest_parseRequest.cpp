@@ -9,9 +9,9 @@
  *        - BAD_REQUEST: malformed request
  *        - INTERNAL_SERVER_ERROR: unexpected error during parsing
  */
-void HttpRequest::ParseRequest(const char* payload) {
+void HttpRequest::ParseRequest(const char* data, size_t len) {
   try {
-    buffer_ += payload;
+    buffer_.append(data, len);
 
     for (;;) {
       switch (progress_) {

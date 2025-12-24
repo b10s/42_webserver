@@ -2,6 +2,7 @@
 
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
+#include <stdexcept>
 
 #include "lib/utils/string_utils.hpp"
 
@@ -35,10 +36,6 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   while (true) {
     int nfds = epoll_.Wait();
-    if (nfds == -1) {
-      // throw error;
-    }
-
     epoll_event* events = epoll_.GetEvents();
 
     for (int i = 0; i < nfds; ++i) {
@@ -49,7 +46,8 @@ void Webserv::Run() {
         int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
                                &client_addr_len);
         if (client_fd == -1) {
-          // throw error;
+          std::cerr << "Failed to accept fd:" << client_fd << std::endl;
+          continue;
         }
         epoll_.Addsocket(client_fd);
       } else {
@@ -69,22 +67,34 @@ void Webserv::HandleEpollIn(int fd) {
   char buffer[kBufferSize];
   ssize_t bytes_received = recv(fd, buffer, sizeof(buffer), 0);
 
-  if (bytes_received == -1) {
+  if (bytes_received <= 0) {
     epoll_.RemoveSocket(fd);
     close(fd);
     output_buffers_.erase(fd);
-    raw_requests_.erase(fd);
+    requests_.erase(fd);
   } else {
-    raw_requests_[fd] = buffer;
-    HttpResponse res;
-    res.SetStatus(200, "OK");
-    res.AddHeader("Content-Type", "text/plain");
-    res.SetBody(raw_requests_[fd]);
+    HttpRequest& req = requests_[fd];
+    try {
+      req.ParseRequest(buffer, bytes_received);
+      if (req.IsDone()) {
+        HttpResponse res;
+        res.SetStatus(200, "OK");
+        res.AddHeader("Content-Type", "text/plain");
+        res.SetBody(req.GetHostName() + ":" + req.GetHostPort());
 
-    output_buffers_[fd] = res.ToHttpString();
-    epoll_.ModSocket(fd, EPOLLOUT);
+        output_buffers_[fd] = res.ToHttpString();
+        epoll_.ModSocket(fd, EPOLLOUT);
 
-    raw_requests_[fd].clear();
+        requests_.erase(fd);
+      }
+    } catch (const std::exception& e) {
+      std::cerr << "Request handling error for fd " << fd << ": " << e.what()
+                << std::endl;
+      // TODO: Send an appropriate error response to the client
+      requests_.erase(fd);
+      epoll_.RemoveSocket(fd);
+      close(fd);
+    }
   }
 }
 
@@ -93,16 +103,18 @@ void Webserv::HandleEpollOut(int fd) {
     std::string& buffer = output_buffers_[fd];
     ssize_t bytes_sent = send(fd, buffer.c_str(), buffer.length(), 0);
 
-    if (bytes_sent == -1) {
+    if (bytes_sent <= 0) {
       epoll_.RemoveSocket(fd);
       close(fd);
       output_buffers_.erase(fd);
+      requests_.erase(fd);
     } else if (static_cast<size_t>(bytes_sent) < buffer.length()) {
       buffer = buffer.substr(bytes_sent);
     } else {
       output_buffers_.erase(fd);
       epoll_.RemoveSocket(fd);
       close(fd);
+      requests_.erase(fd);
     }
   }
 }
