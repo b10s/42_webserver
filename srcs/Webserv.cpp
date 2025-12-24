@@ -3,7 +3,14 @@
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
 #include <stdexcept>
+#include <string>
 
+#include "HttpRequest.hpp"
+#include "HttpResponse.hpp"
+#include "RequestHandler.hpp"
+#include "ServerConfig.hpp"
+#include "lib/http/Method.hpp"
+#include "lib/http/Status.hpp"
 #include "lib/utils/string_utils.hpp"
 
 Webserv::Webserv() {
@@ -77,14 +84,14 @@ void Webserv::HandleEpollIn(int fd) {
     try {
       req.ParseRequest(buffer, bytes_received);
       if (req.IsDone()) {
-        HttpResponse res;
-        res.SetStatus(200, "OK");
-        res.AddHeader("Content-Type", "text/plain");
-        res.SetBody(req.GetHostName() + ":" + req.GetHostPort());
-
+	const ServerConfig* conf = FindServerConfigByPort(req.GetHostPort());
+	if (conf == NULL)
+	  return;
+	RequestHandler handler(*conf, req);
+	HttpResponse res = response_[fd];
+	res = handler.Run();
         output_buffers_[fd] = res.ToHttpString();
         epoll_.ModSocket(fd, EPOLLOUT);
-
         requests_.erase(fd);
       }
     } catch (const std::exception& e) {
