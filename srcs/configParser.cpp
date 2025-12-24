@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+
 #include "lib/utils/ReadFile.hpp"
 
 ConfigParser::ConfigParser() : current_pos_(0), server_configs_(), content("") {

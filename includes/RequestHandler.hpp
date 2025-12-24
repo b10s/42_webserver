@@ -11,8 +11,9 @@ class RequestHandler {
   ~RequestHandler();
 
   HttpResponse Run();
+
  private:
-  RequestHandler(); // shouldn't use default constructor
+  RequestHandler();  // shouldn't use default constructor
   ServerConfig conf_;
   HttpRequest req_;
   HttpResponse res_;

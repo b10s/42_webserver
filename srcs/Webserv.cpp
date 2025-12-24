@@ -84,12 +84,11 @@ void Webserv::HandleEpollIn(int fd) {
     try {
       req.ParseRequest(buffer, bytes_received);
       if (req.IsDone()) {
-	const ServerConfig* conf = FindServerConfigByPort(req.GetHostPort());
-	if (conf == NULL)
-	  return;
-	RequestHandler handler(*conf, req);
-	HttpResponse res = response_[fd];
-	res = handler.Run();
+        const ServerConfig* conf = FindServerConfigByPort(req.GetHostPort());
+        if (conf == NULL) return;
+        RequestHandler handler(*conf, req);
+        HttpResponse res = response_[fd];
+        res = handler.Run();
         output_buffers_[fd] = res.ToHttpString();
         epoll_.ModSocket(fd, EPOLLOUT);
         requests_.erase(fd);
