@@ -2,6 +2,7 @@
 
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
+#include <stdexcept>
 
 #include "lib/utils/string_utils.hpp"
 
@@ -35,10 +36,6 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   while (true) {
     int nfds = epoll_.Wait();
-    if (nfds == -1) {
-      // throw error;
-    }
-
     epoll_event* events = epoll_.GetEvents();
 
     for (int i = 0; i < nfds; ++i) {
@@ -49,7 +46,8 @@ void Webserv::Run() {
         int client_fd = accept(events[i].data.fd, (sockaddr*)&client_addr,
                                &client_addr_len);
         if (client_fd == -1) {
-          // throw error;
+          std::cerr << "Failed to accept fd:" << client_fd << std::endl;
+          continue;
         }
         epoll_.Addsocket(client_fd);
       } else {
