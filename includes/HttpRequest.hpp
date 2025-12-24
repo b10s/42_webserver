@@ -35,7 +35,7 @@ class HttpRequest {
   std::string uri_;
   Dict query_;
   std::string host_name_;
-  std::string host_port_;
+  unsigned short host_port_;
   std::string version_;
   Dict headers_;
   std::string body_;
@@ -79,7 +79,7 @@ class HttpRequest {
   // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
-  static const std::string kDefaultPort;
+  static const unsigned short kDefaultPort;
 
   HttpRequest();
   HttpRequest(const HttpRequest& src);
@@ -98,7 +98,7 @@ class HttpRequest {
   void SetMethod(lib::http::Method method);  // for test purposes
   const std::string& GetUri() const;
   const std::string& GetHostName() const;
-  const std::string& GetHostPort() const;
+  const unsigned short& GetHostPort() const;
   const std::string& GetVersion() const;
   const Dict& GetHeader() const;
   const std::string& GetHeader(const std::string& key) const;

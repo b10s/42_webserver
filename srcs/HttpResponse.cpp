@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "lib/exception/InvalidHeader.hpp"
+#include "lib/http/Status.hpp"
 #include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
@@ -13,9 +14,28 @@ HttpResponse::HttpResponse()
 HttpResponse::~HttpResponse() {
 }
 
-void HttpResponse::SetStatus(int status, const std::string& reason_phrase) {
+HttpResponse::HttpResponse(const HttpResponse& other)
+    : status_code_(other.status_code_),
+      reason_phrase_(other.reason_phrase_),
+      headers_(other.headers_),
+      body_(other.body_),
+      version_(other.version_) {
+}
+
+HttpResponse& HttpResponse::operator=(const HttpResponse& other) {
+  if (this != &other) {
+    status_code_ = other.status_code_;
+    reason_phrase_ = other.reason_phrase_;
+    headers_ = other.headers_;
+    body_ = other.body_;
+    version_ = other.version_;
+  }
+  return *this;
+}
+
+void HttpResponse::SetStatus(lib::http::Status status) {
   status_code_ = status;
-  reason_phrase_ = reason_phrase;
+  reason_phrase_ = lib::http::StatusToString(status);
 }
 
 void HttpResponse::AddHeader(const std::string& key, const std::string& value) {

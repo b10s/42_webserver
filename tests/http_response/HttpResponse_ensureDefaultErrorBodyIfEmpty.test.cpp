@@ -3,12 +3,13 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "enums.hpp"
+#include "lib/http/Status.hpp"
 
 // setStatus does not automatically generate a default error body
 TEST(HttpResponse, SetStatus_DoesNotGenerateBody) {
   HttpResponse res;
   res.SetBody("");
-  res.SetStatus(404, "Not Found");
+  res.SetStatus(lib::http::kNotFound);
   EXPECT_EQ(res.GetBody(), "");
 }
 
@@ -16,7 +17,7 @@ TEST(HttpResponse, SetStatus_DoesNotGenerateBody) {
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
   HttpResponse res;
   res.SetBody("");
-  res.SetStatus(404, "Not Found");
+  res.SetStatus(lib::http::kNotFound);
   res.EnsureDefaultErrorContent();
   EXPECT_FALSE(res.GetBody().empty());
   EXPECT_NE(res.GetBody().find("404 Not Found"), std::string::npos);
@@ -26,7 +27,7 @@ TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_DoesNotOverrideExistingBody) {
   HttpResponse res;
   res.SetBody("custom");
-  res.SetStatus(500, "Internal Server Error");
+  res.SetStatus(lib::http::kInternalServerError);
   res.EnsureDefaultErrorContent();
   EXPECT_EQ(res.GetBody(), "custom");
 }
@@ -35,7 +36,7 @@ TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_DoesNotOverrideExistingBody) {
 TEST(HttpResponse, ToString_AddsContentLengthIfMissingAndNoTransferEncoding) {
   HttpResponse res;
   res.SetBody("hello");
-  res.SetStatus(200, "OK");
+  res.SetStatus(lib::http::kOk);
   std::string s = res.ToHttpString();
   EXPECT_NE(s.find("content-length: 5\r\n"), std::string::npos);
 }
@@ -44,7 +45,7 @@ TEST(HttpResponse, ToString_AddsContentLengthIfMissingAndNoTransferEncoding) {
 TEST(HttpResponse, ToString_DoesNotAddContentLengthWhenTransferEncodingExists) {
   HttpResponse res;
   res.SetBody("hello");
-  res.SetStatus(200, "OK");
+  res.SetStatus(lib::http::kOk);
   res.AddHeader("transfer-encoding", "chunked");
   std::string s = res.ToHttpString();
   EXPECT_EQ(s.find("content-length:"), std::string::npos);

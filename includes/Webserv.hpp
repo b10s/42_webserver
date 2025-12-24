@@ -24,11 +24,15 @@ class Webserv {
   std::map<int, bool> client_fd_to_keep_alive_;
   std::set<int> keep_alive_fds_;
   std::map<int, HttpRequest> requests_;
+  std::map<int, HttpResponse> response_;
 
   static const size_t kBufferSize = 1024;
 
   void HandleEpollIn(int fd);
   void HandleEpollOut(int fd);
+
+  void HandleRequest(int client_fd, const unsigned short& port);
+  HttpResponse HandleGet(const ServerConfig* server_conf, HttpRequest& req);
 
  public:
   Webserv();  // should be private but made public for testing
@@ -43,7 +47,6 @@ class Webserv {
   // utility methods for accessing server configurations
   const std::map<unsigned short, ServerConfig>& GetPortConfigs() const;
   const ServerConfig* FindServerConfigByPort(const unsigned short& port) const;
-  void HandleRequest(int client_fd, const unsigned short& port);
 
   // for testing purposes
   void TestConfiguration();

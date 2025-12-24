@@ -6,14 +6,14 @@
 const size_t HttpRequest::kMaxHeaderSize;
 const size_t HttpRequest::kMaxPayloadSize;
 const size_t HttpRequest::kMaxUriSize;
-const std::string HttpRequest::kDefaultPort = "8080";
+const unsigned short HttpRequest::kDefaultPort = 8080;
 
 HttpRequest::HttpRequest()
     : buffer_(),
       method_(lib::http::kUnknownMethod),
       uri_(),
       host_name_(),
-      host_port_("8080"),
+      host_port_(8080),
       version_(),
       headers_(),
       body_(),
@@ -70,7 +70,7 @@ const std::string& HttpRequest::GetHostName() const {
   return host_name_;
 }
 
-const std::string& HttpRequest::GetHostPort() const {
+const unsigned short& HttpRequest::GetHostPort() const {
   return host_port_;
 }
 
