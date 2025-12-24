@@ -2,6 +2,7 @@
 #include <algorithm>
 #include "HttpResponse.hpp"
 #include "enums.hpp"
+#include "lib/http/Status.hpp"
 
 TEST(HttpResponseTest, DefaultConstructor) {
   HttpResponse response;
@@ -15,7 +16,7 @@ TEST(HttpResponseTest, DefaultConstructor) {
 
 TEST(HttpResponseTest, SetStatus) {
   HttpResponse response;
-  response.SetStatus(404, "Not Found");
+  response.SetStatus(lib::http::kNotFound);
   std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 404 Not Found"), std::string::npos);
@@ -67,7 +68,7 @@ TEST(HttpResponseTest, SetBody) {
 
 TEST(HttpResponseTest, FullResponse) {
   HttpResponse response;
-  response.SetStatus(201, "Created");
+  response.SetStatus(lib::http::kCreated);
   response.AddHeader("Content-Type", "text/plain");
   std::string body = "Created Successfully";
   response.SetBody(body);
