@@ -13,6 +13,25 @@ HttpResponse::HttpResponse()
 HttpResponse::~HttpResponse() {
 }
 
+HttpResponse::HttpResponse(const HttpResponse& other)
+    : status_code_(other.status_code_),
+      reason_phrase_(other.reason_phrase_),
+      headers_(other.headers_),
+      body_(other.body_),
+      version_(other.version_) {
+}
+
+HttpResponse& HttpResponse::operator=(const HttpResponse& other) {
+  if (this != &other) {
+    status_code_ = other.status_code_;
+    reason_phrase_ = other.reason_phrase_;
+    headers_ = other.headers_;
+    body_ = other.body_;
+    version_ = other.version_;
+  }
+  return *this;
+}
+
 void HttpResponse::SetStatus(int status, const std::string& reason_phrase) {
   status_code_ = status;
   reason_phrase_ = reason_phrase;

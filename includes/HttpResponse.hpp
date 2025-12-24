@@ -8,6 +8,8 @@ class HttpResponse {
  public:
   HttpResponse();
   ~HttpResponse();
+  HttpResponse(const HttpResponse& other);
+  HttpResponse& operator=(const HttpResponse& other);
 
   void SetStatus(int status, const std::string& reason_phrase);
   void AddHeader(const std::string& key, const std::string& value);
