@@ -12,12 +12,6 @@ static void callParseRoot(const std::string& input, Location* loc) {
   p.ParseRoot(loc);
 }
 
-static void callParseCgiPath(const std::string& input, Location* loc) {
-  ConfigParser p;
-  p.content = input;
-  p.ParseCgiPath(loc);
-}
-
 static void callParseUploadPath(const std::string& input, Location* loc) {
   ConfigParser p;
   p.content = input;
@@ -56,23 +50,6 @@ TEST(ConfigParser, SimpleDir_ParseRoot_EmptyValue_Throws) {
 TEST(ConfigParser, SimpleDir_ParseRoot_ExtraTokens_Throws) {
   Location loc;
   EXPECT_THROW(callParseRoot("/var /www;", &loc), std::runtime_error);
-}
-
-/* ===================== ParseCgiPath ===================== */
-TEST(ConfigParser, SimpleDir_ParseCgiPath_OK) {
-  Location loc;
-  EXPECT_NO_THROW(callParseCgiPath("cgi/cgi.py;", &loc));
-  EXPECT_EQ(loc.GetCgiPath(), "cgi/cgi.py");
-}
-
-TEST(ConfigParser, SimpleDir_ParseCgiPath_MissingSemicolon_Throws) {
-  Location loc;
-  EXPECT_THROW(callParseCgiPath("cgi/cgi.py", &loc), std::runtime_error);
-}
-
-TEST(ConfigParser, SimpleDir_ParseCgiPath_EmptyValue_Throws) {
-  Location loc;
-  EXPECT_THROW(callParseCgiPath(";", &loc), std::runtime_error);
 }
 
 /* ===================== ParseUploadPath ===================== */
@@ -125,4 +102,35 @@ TEST(ConfigParser, SimpleDir_ParseServerName_MissingSemicolon_Throws) {
 TEST(ConfigParser, SimpleDir_ParseServerName_EmptyValue_Throws) {
   ServerConfig sc;
   EXPECT_THROW(callParseServerName(";", &sc), std::runtime_error);
+}
+
+/* ===================== ParseCgi ===================== */
+TEST(ConfigParser, SimpleDir_ParseCgi_OK_On) {
+  Location loc;
+  ConfigParser p;
+  p.content = "on;";
+  EXPECT_NO_THROW(p.ParseCgi(&loc));
+  EXPECT_TRUE(loc.GetCgiEnabled());
+}
+
+TEST(ConfigParser, SimpleDir_ParseCgi_OK_Off) {
+  Location loc;
+  ConfigParser p;
+  p.content = "off;";
+  EXPECT_NO_THROW(p.ParseCgi(&loc));
+  EXPECT_FALSE(loc.GetCgiEnabled());
+}
+
+TEST(ConfigParser, SimpleDir_ParseCgi_MissingSemicolon_Throws) {
+  Location loc;
+  ConfigParser p;
+  p.content = "on";
+  EXPECT_THROW(p.ParseCgi(&loc), std::runtime_error);
+}
+
+TEST(ConfigParser, SimpleDir_ParseCgi_EmptyValue_Throws) {
+  Location loc;
+  ConfigParser p;
+  p.content = ";";
+  EXPECT_THROW(p.ParseCgi(&loc), std::runtime_error);
 }

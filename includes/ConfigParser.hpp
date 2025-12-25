@@ -26,11 +26,10 @@ const std::string kAllowMethods = "allow_methods";
 const std::string kRoot = "root";
 const std::string kAutoIndex = "autoindex";
 const std::string kIndex = "index";
-const std::string kExtension = "extension";
 const std::string kUploadPath = "upload_path";
 const std::string kServer = "server";
 const std::string kRedirect = "return";
-const std::string kCgiPath = "cgi_path";
+const std::string kCgi = "cgi";
 }  // namespace config_tokens
 
 namespace url_constants {
@@ -68,10 +67,9 @@ class ConfigParser {
   void ParseRoot(Location* location);
   void ParseAutoIndex(Location* location);
   void ParseIndex(Location* location);
-  void ParseExtensions(Location* location);
   void ParseUploadPath(Location* location);
   void ParseRedirect(Location* location);
-  void ParseCgiPath(Location* location);
+  void ParseCgi(Location* location);
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);
