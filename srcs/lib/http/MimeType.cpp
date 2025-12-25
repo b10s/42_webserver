@@ -12,29 +12,19 @@ static std::string GetExtension(const std::string& file_path) {
   return lib::utils::ToLowerAscii(path.substr(last_dot + 1));
 }
 
+// map is not thread safe, so we use a simple function here
 std::string DetectMimeTypeFromPath(const std::string& file_path) {
-  static std::map<std::string, std::string> mime_types;
-  if (mime_types.empty()) {
-    mime_types["html"] = "text/html";
-    mime_types["htm"] = "text/html";
-    mime_types["css"] = "text/css";
-    mime_types["js"] = "application/javascript";
-    mime_types["json"] = "application/json";
-    mime_types["png"] = "image/png";
-    mime_types["jpg"] = "image/jpeg";
-    mime_types["jpeg"] = "image/jpeg";
-    mime_types["gif"] = "image/gif";
-    mime_types["txt"] = "text/plain";
-    mime_types["pdf"] = "application/pdf";
-    mime_types["xml"] = "application/xml";
-    mime_types["svg"] = "image/svg+xml";
-    mime_types["ico"] = "image/x-icon";
-  }
-
   const std::string extension = GetExtension(file_path);
-  std::map<std::string, std::string>::const_iterator it =
-      mime_types.find(extension);
-  if (it != mime_types.end()) return it->second;
+  if (extension == "html" || extension == "htm") return "text/html";
+  if (extension == "css")  return "text/css";
+  if (extension == "js")   return "application/javascript";
+  if (extension == "json") return "application/json";
+  if (extension == "png")  return "image/png";
+  if (extension == "jpg" || extension == "jpeg") return "image/jpeg";
+  if (extension == "gif")  return "image/gif";
+  if (extension == "txt")  return "text/plain";
+  if (extension == "pdf")  return "application/pdf";
+  if (extension == "xml")  return "application/xml";
   return "application/octet-stream";  // Default MIME type
 }
 

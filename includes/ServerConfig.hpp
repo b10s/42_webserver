@@ -85,7 +85,6 @@ class ServerConfig {
     return locations_;
   }
 
-  // Add this method for testing purposes
   // Helper method for testing
   void AddDefaultLocation(const std::string& root = "./",
                           const std::string& index = "index.html") {

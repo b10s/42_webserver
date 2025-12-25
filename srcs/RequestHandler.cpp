@@ -1,6 +1,7 @@
 #include "RequestHandler.hpp"
 
 #include <iostream>
+#include <stdexcept>
 
 #include "HttpRequest.hpp"
 #include "ServerConfig.hpp"
@@ -36,13 +37,26 @@ HttpResponse RequestHandler::Run() {
 // if uri ends with '/', it's a directory so append index file
 // otherwise return as is
 // TODO: check file existence and permissions, detect dangerous paths (e.g.,
-// ../)
+// ../) 
+// Consider adding bounds checking or ensuring these vectors are never empty through validation.
 std::string RequestHandler::ResolveFullPath() const {
-  std::string path = conf_.GetLocations()[0].GetRoot() + req_.GetUri();
+  const std::vector<Location>& locations = conf_.GetLocations();
+  // Ensure we have at least one location
+  if (locations.empty()) {
+    throw std::runtime_error("No locations configured");
+  }
+  const Location& location = locations[0];
+  if (location.GetRoot().empty()) {
+    throw std::runtime_error("Location root is empty");
+  }
+  std::string path = location.GetRoot() + req_.GetUri();
   if (!path.empty() &&
       path[path.size() - 1] == '/') {  // if path ends with '/', it's a
                                        // directory so append index file
-    path += conf_.GetLocations()[0].GetIndexFiles()[0];
+    if (location.GetIndexFiles().empty()) {
+      throw std::runtime_error("No index files configured for location");
+    }
+    path += location.GetIndexFiles()[0];
   }
   return path;
 }
