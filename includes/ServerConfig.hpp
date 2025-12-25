@@ -17,7 +17,7 @@
 class ServerConfig {
  private:
   std::string host_;
-  std::string port_;
+  unsigned short port_;
   std::string server_name_;
   int max_body_size_;
   std::map<lib::http::Status, std::string> errors_;
@@ -28,9 +28,9 @@ class ServerConfig {
 
  public:
   ServerConfig();
-  void SetListen(const std::string& host, const std::string& port);
+  void SetListen(const std::string& host, const unsigned short& port);
   void SetHost(const std::string& host);
-  void SetPort(const std::string& port);
+  void SetPort(const unsigned short& port);
   void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
 
@@ -38,15 +38,15 @@ class ServerConfig {
     errors_[status] = path;
   }
 
-  const std::string GetHost() const {
+  const std::string& GetHost() const {
     return host_;
   }
 
-  const std::string GetPort() const {
+  const unsigned short& GetPort() const {
     return port_;
   }
 
-  const std::string GetServerName() const {
+  const std::string& GetServerName() const {
     return server_name_;
   }
 
@@ -99,4 +99,4 @@ class ServerConfig {
 // test_conf new ServerConfig();
 
 // test_conf.host_ == "asdsad"
-// test_conf.port_ == "8080"
+// test_conf.port_ == 8080

@@ -13,7 +13,7 @@ std::string MethodToString(Method method) {
       return "POST";
     case kDelete:
       return "DELETE";
-    case kUnknownMethod:
+    case lib::http::kUnknownMethod:
       return "UNKNOWN_METHOD";
     default:
       return "kNone";

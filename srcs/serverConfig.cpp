@@ -6,7 +6,7 @@ If the address is omitted, the server listens on all addresses (0.0.0.0).
 */
 ServerConfig::ServerConfig()
     : host_("0.0.0.0"),
-      port_("80"),
+      port_(80),
       server_name_(),
       max_body_size_(0),
       has_listen_(false),
@@ -14,7 +14,8 @@ ServerConfig::ServerConfig()
       has_max_body_(false) {
 }
 
-void ServerConfig::SetListen(const std::string& host, const std::string& port) {
+void ServerConfig::SetListen(const std::string& host,
+                             const unsigned short& port) {
   if (has_listen_) {
     throw std::runtime_error("Duplicate listen directive");
   }
@@ -31,7 +32,7 @@ void ServerConfig::SetHost(const std::string& host) {
   has_listen_ = true;
 }
 
-void ServerConfig::SetPort(const std::string& port) {
+void ServerConfig::SetPort(const unsigned short& port) {
   if (has_listen_) {
     throw std::runtime_error("Duplicate listen directive");
   }

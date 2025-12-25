@@ -26,6 +26,9 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
                                         std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
+    if (!http::IsValidHeaderChar(req[i])) {
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+    }
     BumpLenOrThrow(total_len, 1);
     ++i;
   }
@@ -40,6 +43,9 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   req += i;
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
+    if (!http::IsValidHeaderChar(req[vlen])) {
+      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+    }
     BumpLenOrThrow(total_len, 1);
     ++vlen;
   }
@@ -64,12 +70,10 @@ void HttpRequest::StoreHeader(const std::string& raw_key,
 }
 
 void HttpRequest::ValidateAndExtractHost() {
-  std::string host_value;
-  if (headers_.count("host"))
-    host_value = headers_["host"];
-  else
+  Dict::const_iterator it = headers_.find("host");
+  if (it == headers_.end())
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-
+  const std::string& host_value = it->second;
   if (host_value.empty())
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   size_t i = 0;
@@ -78,9 +82,10 @@ void HttpRequest::ValidateAndExtractHost() {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   host_name_ = host_value.substr(0, i);
   if (i == host_value.size()) {
-    host_port_ = kDefaultPort;
+    host_port_ = static_cast<unsigned short>(kDefaultPort);
   } else {
-    host_port_ = host_value.substr(i + 1);
+    host_port_ =
+        lib::utils::StrToUnsignedShort(host_value.substr(i + 1)).Value();
   }
 }
 
@@ -132,15 +137,15 @@ void HttpRequest::ParseConnectionDirective() {
   if (headers_.count(key)) {
     const std::string& v = headers_[key];
     if (v == "close")
-      keep_alive = false;
+      keep_alive_ = false;
     else if (v == "keep-alive")
-      keep_alive = true;
+      keep_alive_ = true;
     else
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     return;
   }
   // HTTP/1.1 default is keep-alive
-  keep_alive = (version_ == "HTTP/1.1");
+  keep_alive_ = (version_ == "HTTP/1.1");
 }
 
 const char* HttpRequest::ConsumeHeader(const char* req) {
@@ -150,7 +155,7 @@ const char* HttpRequest::ConsumeHeader(const char* req) {
     req = ReadHeaderLine(req, key, value, total_len);
     StoreHeader(key, value);
   }
-  if (!IsCRLF(req)) {
+  if (!IsCRLF(req)) {  // empty line with CRLF should follow after headers
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   BumpLenOrThrow(total_len, 2);

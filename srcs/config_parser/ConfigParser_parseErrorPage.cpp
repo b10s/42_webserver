@@ -34,9 +34,5 @@ void ConfigParser::ParseErrorPage(ServerConfig* server_config) {
   }
   server_config->SetErrorPage(static_cast<lib::http::Status>(error_code),
                               token);
-  token = Tokenize(content);
-  if (token != ";") {
-    throw std::runtime_error(
-        "Syntax error: expected ';' after error_page directive" + token);
-  }
+  ConsumeExpectedSemicolon("error_page");
 }

@@ -17,7 +17,7 @@ std::string StatusToString(Status status) {
       return "Reset Content";
     case kTemporaryRedirect:
       return "Temporary Redirect";
-    case kBadRequest:
+    case lib::http::kBadRequest:
       return "Bad Request";
     case kUnauthorized:
       return "Unauthorized";
@@ -29,7 +29,7 @@ std::string StatusToString(Status status) {
       return "Method Not Allowed";
     case kUriTooLong:
       return "URI Too Long";
-    case kInternalServerError:
+    case lib::http::kInternalServerError:
       return "Internal Server Error";
     case kNotImplemented:
       return "Not Implemented";
