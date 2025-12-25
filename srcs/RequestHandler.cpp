@@ -9,6 +9,7 @@
 #include "lib/http/MimeType.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/utils/ReadFile.hpp"
+#include "lib/utils/file_utils.hpp"
 
 RequestHandler::RequestHandler() {
 }
@@ -37,8 +38,7 @@ HttpResponse RequestHandler::Run() {
 // if uri ends with '/', it's a directory so append index file
 // otherwise return as is
 // TODO: check file existence and permissions, detect dangerous paths (e.g.,
-// ../) 
-// Consider adding bounds checking or ensuring these vectors are never empty through validation.
+// ../)
 std::string RequestHandler::ResolveFullPath() const {
   const std::vector<Location>& locations = conf_.GetLocations();
   // Ensure we have at least one location
@@ -50,9 +50,11 @@ std::string RequestHandler::ResolveFullPath() const {
     throw std::runtime_error("Location root is empty");
   }
   std::string path = location.GetRoot() + req_.GetUri();
-  if (!path.empty() &&
-      path[path.size() - 1] == '/') {  // if path ends with '/', it's a
-                                       // directory so append index file
+  // Check if path is actually a directory (either ends with '/' or filesystem
+  // says so)
+  bool is_directory = (!path.empty() && path[path.size() - 1] == '/') ||
+                      lib::utils::IsDirectory(path);
+  if (is_directory) {
     if (location.GetIndexFiles().empty()) {
       throw std::runtime_error("No index files configured for location");
     }

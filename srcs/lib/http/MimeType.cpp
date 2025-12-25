@@ -16,15 +16,15 @@ static std::string GetExtension(const std::string& file_path) {
 std::string DetectMimeTypeFromPath(const std::string& file_path) {
   const std::string extension = GetExtension(file_path);
   if (extension == "html" || extension == "htm") return "text/html";
-  if (extension == "css")  return "text/css";
-  if (extension == "js")   return "application/javascript";
+  if (extension == "css") return "text/css";
+  if (extension == "js") return "application/javascript";
   if (extension == "json") return "application/json";
-  if (extension == "png")  return "image/png";
+  if (extension == "png") return "image/png";
   if (extension == "jpg" || extension == "jpeg") return "image/jpeg";
-  if (extension == "gif")  return "image/gif";
-  if (extension == "txt")  return "text/plain";
-  if (extension == "pdf")  return "application/pdf";
-  if (extension == "xml")  return "application/xml";
+  if (extension == "gif") return "image/gif";
+  if (extension == "txt") return "text/plain";
+  if (extension == "pdf") return "application/pdf";
+  if (extension == "xml") return "application/xml";
   return "application/octet-stream";  // Default MIME type
 }
 
