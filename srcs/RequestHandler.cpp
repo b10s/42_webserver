@@ -5,9 +5,9 @@
 #include "HttpRequest.hpp"
 #include "ServerConfig.hpp"
 #include "lib/http/Method.hpp"
+#include "lib/http/MimeType.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/utils/ReadFile.hpp"
-#include "lib/http/MimeType.hpp"
 
 RequestHandler::RequestHandler() {
 }
@@ -35,16 +35,20 @@ HttpResponse RequestHandler::Run() {
 
 // if uri ends with '/', it's a directory so append index file
 // otherwise return as is
+// TODO: check file existence and permissions, detect dangerous paths (e.g.,
+// ../)
 std::string RequestHandler::ResolveFullPath() const {
   std::string path = conf_.GetLocations()[0].GetRoot() + req_.GetUri();
-  if (!path.empty() && path[path.size() - 1] == '/') { // if path ends with '/', it's a directory so append index file
+  if (!path.empty() &&
+      path[path.size() - 1] == '/') {  // if path ends with '/', it's a
+                                       // directory so append index file
     path += conf_.GetLocations()[0].GetIndexFiles()[0];
   }
   return path;
 }
 
 void RequestHandler::HandleGet() {
-  const std::string path = ResolveFullPath(); // TODO
+  const std::string path = ResolveFullPath();
   std::string body = lib::utils::ReadFile(path);
   res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
   res_.SetBody(body);

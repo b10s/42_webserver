@@ -1,13 +1,13 @@
 #ifndef MIME_TYPE_HPP_
 #define MIME_TYPE_HPP_
 
+#include <cctype>
 #include <map>
 #include <string>
-#include <cctype>
 
 namespace lib {
 namespace http {
-    std::string DetectMimeTypeFromPath(const std::string& file_path);
+std::string DetectMimeTypeFromPath(const std::string& file_path);
 }  // namespace http
 }  // namespace lib
 

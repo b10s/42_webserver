@@ -62,6 +62,10 @@ const std::string& HttpRequest::GetUri() const {
   return uri_;
 }
 
+void HttpRequest::SetUri(const std::string& uri) {
+  uri_ = uri;
+}
+
 const Dict& HttpRequest::GetQuery() const {
   return query_;
 }

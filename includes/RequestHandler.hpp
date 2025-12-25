@@ -11,6 +11,7 @@ class RequestHandler {
   ~RequestHandler();
 
   HttpResponse Run();
+  std::string ResolveFullPath() const;  // for testing purpose
 
  private:
   RequestHandler();  // shouldn't use default constructor
@@ -22,8 +23,6 @@ class RequestHandler {
   void HandleGet();
   void HandlePost();
   void HandleDelete();
-  std::string ResolveFullPath() const;
-  std::string DetectMimeType(const std::string& file_path) const;
 };
 
 #endif
