@@ -7,6 +7,7 @@
 namespace lib {
 namespace utils {
 // uri ends with '/' or is a directory
+// TODO: devide difinition and declaration
 bool IsDirectory(const std::string& path) {
   struct stat st;
   if (stat(path.c_str(), &st) != 0) return false;

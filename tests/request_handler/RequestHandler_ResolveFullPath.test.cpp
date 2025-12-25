@@ -1,4 +1,3 @@
-// test/gtest_RequestHandler.cpp
 #include <gtest/gtest.h>
 #include "RequestHandler.hpp"
 
