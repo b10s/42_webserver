@@ -35,18 +35,18 @@ HttpResponse RequestHandler::Run() {
 
 // if uri ends with '/', it's a directory so append index file
 // otherwise return as is
-std::string RequestHandler::ResolvePath() const {
+std::string RequestHandler::ResolveFullPath() const {
   std::string path = conf_.GetLocations()[0].GetRoot() + req_.GetUri();
-  if (!path.empty() && path.back() == '/') { // if path ends with '/', it's a directory so append index file
+  if (!path.empty() && path[path.size() - 1] == '/') { // if path ends with '/', it's a directory so append index file
     path += conf_.GetLocations()[0].GetIndexFiles()[0];
   }
-  return path_;
+  return path;
 }
 
 void RequestHandler::HandleGet() {
-  // const std::string path = ResolvePath(full_path_); TODO
-  std::string body = lib::utils::ReadFile(full_path_);
-  res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(full_path_));
+  const std::string path = ResolveFullPath(); // TODO
+  std::string body = lib::utils::ReadFile(path);
+  res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
   res_.SetBody(body);
   res_.SetStatus(lib::http::kOk);
 }

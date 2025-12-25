@@ -22,6 +22,8 @@ class RequestHandler {
   void HandleGet();
   void HandlePost();
   void HandleDelete();
+  std::string ResolveFullPath() const;
+  std::string DetectMimeType(const std::string& file_path) const;
 };
 
 #endif

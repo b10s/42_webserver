@@ -6,10 +6,10 @@ namespace http {
 
 static std::string GetExtension(const std::string& file_path) {
     std::string path = file_path;
-    std::string::size_type question = path.find('?');
-    if (question != std::string::npos) {
-        path = path.substr(0, question);
-    }
+    // std::string::size_type question = path.find('?'); // consumeUri already removes query string
+    // if (question != std::string::npos) {
+    //     path = path.substr(0, question);
+    // }
     std::string::size_type last_dot = path.find_last_of('.');
     if (last_dot == std::string::npos) return "";
     return lib::utils::ToLowerAscii(path.substr(last_dot + 1));
