@@ -31,6 +31,7 @@ const std::string kUploadPath = "upload_path";
 const std::string kServer = "server";
 const std::string kRedirect = "return";
 const std::string kCgiPath = "cgi_path";
+const std::string kCgi = "cgi";
 }  // namespace config_tokens
 
 namespace url_constants {
@@ -72,6 +73,7 @@ class ConfigParser {
   void ParseUploadPath(Location* location);
   void ParseRedirect(Location* location);
   void ParseCgiPath(Location* location);
+  void ParseCgi(Location* location);
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);

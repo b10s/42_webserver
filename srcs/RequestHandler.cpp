@@ -33,6 +33,7 @@ HttpResponse RequestHandler::Run() {
 }
 
 void RequestHandler::HandleGet() {
+  std::cout << conf_.GetLocations()[1].GetCgiEnabled() << std::endl;
   std::string body = lib::utils::ReadFile(full_path_);
   res_.AddHeader("Content-Type", "text/html");
   res_.SetBody(body);

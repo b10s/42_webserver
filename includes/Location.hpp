@@ -20,6 +20,7 @@ class Location {
   std::string upload_path_;
   std::string redirect_;
   std::string cgi_path_;
+  bool cgi_enabled_;
   bool has_allow_methods_;  // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
@@ -28,6 +29,7 @@ class Location {
   bool has_upload_path_;
   bool has_redirect_;
   bool has_cgi_path_;
+  bool has_cgi_enabled_;
 
  public:
   Location();
@@ -146,6 +148,21 @@ class Location {
 
   const std::string& GetCgiPath() const {
     return cgi_path_;
+  }
+
+  void SetCgiEnabled(const std::string& value) {
+    if (has_cgi_enabled_) {
+      throw std::runtime_error("Duplicate cgi directive");
+    }
+    if (value != "on" && value != "off") {
+      throw std::runtime_error("Invalid cgi value: " + value);
+    }
+    cgi_enabled_ = (value == "on");
+    has_cgi_enabled_ = true;
+  }
+
+  bool GetCgiEnabled() const {
+    return cgi_enabled_;
   }
 };
 

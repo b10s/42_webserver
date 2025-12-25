@@ -34,6 +34,24 @@ TEST(ConfigParser, Location_WithAutoIndexOn) {
   EXPECT_TRUE(locs[0].GetAutoIndex());
 }
 
+TEST(ConfigParser, Location_WithCgiOn) {
+  ServerConfig sc;
+  EXPECT_NO_THROW(callParseLocation("/cgi-bin/ { cgi on; }", &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  ASSERT_EQ(locs.size(), 1u);
+  EXPECT_TRUE(locs[0].GetCgiEnabled());
+}
+
+TEST(ConfigParser, Location_WithCgiOff) {
+  ServerConfig sc;
+  EXPECT_NO_THROW(callParseLocation("/cgi-bin/ { cgi off; }", &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  ASSERT_EQ(locs.size(), 1u);
+  EXPECT_FALSE(locs[0].GetCgiEnabled());
+}
+
 TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
   ServerConfig sc;
   const std::string s =
@@ -157,6 +175,25 @@ TEST(ConfigParser, Location_DuplicateCgiPath_Throws) {
       "/x/ {\n"
       "  cgi_path cgi/app.py;\n"
       "  cgi_path cgi/app2.py;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_DuplicateCgi_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  cgi on;\n"
+      "  cgi off;\n"
+      "}\n";
+  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
+}
+
+TEST(ConfigParser, Location_InvalidCgiValue_Throws) {
+  ServerConfig sc;
+  const std::string s =
+      "/x/ {\n"
+      "  cgi invalid;\n"
       "}\n";
   EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
 }
