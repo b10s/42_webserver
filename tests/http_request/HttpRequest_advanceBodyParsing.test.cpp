@@ -78,7 +78,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_MultipleRecvs) 
   EXPECT_FALSE(done); // still waiting for last chunk
   EXPECT_EQ("xxxxxxxxxx123", req.GetBody());
 
-  // third recv: 
+  // third recv:
   req.AppendToBufferForTest("2\r\n45\r\n0\r\n\r\n");
   done = req.AdvanceBodyParsing();
   EXPECT_TRUE(done); // all chunks complete
@@ -122,7 +122,7 @@ TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_Chunk
   req.SetContentLengthForTest(-1); // chunked
 
   EXPECT_THROW(req.AdvanceBodyParsing(), lib::exception::ResponseStatusException);
-} 
+}
 
 TEST_F(HttpRequestAdvanceBodyParsing, AdvanceBodyParsing_Chunked_Malformed_NoFinalCRLF) {
   req.SetBufferForTest("5\r\nhello\r\n0\r\n"); // missing final CRLF after last chunk

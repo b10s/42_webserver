@@ -59,7 +59,6 @@ TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
       "  autoindex off;\n"
       "  root /var/www/app;\n"
       "  index index.html;\n"
-      "  extension .php;\n"
       "}\n";
   EXPECT_NO_THROW(callParseLocation(s, &sc));
 
@@ -139,16 +138,6 @@ TEST(ConfigParser, Location_DuplicateIndex_Throws) {
   EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
 }
 
-TEST(ConfigParser, Location_DuplicateExtensions_Throws) {
-  ServerConfig sc;
-  const std::string s =
-      "/x/ {\n"
-      "  extension .php;\n"
-      "  extension .html;\n"
-      "}\n";
-  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
-}
-
 TEST(ConfigParser, Location_DuplicateUploadPath_Throws) {
   ServerConfig sc;
   const std::string s =
@@ -165,16 +154,6 @@ TEST(ConfigParser, Location_DuplicateRedirect_Throws) {
       "/x/ {\n"
       "  redirect https://example.com/;\n"
       "  redirect https://example.org/;\n"
-      "}\n";
-  EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
-}
-
-TEST(ConfigParser, Location_DuplicateCgiPath_Throws) {
-  ServerConfig sc;
-  const std::string s =
-      "/x/ {\n"
-      "  cgi_path cgi/app.py;\n"
-      "  cgi_path cgi/app2.py;\n"
       "}\n";
   EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
 }

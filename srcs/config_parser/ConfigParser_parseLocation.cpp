@@ -30,17 +30,11 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
       case kTokenIndex:
         ParseIndex(&location);
         break;
-      case kTokenExtension:
-        ParseExtensions(&location);
-        break;
       case kTokenUploadPath:
         ParseUploadPath(&location);
         break;
       case kTokenRedirect:
         ParseRedirect(&location);
-        break;
-      case kTokenCgiPath:
-        ParseCgiPath(&location);
         break;
       case kTokenCgi:
         ParseCgi(&location);

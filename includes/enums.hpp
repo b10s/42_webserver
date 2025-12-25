@@ -13,10 +13,8 @@ enum TokenType {
   kTokenRoot,
   kTokenAutoindex,
   kTokenIndex,
-  kTokenExtension,
   kTokenUploadPath,
   kTokenRedirect,
-  kTokenCgiPath,
   kTokenCgi
 };
 
