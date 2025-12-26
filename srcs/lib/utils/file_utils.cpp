@@ -1,4 +1,4 @@
-#include "lib/utils/ReadFile.hpp"
+#include "lib/utils/file_utils.hpp"
 
 #include <sys/stat.h>
 
@@ -7,6 +7,12 @@
 
 namespace lib {
 namespace utils {
+
+bool IsDirectory(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) return false;
+  return S_ISDIR(st.st_mode);
+}
 
 std::string ReadFile(const std::string& filename) {
   struct stat s;

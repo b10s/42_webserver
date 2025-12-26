@@ -107,6 +107,7 @@ class HttpRequest {
   lib::http::Method GetMethod() const;
   void SetMethod(lib::http::Method method);  // for test purposes
   const std::string& GetUri() const;
+  void SetUri(const std::string& uri);  // for test purposes
   const std::string& GetHostName() const;
   const unsigned short& GetHostPort() const;
   const std::string& GetVersion() const;
