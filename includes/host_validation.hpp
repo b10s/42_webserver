@@ -23,7 +23,8 @@ inline bool ContainsInvalidChars(const std::string& host) {
 bool LooksLikeIPv4(const std::string& host);
 bool IsValidIPv4Segment(const std::string& segment);
 bool IsValidIPv4(const std::string& host);
-bool LooksLikeDomain(const std::string& host);
+bool IsValidDomainLabel(const std::string& label);
+bool IsValidDomainName(const std::string& host);
 bool IsValidHost(const std::string& host);
 
 }  // namespace host_validation

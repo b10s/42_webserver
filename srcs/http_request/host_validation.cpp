@@ -35,10 +35,17 @@ bool host_validation::IsValidIPv4Segment(const std::string& segment) {
 }
 
 bool host_validation::IsValidIPv4(const std::string& host) {
+  // check that host contains only digits and dots (disallow hyphens)
+  for (size_t i = 0; i < host.length(); ++i) {
+    char c = host[i];
+    if (!std::isdigit(c) && c != '.') {
+      return false;
+    }
+  }
+  // then split by '.' and validate each segment
   std::istringstream ss(host);
   std::string segment;
   int seg_cnt = 0;  // count of segments
-
   while (std::getline(ss, segment, '.')) {
     if (++seg_cnt > 4) return false;
     if (!IsValidIPv4Segment(segment)) return false;
@@ -46,21 +53,31 @@ bool host_validation::IsValidIPv4(const std::string& host) {
   return seg_cnt == 4;
 }
 
-bool host_validation::LooksLikeDomain(const std::string& host) {
-  size_t dot_pos = host.find('.');
-  if (dot_pos == std::string::npos || dot_pos == 0 ||
-      dot_pos == host.length() - 1) {
-    return false;  // No dot or dot at start/end
+bool host_validation::IsValidDomainName(const std::string& host) {
+  if (host.empty() || host[0] == '.' || host[host.length() - 1] == '.') {
+    return false;  // empty or starts/ends with dot
   }
-  // Check for leading/trailing hyphens in each label
-  // Most DNS resolvers will reject hostnames starting with hyphens as invalid
-  // RFC 1123 explicitly forbids leading/trailing hyphens in each label
   std::istringstream ss(host);
   std::string label;
+  int label_count = 0;
   while (std::getline(ss, label, '.')) {
-    if (label.empty() || label[0] == '-' || label[label.length() - 1] == '-') {
-      return false;
-    }
+    if (!IsValidDomainLabel(label)) return false;
+    ++label_count;
+  }
+  return label_count >= 2;  // at least two labels (e.g., example.com)
+}
+
+// Check for leading/trailing hyphens in each label
+// Most DNS resolvers will reject hostnames starting with hyphens as invalid
+// RFC 1123 explicitly forbids leading/trailing hyphens in each label
+bool host_validation::IsValidDomainLabel(const std::string& label) {
+  if (label.empty() || label.length() > 63) return false;
+  if (label[0] == '-' || label[label.length() - 1] == '-') {
+    return false;
+  }
+  for (std::size_t i = 0; i < label.length(); ++i) {
+    char c = label[i];
+    if (!std::isalnum(c) && c != '-') return false;
   }
   return true;
 }
@@ -68,11 +85,14 @@ bool host_validation::LooksLikeDomain(const std::string& host) {
 bool host_validation::IsValidHost(const std::string& host) {
   if (host.empty()) return false;
   if (host == "localhost") return true;
+  // Check for IPv4
+  // looks redundant but necessary to avoid
+  // misclassifying invalid IPV4 as domain names
   if (LooksLikeIPv4(host)) {
     if (IsValidIPv4(host)) return true;
     return false;
   }
+  // Check for Domain Name
   if (ContainsInvalidChars(host)) return false;
-  if (LooksLikeDomain(host)) return true;
-  return false;
+  return IsValidDomainName(host);
 }

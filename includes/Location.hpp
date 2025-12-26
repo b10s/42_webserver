@@ -16,18 +16,16 @@ class Location {
   std::string root_;
   bool autoindex_;
   std::vector<std::string> index_files_;  // multiple index files allowed
-  std::string extensions_;
   std::string upload_path_;
   std::string redirect_;
-  std::string cgi_path_;
+  bool cgi_enabled_;
   bool has_allow_methods_;  // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
   bool has_index_directive_;  // index directive should appear only once
-  bool has_extensions_;
   bool has_upload_path_;
   bool has_redirect_;
-  bool has_cgi_path_;
+  bool has_cgi_enabled_;
 
  public:
   Location();
@@ -100,18 +98,6 @@ class Location {
     return index_files_;
   }
 
-  void SetExtension(const std::string& ext) {
-    if (has_extensions_) {
-      throw std::runtime_error("Duplicate extension directive");
-    }
-    extensions_ = ext;
-    has_extensions_ = true;
-  }
-
-  const std::string& GetExtensions() const {
-    return extensions_;
-  }
-
   void SetUploadPath(const std::string& path) {
     if (has_upload_path_) {
       throw std::runtime_error("Duplicate upload_path directive");
@@ -136,16 +122,19 @@ class Location {
     return redirect_;
   }
 
-  void SetCgiPath(const std::string& path) {
-    if (has_cgi_path_) {
-      throw std::runtime_error("Duplicate cgi_path directive");
+  void SetCgiEnabled(const std::string& value) {
+    if (has_cgi_enabled_) {
+      throw std::runtime_error("Duplicate cgi directive");
     }
-    cgi_path_ = path;
-    has_cgi_path_ = true;
+    if (value != "on" && value != "off") {
+      throw std::runtime_error("Invalid cgi value: " + value);
+    }
+    cgi_enabled_ = (value == "on");
+    has_cgi_enabled_ = true;
   }
 
-  const std::string& GetCgiPath() const {
-    return cgi_path_;
+  bool GetCgiEnabled() const {
+    return cgi_enabled_;
   }
 };
 
