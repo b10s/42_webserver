@@ -8,7 +8,6 @@
 #include "lib/http/Method.hpp"
 #include "lib/http/MimeType.hpp"
 #include "lib/http/Status.hpp"
-#include "lib/utils/ReadFile.hpp"
 #include "lib/utils/file_utils.hpp"
 
 RequestHandler::RequestHandler() {

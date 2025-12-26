@@ -3,10 +3,13 @@
 
 class RequestHandlerTest : public ::testing::Test {
 protected:
-    void SetUp() override {
-        config.AddDefaultLocation("/var/www/html", "index.html");
-    }
     ServerConfig config;
+    void SetUp() override {
+        Location location;
+        location.SetRoot("/var/www/html");
+        location.AddIndex("index.html");
+        config.AddLocation(location);
+    }
 };
 
 TEST_F(RequestHandlerTest, ResolveFullPath_RootDirectory) {

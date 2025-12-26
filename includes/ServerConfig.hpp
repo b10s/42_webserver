@@ -84,15 +84,6 @@ class ServerConfig {
   const std::vector<Location>& GetLocations() const {
     return locations_;
   }
-
-  // Helper method for testing
-  void AddDefaultLocation(const std::string& root = "./",
-                          const std::string& index = "index.html") {
-    Location location;
-    location.SetRoot(root);
-    location.AddIndex(index);
-    AddLocation(location);
-  }
 };
 
 #endif
