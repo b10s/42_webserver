@@ -38,6 +38,7 @@ HttpResponse RequestHandler::Run() {
 // otherwise return as is
 // TODO: check file existence and permissions, detect dangerous paths (e.g.,
 // ../)
+// return 308 if uri is a directory but missing trailing '/' (normalize)
 std::string RequestHandler::ResolveFullPath() const {
   const std::vector<Location>& locations = conf_.GetLocations();
   // Ensure we have at least one location

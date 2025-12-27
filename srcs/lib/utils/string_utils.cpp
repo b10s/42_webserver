@@ -35,5 +35,12 @@ lib::type::Optional<unsigned short> StrToUnsignedShort(const std::string& s) {
   return lib::type::Optional<unsigned short>(result);
 }
 
+bool StartsWith(const std::string& str, const std::string& prefix) {
+  if (prefix.size() > str.size()) {
+    return false;
+  }
+  return str.compare(0, prefix.size(), prefix) == 0;
+}
+
 }  // namespace utils
 }  // namespace lib
