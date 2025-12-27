@@ -13,7 +13,7 @@
 // /kapouet2/test→ /
 // /images/cat.png → /images
 
-TEST(ConfigParser, Server_MatchLocation_BasicMatches) {
+TEST(ConfigParser, Server_FindLocation_BasicMatches) {
   ConfigParser parser;
   parser.content =
       "{ "
@@ -28,23 +28,23 @@ TEST(ConfigParser, Server_MatchLocation_BasicMatches) {
   const ServerConfig& server = servers[0];
   // Test matching /kapouet/pouic/toto
   {
-    const Location* loc =
-        server.MatchLocation("/kapouet/pouic/toto");
-    ASSERT_NE(loc, nullptr);
-    EXPECT_EQ(loc->GetName(), "/kapouet");
+    const Location& loc =
+        server.FindLocationForUri("/kapouet/pouic/toto");
+    ASSERT_NE(&loc, nullptr);
+    EXPECT_EQ(loc.GetName(), "/kapouet");
   }
   // Test matching /kapouet2/test
   {
-    const Location* loc =
-        server.MatchLocation("/kapouet2/test");
-    ASSERT_NE(loc, nullptr);
-    EXPECT_EQ(loc->GetName(), "/");
+    const Location& loc =
+        server.FindLocationForUri("/kapouet2/test");
+    ASSERT_NE(&loc, nullptr);
+    EXPECT_EQ(loc.GetName(), "/");
   }
   // Test matching /images/cat.png
   {
-    const Location* loc =
-        server.MatchLocation("/images/cat.png");
-    ASSERT_NE(loc, nullptr);
-    EXPECT_EQ(loc->GetName(), "/images");
+    const Location& loc =
+        server.FindLocationForUri("/images/cat.png");
+    ASSERT_NE(&loc, nullptr);
+    EXPECT_EQ(loc.GetName(), "/images");
   }
 }

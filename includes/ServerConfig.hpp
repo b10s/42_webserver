@@ -33,7 +33,9 @@ class ServerConfig {
   void SetPort(const unsigned short& port);
   void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
-  const Location& MatchLocation(const std::string& uri) const;
+  bool IsPathPrefix(const std::string& uri,
+                     const std::string& prefix) const;
+  const Location& FindLocationForUri(const std::string& uri) const;
 
   void SetErrorPage(lib::http::Status status, const std::string& path) {
     errors_[status] = path;
