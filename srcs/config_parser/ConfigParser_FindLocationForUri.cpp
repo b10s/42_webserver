@@ -1,7 +1,8 @@
 #include "ConfigParser.hpp"
 #include "lib/utils/string_utils.hpp"
 
-bool ServerConfig::IsPathPrefix(const std::string& uri, const std::string& prefix) const {
+bool ServerConfig::IsPathPrefix(const std::string& uri,
+                                const std::string& prefix) const {
   if (prefix == "/") return true;
   if (uri.size() < prefix.size()) return false;
   if (uri.compare(0, prefix.size(), prefix) != 0) return false;
