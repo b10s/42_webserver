@@ -38,16 +38,13 @@ HttpResponse RequestHandler::Run() {
 // otherwise return as is
 // TODO: check file existence and permissions, detect dangerous paths (e.g.,
 // ../)
+// return 308 if uri is a directory but missing trailing '/' (normalize)
 std::string RequestHandler::ResolveFullPath() const {
   const std::vector<Location>& locations = conf_.GetLocations();
-  // Ensure we have at least one location
   if (locations.empty()) {
-    throw std::runtime_error("No locations configured");
+    throw std::runtime_error("No locations configured in server");
   }
-  const Location& location = locations[0];
-  if (location.GetRoot().empty()) {
-    throw std::runtime_error("Location root is empty");
-  }
+  const Location& location = conf_.FindLocationForUri(req_.GetUri());
   std::string path = location.GetRoot() + req_.GetUri();
   // Check if path is actually a directory (either ends with '/' or filesystem
   // says so)

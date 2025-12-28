@@ -1,14 +1,20 @@
 #include "ConfigParser.hpp"
 
-// Extracts the next token (word or symbol) from the configuration file content.
+/*
+I made the trailing slash in Location names optional for simplicity.
+Previously, we enforced a trailing slash,
+but that introduces cases where URI normalization or redirects
+become necessary (e.g. handling /kapouet and /kapouet/).
+*/
 void ConfigParser::ParseLocation(ServerConfig* server) {
   (void)server;
   std::string token;
   Location location = Location();
 
   token = Tokenize(content);
-  if (token.empty() || token[0] != '/' || token[token.size() - 1] != '/')
+  if (token.empty() || token[0] != '/') {
     throw std::runtime_error("Invalid location name: " + token);
+  }
   location.SetName(token);
   token = Tokenize(content);
   if (token != "{")
