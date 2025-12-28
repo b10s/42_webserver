@@ -6,8 +6,10 @@
 #include <cstdlib>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
 
 namespace {
@@ -171,9 +173,11 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.1.
   meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.2.
-  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
+  //  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
+  meta_vars_["CONTENT_LENGTH"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.3.
-  meta_vars_["CONTENT_TYPE"] = req.GetHeader("content-type");
+  //  meta_vars_["CONTENT_TYPE"] = req.GetHeader("content-type");
+  meta_vars_["CONTENT_TYPE"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.4.
   meta_vars_["GATEWAY_INTERFACE"] = lib::type::Optional<std::string>("CGI/1.1");
   // RFC 3875 4.1.5.
@@ -227,6 +231,7 @@ HttpResponse CgiExecutor::Run() {
   int pid = fork();
   if (pid < 0)
     ;
+
   if (pid == 0) {  // Child process
     close(pipe_in[kWriteEnd]);
     close(pipe_out[kReadEnd]);
@@ -247,6 +252,7 @@ HttpResponse CgiExecutor::Run() {
     }
     exit(1);
   } else {  // Parent process
+    close(pipe_out[kWriteEnd]);
     close(pipe_in[kReadEnd]);
 
     std::string req_method = GetMetaVar("REQUEST_METHOD");

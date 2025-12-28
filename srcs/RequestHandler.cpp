@@ -71,7 +71,7 @@ void RequestHandler::HandleGet() {
   res_.SetStatus(lib::http::kOk);
 
   CgiExecutor cgi(req_, path);
-  cgi.Run();
+  res_ = cgi.Run();
 }
 
 void RequestHandler::HandlePost() {
