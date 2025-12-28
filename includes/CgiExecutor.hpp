@@ -40,14 +40,12 @@ class CgiExecutor {
   std::map<std::string, lib::type::Optional<std::string> > meta_vars_;
   std::string GetMetaVar(const std::string&) const;
   std::vector<std::string> GetMetaVars() const;
-  void InitializeMetaVars(const HttpRequest& req);
+  void InitializeMetaVars(const HttpRequest&);
 
   std::string script_path_;
-  std::string ResolveScriptPath(const HttpRequest& req,
-                                const Location& location);
 
  public:
-  CgiExecutor(const HttpRequest&, const Location&);
+  CgiExecutor(const HttpRequest&, const std::string&);
   ~CgiExecutor();
 
   HttpResponse Run();

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "CgiExecutor.hpp"
 #include "HttpRequest.hpp"
 #include "ServerConfig.hpp"
 #include "lib/http/Method.hpp"
@@ -68,6 +69,9 @@ void RequestHandler::HandleGet() {
   res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
   res_.SetBody(body);
   res_.SetStatus(lib::http::kOk);
+
+  CgiExecutor cgi(req_, path);
+  cgi.Run();
 }
 
 void RequestHandler::HandlePost() {

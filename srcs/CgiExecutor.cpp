@@ -141,9 +141,9 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
 }
 }  // namespace
 
-CgiExecutor::CgiExecutor(const HttpRequest& req, const Location& location)
-    : script_path_(ResolveScriptPath(req, location)) {
+CgiExecutor::CgiExecutor(const HttpRequest& req, const std::string& script_path){
   InitializeMetaVars(req);
+  script_path_ = script_path;
 }
 
 CgiExecutor::~CgiExecutor() {
@@ -165,20 +165,6 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
     }
   }
   return ret_vars;
-}
-
-std::string CgiExecutor::ResolveScriptPath(const HttpRequest& req,
-                                           const Location& location) {
-  std::string root = location.GetRoot();
-  std::string uri = req.GetUri();
-
-  if (!root.empty() && root[root.length() - 1] == '/') {
-    root.erase(root.length() - 1);
-  }
-  if (!uri.empty() && uri[0] != '/') {
-    uri.insert(0, "/");
-  }
-  return root + uri;
 }
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
