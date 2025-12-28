@@ -1,14 +1,17 @@
-#ifndef LIB_UTILS_READ_FILE_HPP_
-#define LIB_UTILS_READ_FILE_HPP_
+#ifndef FILE_UTILS_HPP_
+#define FILE_UTILS_HPP_
+#include <sys/stat.h>
 
 #include <string>
 
 namespace lib {
 namespace utils {
 
+bool IsDirectory(const std::string& path);
+
 std::string ReadFile(const std::string& filename);
 
 }  // namespace utils
 }  // namespace lib
 
-#endif
+#endif  // FILE_UTILS_HPP_
