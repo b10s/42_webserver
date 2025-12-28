@@ -2,12 +2,13 @@
 #include "lib/utils/string_utils.hpp"
 
 // treat "/path////" as "/path"
-// NOTE(routing): We intentionally do NOT normalize internal "//" in the URI path.
-// Routing normalization only absorbs trailing-slash variations ("/img" vs "/img/").
-// Any non-trivial normalization or dangerous patterns (e.g. "//", "..", percent-decoding)
-// are handled later in the security/path-validation phase.
+// NOTE(routing): We intentionally do NOT normalize internal "//" in the URI
+// path. Routing normalization only absorbs trailing-slash variations ("/img" vs
+// "/img/"). Any non-trivial normalization or dangerous patterns (e.g. "//",
+// "..", percent-decoding) are handled later in the security/path-validation
+// phase.
 static std::string TrimTrailingSlashExceptRoot(const std::string& s) {
-  if (s.size() <= 1) return s;              // "/"
+  if (s.size() <= 1) return s;  // "/"
   size_t end = s.size();
   while (end > 1 && s[end - 1] == '/') {
     --end;
@@ -15,7 +16,8 @@ static std::string TrimTrailingSlashExceptRoot(const std::string& s) {
   return s.substr(0, end);
 }
 
-// URI and prefix are both assumed to be trimmed of trailing slashes (except for root "/")
+// URI and prefix are both assumed to be trimmed of trailing slashes (except for
+// root "/")
 bool ServerConfig::IsPathPrefix(const std::string& uri_key,
                                 const std::string& loc_key) const {
   if (loc_key == "/") return true;
@@ -44,7 +46,8 @@ const Location& ServerConfig::FindLocationForUri(const std::string& uri) const {
     }
   }
   if (longest_match == NULL) {
-    throw std::runtime_error("No matching location found for URI: " + uri_key); // TODO: return HTTP 404?
+    throw std::runtime_error("No matching location found for URI: " +
+                             uri_key);  // TODO: return HTTP 404?
   }
   return *longest_match;
 }
