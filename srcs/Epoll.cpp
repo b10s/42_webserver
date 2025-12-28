@@ -29,13 +29,15 @@ Epoll::~Epoll() {
 void Epoll::AddServer(unsigned short port) {
   int server_fd = socket(PF_INET, SOCK_STREAM, 0);
   if (server_fd == -1) {
-    throw std::runtime_error("socket() failed. " + std::string(strerror(errno)));
+    throw std::runtime_error("socket() failed. " +
+                             std::string(strerror(errno)));
   }
   int opt = 1;
   int ret;
   ret = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   if (ret == -1) {
-    throw std::runtime_error("setsockopt() failed. " + std::string(strerror(errno)));
+    throw std::runtime_error("setsockopt() failed. " +
+                             std::string(strerror(errno)));
   }
 
   sockaddr_in server_addr;
@@ -51,7 +53,8 @@ void Epoll::AddServer(unsigned short port) {
 
   ret = listen(server_fd, SOMAXCONN);
   if (ret == -1) {
-    throw std::runtime_error("listen() failed. " + std::string(strerror(errno)));
+    throw std::runtime_error("listen() failed. " +
+                             std::string(strerror(errno)));
   }
 
   Addsocket(server_fd);

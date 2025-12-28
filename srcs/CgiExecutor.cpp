@@ -3,11 +3,15 @@
 #include <sys/wait.h>
 
 #include <cctype>
+#include <cerrno>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
-#include <sstream>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
+#include "HttpResponse.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
@@ -143,7 +147,8 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
 }
 }  // namespace
 
-CgiExecutor::CgiExecutor(const HttpRequest& req, const std::string& script_path){
+CgiExecutor::CgiExecutor(const HttpRequest& req,
+                         const std::string& script_path) {
   InitializeMetaVars(req);
   script_path_ = script_path;
 }
@@ -215,69 +220,67 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 }
 
 HttpResponse CgiExecutor::Run() {
-  int pipe_in[2], pipe_out[2];
+  try {
+    int pipe_in[2], pipe_out[2];
 
-  if (pipe(pipe_in) < 0)
-    // throw error
-    ;
-  if (pipe(pipe_out) < 0) {
-    ClosePipe(pipe_in);
-    // throw error
-  }
+    if (pipe(pipe_in) < 0) throw std::runtime_error("pipe error");
+    if (pipe(pipe_out) < 0) {
+      ClosePipe(pipe_in);
+      throw std::runtime_error("pipe error");
+    }
 
-  std::vector<std::string> meta_vars = GetMetaVars();
-  std::vector<char*> envp = CreateEnvp(meta_vars);
+    std::vector<std::string> meta_vars = GetMetaVars();
+    std::vector<char*> envp = CreateEnvp(meta_vars);
 
-  int pid = fork();
-  if (pid < 0)
-    ;
+    int pid = fork();
+    if (pid < 0) throw std::runtime_error("fork error");
 
-  if (pid == 0) {  // Child process
-    close(pipe_in[kWriteEnd]);
-    close(pipe_out[kReadEnd]);
-    dup2(pipe_in[kReadEnd], STDIN_FILENO);
-    dup2(pipe_out[kWriteEnd], STDOUT_FILENO);
-    close(pipe_in[kReadEnd]);
-    close(pipe_out[kWriteEnd]);
+    if (pid == 0) {  // Child process
+      close(pipe_in[kWriteEnd]);
+      close(pipe_out[kReadEnd]);
+      dup2(pipe_in[kReadEnd], STDIN_FILENO);
+      dup2(pipe_out[kWriteEnd], STDOUT_FILENO);
+      close(pipe_in[kReadEnd]);
+      close(pipe_out[kWriteEnd]);
 
-    lib::type::Optional<std::string> shebang = ReadShebang(script_path_);
-    if (shebang.HasValue()) {
-      std::string interpreter = shebang.Value();
-      char* argv[] = {const_cast<char*>(interpreter.c_str()),
-                      const_cast<char*>(script_path_.c_str()), NULL};
-      execve(interpreter.c_str(), argv, envp.data());
-    } else {
+      lib::type::Optional<std::string> shebang = ReadShebang(script_path_);
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
       execve(script_path_.c_str(), argv, envp.data());
+      std::cout << "Status: 500 Internal Server Error\r\nContent-Type: "
+                   "text/plain\r\n\r\n";
+      std::cout << "Execve failed: " << std::strerror(errno) << std::endl;
+      exit(1);
+    } else {  // Parent process
+      close(pipe_in[kReadEnd]);
+      std::string req_method = GetMetaVar("REQUEST_METHOD");
+      if (req_method == "GET") {
+        close(pipe_out[kWriteEnd]);
+      } else if (req_method == "POST") {
+        ;
+      } else if (req_method == "DELETE") {
+        ;
+      }
+
+      std::string cgi_output;
+      char buffer[4096];
+      ssize_t bytes_read;
+
+      while ((bytes_read = read(pipe_out[kReadEnd], buffer, sizeof(buffer))) >
+             0) {
+        cgi_output.append(buffer, bytes_read);
+      }
+      ClosePipe(pipe_out);
+
+      int status;
+      waitpid(pid, &status, 0);
+
+      std::cout << "cgi output: " << cgi_output << std::endl;
+      HttpResponse res = ParseCgiResponse(cgi_output);
+      return res;
     }
-    exit(1);
-  } else {  // Parent process
-    close(pipe_out[kWriteEnd]);
-    close(pipe_in[kReadEnd]);
-
-    std::string req_method = GetMetaVar("REQUEST_METHOD");
-    if (req_method == "GET") {
-      close(pipe_in[kWriteEnd]);
-    } else if (req_method == "POST") {
-      ;
-    } else if (req_method == "DELETE") {
-      ;
-    }
-
-    std::string cgi_output;
-    char buffer[4096];
-    ssize_t bytes_read;
-
-    while ((bytes_read = read(pipe_out[kReadEnd], buffer, sizeof(buffer))) >
-           0) {
-      cgi_output.append(buffer, bytes_read);
-    }
-    ClosePipe(pipe_out);
-
-    int status;
-    waitpid(pid, &status, 0);
-
-    HttpResponse res = ParseCgiResponse(cgi_output);
+  } catch (std::exception& e) {
+    HttpResponse res;
+    res.SetStatus(lib::http::kInternalServerError);
     return res;
   }
 }
