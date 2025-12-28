@@ -47,4 +47,35 @@ TEST(ConfigParser, Server_FindLocation_BasicMatches) {
     ASSERT_NE(&loc, nullptr);
     EXPECT_EQ(loc.GetName(), "/images");
   }
+
+  // Find location that does not exist
+  {
+    const Location& loc =
+        server.FindLocationForUri("/nonexistent/path");
+    ASSERT_NE(&loc, nullptr);
+    EXPECT_EQ(loc.GetName(), "/");
+  }
+}
+
+// throws if no root location is defined
+// TODO: change behavior to return 404 location instead
+TEST(ConfigParser, Server_FindLocation_NoRootLocation) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "listen 8080; "
+      "location /kapouet { root /tmp/www; } "
+      "}";
+  EXPECT_NO_THROW(parser.ParseServer());
+  const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
+  ASSERT_EQ(servers.size(), 1u);
+  const ServerConfig& server = servers[0];
+
+  // /kapouet2/test -> no match -> throws (current behavior)
+  {
+    EXPECT_THROW(
+      server.FindLocationForUri("/kapouet2/test"),
+      std::runtime_error
+    );
+  }
 }
