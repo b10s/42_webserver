@@ -60,3 +60,9 @@ TEST(StringUtilsTest, ToString) {
   EXPECT_EQ(lib::utils::ToString(-123), "-123");
   EXPECT_EQ(lib::utils::ToString(123.456), "123.456");
 }
+
+TEST(StringUtilsTest, GetFirstToken) {
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic hogehoge", " ").Value(), "Basic");
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic    hogehoge", " ").Value(), "Basic");
+  EXPECT_FALSE(lib::utils::GetFirstToken("hogehoge", " ").HasValue());
+}

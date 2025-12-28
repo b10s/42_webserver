@@ -12,7 +12,9 @@ HttpResponse::HttpResponse()
 }
 
 HttpResponse::HttpResponse(lib::http::Status status)
-  : status_code_(status), reason_phrase_(lib::http::StatusToString(status)), version_("HTTP/1.1") {
+    : status_code_(status),
+      reason_phrase_(lib::http::StatusToString(status)),
+      version_("HTTP/1.1") {
 }
 
 HttpResponse::~HttpResponse() {

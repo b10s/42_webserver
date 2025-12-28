@@ -176,7 +176,7 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.1.
-  meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>();
+  meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>(lib::utils::GetFirstToken(req.GetHeader("authorization"), " "));
   // RFC 3875 4.1.2.
   //  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
   meta_vars_["CONTENT_LENGTH"] = lib::type::Optional<std::string>();
@@ -263,7 +263,8 @@ HttpResponse CgiExecutor::Run() {
 
       std::string cgi_output;
       // でかいデータもいい感じに取得する。epollで同じのやった気がする。
-      // CGI Scriptが無限ループした場合、ここでブロッキングが発生してしまうのか？
+      // CGI
+      // Scriptが無限ループした場合、ここでブロッキングが発生してしまうのか？
       char buffer[4096];
       ssize_t bytes_read;
 

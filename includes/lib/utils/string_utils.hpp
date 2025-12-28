@@ -20,6 +20,9 @@ std::string ToString(const T& value) {
   return oss.str();
 }
 
+lib::type::Optional<std::string> GetFirstToken(const std::string& str,
+                                               const std::string& delimiter);
+
 }  // namespace utils
 }  // namespace lib
 
