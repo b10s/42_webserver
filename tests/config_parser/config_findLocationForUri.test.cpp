@@ -116,7 +116,7 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
     ASSERT_NE(&loc, nullptr);
     EXPECT_EQ(loc.GetName(), "/images///");
   }
-  // Test matching /img//cat.png
+  // Test matching /img//assets/cat.png
   {
     const Location& loc =
         server.FindLocationForUri("/img//assets/cat.png");
