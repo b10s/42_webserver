@@ -1,6 +1,5 @@
 #include "Epoll.hpp"
 
-#include <asm-generic/socket.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/epoll.h>
@@ -35,7 +34,8 @@ void Epoll::AddServer(unsigned short port) {
   int ret;
   ret = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   if (ret == -1) {
-    throw std::runtime_error("setsockopt() failed. " + std::string(strerror(errno)));
+    throw std::runtime_error("setsockopt() failed. " +
+                             std::string(strerror(errno)));
   }
 
   sockaddr_in server_addr;
