@@ -75,7 +75,7 @@ void ClosePipe(int fd[2]) {
 }
 
 HttpResponse ParseCgiResponse(const std::string& cgi_output) {
-  HttpResponse response;
+  HttpResponse response(lib::http::kOk);
 
   // Find separation between headers and body
   size_t header_end = cgi_output.find("\r\n\r\n");
@@ -262,6 +262,8 @@ HttpResponse CgiExecutor::Run() {
       }
 
       std::string cgi_output;
+      // でかいデータもいい感じに取得する。epollで同じのやった気がする。
+      // CGI Scriptが無限ループした場合、ここでブロッキングが発生してしまうのか？
       char buffer[4096];
       ssize_t bytes_read;
 
@@ -279,8 +281,7 @@ HttpResponse CgiExecutor::Run() {
       return res;
     }
   } catch (std::exception& e) {
-    HttpResponse res;
-    res.SetStatus(lib::http::kInternalServerError);
+    HttpResponse res(lib::http::kInternalServerError);
     return res;
   }
 }

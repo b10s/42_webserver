@@ -11,6 +11,10 @@ HttpResponse::HttpResponse()
     : status_code_(200), reason_phrase_("OK"), version_("HTTP/1.1") {
 }
 
+HttpResponse::HttpResponse(lib::http::Status status)
+  : status_code_(status), reason_phrase_(lib::http::StatusToString(status)), version_("HTTP/1.1") {
+}
+
 HttpResponse::~HttpResponse() {
 }
 

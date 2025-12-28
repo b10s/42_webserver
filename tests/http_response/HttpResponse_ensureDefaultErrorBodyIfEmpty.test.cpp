@@ -7,17 +7,15 @@
 
 // setStatus does not automatically generate a default error body
 TEST(HttpResponse, SetStatus_DoesNotGenerateBody) {
-  HttpResponse res;
+  HttpResponse res(lib::http::kNotFound);
   res.SetBody("");
-  res.SetStatus(lib::http::kNotFound);
   EXPECT_EQ(res.GetBody(), "");
 }
 
 // EnsureDefaultErrorContent sets a default error body if the body is empty and status is error
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
-  HttpResponse res;
+  HttpResponse res(lib::http::kNotFound);
   res.SetBody("");
-  res.SetStatus(lib::http::kNotFound);
   res.EnsureDefaultErrorContent();
   EXPECT_FALSE(res.GetBody().empty());
   EXPECT_NE(res.GetBody().find("404 Not Found"), std::string::npos);
@@ -25,27 +23,24 @@ TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_GeneratesForErrorStatus) {
 
 // EnsureDefaultErrorContent does not set a body for non-error status codes
 TEST(HttpResponse, EnsureDefaultErrorBodyIfEmpty_DoesNotOverrideExistingBody) {
-  HttpResponse res;
+  HttpResponse res(lib::http::kInternalServerError);
   res.SetBody("custom");
-  res.SetStatus(lib::http::kInternalServerError);
   res.EnsureDefaultErrorContent();
   EXPECT_EQ(res.GetBody(), "custom");
 }
 
 // ToString outputs the correct content-length header if body is set
 TEST(HttpResponse, ToString_AddsContentLengthIfMissingAndNoTransferEncoding) {
-  HttpResponse res;
+  HttpResponse res(lib::http::kOk);
   res.SetBody("hello");
-  res.SetStatus(lib::http::kOk);
   std::string s = res.ToHttpString();
   EXPECT_NE(s.find("content-length: 5\r\n"), std::string::npos);
 }
 
 // if transfer-encoding header exists, content-length should not be added
 TEST(HttpResponse, ToString_DoesNotAddContentLengthWhenTransferEncodingExists) {
-  HttpResponse res;
+  HttpResponse res(lib::http::kOk);
   res.SetBody("hello");
-  res.SetStatus(lib::http::kOk);
   res.AddHeader("transfer-encoding", "chunked");
   std::string s = res.ToHttpString();
   EXPECT_EQ(s.find("content-length:"), std::string::npos);
