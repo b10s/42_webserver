@@ -7,6 +7,7 @@
 #include <fstream>
 #include <sstream>
 
+#include "lib/http/Status.hpp"
 #include "lib/utils/string_utils.hpp"
 
 namespace {
@@ -78,7 +79,7 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
 
   if (header_end == std::string::npos) {
     // RFC 3875 Violation: No header-body separator
-    response.SetStatus(500, "Internal Server Error");
+    response.SetStatus(lib::http::kInternalServerError);
     response.SetBody(
         "CGI output missing header-body separator. Must conform to RFC 3875.");
     return response;
@@ -119,10 +120,10 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
         lib::type::Optional<long> status_code_opt =
             lib::utils::StrToLong(status_str);
         if (status_code_opt.HasValue()) {
-          response.SetStatus(static_cast<int>(status_code_opt.Value()),
-                             reason_phrase);
+          response.SetStatus(
+              static_cast<lib::http::Status>(status_code_opt.Value()));
         } else {
-          response.SetStatus(500, "Internal Server Error");
+          response.SetStatus(lib::http::kInternalServerError);
           response.SetBody("CGI output contains malformed Status header: " +
                            val);
           return response;
@@ -131,7 +132,7 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
         response.AddHeader(key, val);
       }
     } else {
-      response.SetStatus(500, "Internal Server Error");
+      response.SetStatus(lib::http::kInternalServerError);
       response.SetBody("CGI output contains malformed header line: " + line);
       return response;
     }
@@ -214,7 +215,7 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["SERVER_NAME"] = req.GetHostName();
   // RFC 3875 4.1.15.
   meta_vars_["SERVER_PORT"] =
-      lib::type::Optional<std::string>(req.GetHostPort());
+      lib::type::Optional<std::string>(lib::utils::ToString(req.GetHostPort()));
   // RFC 3875 4.1.16.
   meta_vars_["SERVER_PROTOCOL"] =
       lib::type::Optional<std::string>(req.GetVersion());
