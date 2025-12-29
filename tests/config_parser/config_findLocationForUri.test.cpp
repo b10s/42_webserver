@@ -26,34 +26,40 @@ TEST(ConfigParser, Server_FindLocation_BasicMatches) {
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   ASSERT_EQ(servers.size(), 1u);
   const ServerConfig& server = servers[0];
-  // Test matching /kapouet/pouic/toto
+  // "/" -> location "/" remainder "/"
   {
-    const Location& loc =
-        server.FindLocationForUri("/kapouet/pouic/toto");
-    ASSERT_NE(&loc, nullptr);
-    EXPECT_EQ(loc.GetName(), "/kapouet");
+    LocationMatch m = server.FindLocationForUri("/");
+    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m.loc->GetName(), "/");
+    EXPECT_EQ(m.remainder, "/");
   }
-  // Test matching /kapouet2/test
+  
+  // "/kapouet/pouic/toto" -> "/kapouet" + "/pouic/toto"
   {
-    const Location& loc =
-        server.FindLocationForUri("/kapouet2/test");
-    ASSERT_NE(&loc, nullptr);
-    EXPECT_EQ(loc.GetName(), "/");
+    LocationMatch m = server.FindLocationForUri("/kapouet/pouic/toto");
+    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m.loc->GetName(), "/kapouet");
+    EXPECT_EQ(m.remainder, "/pouic/toto");
   }
-  // Test matching /images/cat.png
+  // boundary: "/kapouet2/test" should fall back to "/"
   {
-    const Location& loc =
-        server.FindLocationForUri("/images/cat.png");
-    ASSERT_NE(&loc, nullptr);
-    EXPECT_EQ(loc.GetName(), "/images");
+    LocationMatch m = server.FindLocationForUri("/kapouet2/test");
+    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m.loc->GetName(), "/");
+    EXPECT_EQ(m.remainder, "/kapouet2/test");
   }
-
+  // "/images/cat.png" -> "/images" + "/cat.png"
+  {
+    LocationMatch m = server.FindLocationForUri("/images/cat.png");
+    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m.loc->GetName(), "/images");
+    EXPECT_EQ(m.remainder, "/cat.png");
+  }
   // Find location that does not exist
   {
-    const Location& loc =
-        server.FindLocationForUri("/nonexistent/path");
-    ASSERT_NE(&loc, nullptr);
-    EXPECT_EQ(loc.GetName(), "/");
+    LocationMatch m = server.FindLocationForUri("/nonexistent/path");
+    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m.loc->GetName(), "/");
   }
 }
 
@@ -77,5 +83,36 @@ TEST(ConfigParser, Server_FindLocation_NoRootLocation) {
       server.FindLocationForUri("/kapouet2/test"),
       std::runtime_error
     );
+  }
+}
+
+// matching with trailing slashes in URI and location definitions
+TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "listen 8080; "
+      "location / { root ./www; } "
+      "location /kapouet { root /tmp/www; } "
+      "}";
+  EXPECT_NO_THROW(parser.ParseServer());
+  const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
+  ASSERT_EQ(servers.size(), 1u);
+  const ServerConfig& server = servers[0];
+  // Exact match with trailing slash variants: "/kapouet" and "/kapouet/"
+  // Both should pick the same location and remainder "/"
+  {
+    LocationMatch m1 = server.FindLocationForUri("/kapouet");
+    LocationMatch m2 = server.FindLocationForUri("/kapouet/");
+    LocationMatch m3 = server.FindLocationForUri("/kapouet////");
+    ASSERT_NE(m1.loc, static_cast<const Location*>(NULL));
+    ASSERT_NE(m2.loc, static_cast<const Location*>(NULL));
+    ASSERT_NE(m3.loc, static_cast<const Location*>(NULL));
+    EXPECT_EQ(m1.loc->GetName(), "/kapouet");
+    EXPECT_EQ(m2.loc->GetName(), "/kapouet");
+    EXPECT_EQ(m3.loc->GetName(), "/kapouet");
+    EXPECT_EQ(m1.remainder, "/");
+    EXPECT_EQ(m2.remainder, "/");
+    EXPECT_EQ(m3.remainder, "/");
   }
 }

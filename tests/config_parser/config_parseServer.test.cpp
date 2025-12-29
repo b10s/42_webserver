@@ -85,3 +85,33 @@ TEST(ConfigParser, Server_DuplicateLocationPath_Throws) {
       "}";
   EXPECT_THROW(parser.ParseServer(), std::runtime_error);
 }
+
+// normalized duplicate location paths
+TEST(ConfigParser, Server_DuplicateLocationPath_Normalised_Throws) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "location /foo/ { } "
+      "location /foo { } "
+      "}";
+  EXPECT_THROW(parser.ParseServer(), std::runtime_error);
+}
+
+// reject multiple slash or dots in location path
+TEST(ConfigParser, Server_Duplicate_Slash_In_LocationPath_Throws) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "location /foo// { } "
+      "}";
+  EXPECT_THROW(parser.ParseServer(), std::runtime_error);
+}
+
+TEST(ConfigParser, Server_Duplicate_Dots_In_LocationPath_Throws) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "location /..foo { } "
+      "}";
+  EXPECT_THROW(parser.ParseServer(), std::runtime_error);
+}
