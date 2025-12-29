@@ -134,6 +134,11 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
                            val);
           return response;
         }
+      } else if (key == "Location") {
+        if (response.GetStatus() == lib::http::kOk) {
+          response.SetStatus(lib::http::kFound);
+        }
+        response.AddHeader(key, val);
       } else {
         response.AddHeader(key, val);
       }
@@ -142,6 +147,12 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
       response.SetBody("CGI output contains malformed header line: " + line);
       return response;
     }
+  }
+
+  if (!response.HasHeader("content-type")) {
+    response.SetStatus(lib::http::kInternalServerError);
+    response.SetBody("CGI output missing Content-Type header. Must conform to RFC 3875.");
+    return response;
   }
   return response;
 }

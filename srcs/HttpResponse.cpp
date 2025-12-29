@@ -44,6 +44,10 @@ void HttpResponse::SetStatus(lib::http::Status status) {
   reason_phrase_ = lib::http::StatusToString(status);
 }
 
+lib::http::Status HttpResponse::GetStatus() {
+  return static_cast<lib::http::Status>(status_code_);
+}
+
 void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
   if (key.find('\r') != std::string::npos ||
       key.find('\n') != std::string::npos ||
