@@ -95,21 +95,11 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
       "listen 8080; "
       "location / { root ./www; } "
       "location /kapouet { root /tmp/www; } "
-      "location /images/// { root /var/img; } "
-      "location /img//assets { root /var/img; } "
       "}";
   EXPECT_NO_THROW(parser.ParseServer());
   const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
   ASSERT_EQ(servers.size(), 1u);
   const ServerConfig& server = servers[0];
-  // "/images/cat.png" should match location "/images///" (definition preserved),
-  // remainder should be "/cat.png"
-  {
-    LocationMatch m = server.FindLocationForUri("/images/cat.png");
-    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
-    EXPECT_EQ(m.loc->GetName(), "/images///");
-    EXPECT_EQ(m.remainder, "/cat.png");
-  }
   // Exact match with trailing slash variants: "/kapouet" and "/kapouet/"
   // Both should pick the same location and remainder "/"
   {
@@ -121,13 +111,5 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
     EXPECT_EQ(m2.loc->GetName(), "/kapouet");
     EXPECT_EQ(m1.remainder, "/");
     EXPECT_EQ(m2.remainder, "/");
-  }
-  // routing does NOT normalize internal "//" in URI.
-  // It should still match "/img/assets" and keep remainder starting with "//..."
-  {
-    LocationMatch m = server.FindLocationForUri("/img/assets//cat.png");
-    ASSERT_NE(m.loc, static_cast<const Location*>(NULL));
-    EXPECT_EQ(m.loc->GetName(), "/img/assets");
-    EXPECT_EQ(m.remainder, "//cat.png");
   }
 }

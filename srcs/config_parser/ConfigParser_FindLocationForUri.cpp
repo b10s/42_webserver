@@ -1,6 +1,6 @@
 #include "ConfigParser.hpp"
-#include "lib/utils/string_utils.hpp"
 #include "LocationMatch.hpp"
+#include "lib/utils/string_utils.hpp"
 
 // treat "/path////" as "/path"
 // NOTE(routing): We intentionally do NOT normalize internal "//" in the URI
@@ -21,7 +21,7 @@ static std::string TrimTrailingSlashExceptRoot(const std::string& s) {
 // root "/")
 bool ServerConfig::IsPathPrefix(const std::string& uri_key,
                                 const std::string& loc_key) const {
-  if (loc_key == "/") return true; // root matches all
+  if (loc_key == "/") return true;  // root matches all
   if (uri_key.size() < loc_key.size()) return false;
   if (uri_key.compare(0, loc_key.size(), loc_key) != 0) return false;
   if (uri_key.size() == loc_key.size()) return true;
@@ -34,7 +34,7 @@ bool ServerConfig::IsPathPrefix(const std::string& uri_key,
 // *_key means trimmed of trailing slashes (except for root "/")
 LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
   LocationMatch best;
-  best.loc = NULL; // pointer to best matching location
+  best.loc = NULL;  // pointer to best matching location
   size_t best_len = 0;
   const std::string uri_key = TrimTrailingSlashExceptRoot(uri);
 
@@ -45,7 +45,7 @@ LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
       size_t len = loc_key.size();
       if (len > best_len) {
         best_len = len;
-        best.loc = &(*it); // Location pointer
+        best.loc = &(*it);  // Location pointer
       }
     }
   }
@@ -55,18 +55,12 @@ LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
   }
   const std::string best_key = TrimTrailingSlashExceptRoot(best.loc->GetName());
   // build remainder (make sure remainder always starts with '/')
-  if (uri_key.size() == best_key.size()) { // exact match
+  if (uri_key.size() == best_key.size()) {  // exact match
     best.remainder = "/";
   } else {
     best.remainder = uri_key.substr(best_key.size());
-    if (best.remainder.empty()) best.remainder = "/"; // should not happen
+    if (best.remainder.empty()) best.remainder = "/";  // should not happen
     if (best.remainder[0] != '/') best.remainder = "/" + best.remainder;
   }
   return best;
-}
-
-LocationMatch ServerConfig::ResolveLocationForUri(
-    const std::string& uri) const {
-  LocationMatch result;
-  result.loc = &FindLocationForUri(uri);
 }

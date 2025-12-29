@@ -1,5 +1,19 @@
 #include "ConfigParser.hpp"
 
+namespace {
+
+bool IsValidLocationName(const std::string& name) {
+  if (name.empty() || name[0] != '/')
+    return false;
+  if (name.find("..") != std::string::npos)
+    return false;
+  if (name.find("//") != std::string::npos)
+    return false;
+  return true;
+}
+
+}
+
 /*
 I made the trailing slash in Location names optional for simplicity.
 Previously, we enforced a trailing slash,
@@ -12,10 +26,10 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
   Location location = Location();
 
   token = Tokenize(content);
-  if (token.empty() || token[0] != '/') {
+  if (!IsValidLocationName(token)) {
     throw std::runtime_error("Invalid location name: " + token);
   }
-  location.SetName(token); // TODO: reject '..', "//" or other dangerous names
+  location.SetName(token);
   token = Tokenize(content);
   if (token != "{")
     throw std::runtime_error(
