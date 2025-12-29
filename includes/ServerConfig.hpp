@@ -13,6 +13,7 @@
 
 #include "Location.hpp"
 #include "lib/http/Status.hpp"
+#include "LocationMatch.hpp"
 
 class ServerConfig {
  private:
@@ -34,7 +35,7 @@ class ServerConfig {
   void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
   bool IsPathPrefix(const std::string& uri, const std::string& prefix) const;
-  const Location& FindLocationForUri(const std::string& uri) const;
+  LocationMatch FindLocationForUri(const std::string& uri) const;
 
   void SetErrorPage(lib::http::Status status, const std::string& path) {
     errors_[status] = path;
@@ -86,6 +87,7 @@ class ServerConfig {
   const std::vector<Location>& GetLocations() const {
     return locations_;
   }
+  
 };
 
 #endif

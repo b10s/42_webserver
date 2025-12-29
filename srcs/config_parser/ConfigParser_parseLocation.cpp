@@ -15,7 +15,7 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
   if (token.empty() || token[0] != '/') {
     throw std::runtime_error("Invalid location name: " + token);
   }
-  location.SetName(token);
+  location.SetName(token); // TODO: reject '..', "//" or other dangerous names
   token = Tokenize(content);
   if (token != "{")
     throw std::runtime_error(

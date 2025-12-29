@@ -40,21 +40,20 @@ HttpResponse RequestHandler::Run() {
 // ../)
 // return 308 if uri is a directory but missing trailing '/' (normalize)
 std::string RequestHandler::ResolveFullPath() const {
-  const std::vector<Location>& locations = conf_.GetLocations();
-  if (locations.empty()) {
-    throw std::runtime_error("No locations configured in server");
-  }
-  const Location& location = conf_.FindLocationForUri(req_.GetUri());
-  std::string path = location.GetRoot() + req_.GetUri();
-  // Check if path is actually a directory (either ends with '/' or filesystem
-  // says so)
+  // const std::vector<Location>& locations = conf_.GetLocations();
+  // if (locations.empty()) {
+  //   throw std::runtime_error("No locations configured in server");
+  // }
+  LocationMatch match = conf_.FindLocationForUri(req_.GetUri());
+  std::string path = match.loc->GetRoot() + match.remainder;
   bool is_directory = (!path.empty() && path[path.size() - 1] == '/') ||
                       lib::utils::IsDirectory(path);
   if (is_directory) {
-    if (location.GetIndexFiles().empty()) {
+    // TODO: may need to append '/' before index file if missing?
+    if (match.loc->GetIndexFiles().empty()) {
       throw std::runtime_error("No index files configured for location");
     }
-    path += location.GetIndexFiles()[0];
+    path += match.loc->GetIndexFiles()[0];
   }
   return path;
 }
