@@ -16,7 +16,8 @@ RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
   PrepareRoutingContext();
 }
 
-RequestHandler::~RequestHandler() {}
+RequestHandler::~RequestHandler() {
+}
 
 HttpResponse RequestHandler::Run() {
   // PrepareRoutingContext();
@@ -46,7 +47,7 @@ return 308 if uri is a directory but missing trailing '/' (normalize)?
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc == NULL) {
     throw std::runtime_error("No matching location found for URI: " +
-                             req_.GetUri()); // TODO: return HTTP 404?
+                             req_.GetUri());  // TODO: return HTTP 404?
   }
   const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
