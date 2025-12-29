@@ -11,6 +11,7 @@
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 
 // http
 namespace http {
@@ -112,7 +113,7 @@ class HttpRequest {
   const unsigned short& GetHostPort() const;
   const std::string& GetVersion() const;
   const Dict& GetHeader() const;
-  const std::string& GetHeader(const std::string& key) const;
+  lib::type::Optional<std::string> GetHeader(const std::string& key) const;
   const Dict& GetQuery() const;
   const std::string& GetBody() const;
 

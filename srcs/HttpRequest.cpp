@@ -1,6 +1,7 @@
 #include "HttpRequest.hpp"
 
 #include "lib/http/Method.hpp"
+#include "lib/type/Optional.hpp"
 
 // 外部定義（初期化子なし）
 const size_t HttpRequest::kMaxHeaderSize;
@@ -86,12 +87,13 @@ const Dict& HttpRequest::GetHeader() const {
   return headers_;
 }
 
-const std::string& HttpRequest::GetHeader(const std::string& key) const {
+lib::type::Optional<std::string> HttpRequest::GetHeader(
+    const std::string& key) const {
   Dict::const_iterator it = headers_.find(key);
   if (it == headers_.end()) {
-    throw std::out_of_range("Header not found: " + key);
+    return lib::type::Optional<std::string>();
   }
-  return it->second;
+  return lib::type::Optional<std::string>(it->second);
 }
 
 const std::string& HttpRequest::GetBody() const {

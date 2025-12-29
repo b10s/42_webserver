@@ -176,13 +176,12 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.1.
-  meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>(lib::utils::GetFirstToken(req.GetHeader("authorization"), " "));
+  meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>(
+      lib::utils::GetFirstToken(req.GetHeader("authorization"), " "));
   // RFC 3875 4.1.2.
-  //  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
-  meta_vars_["CONTENT_LENGTH"] = lib::type::Optional<std::string>();
+  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
   // RFC 3875 4.1.3.
-  //  meta_vars_["CONTENT_TYPE"] = req.GetHeader("content-type");
-  meta_vars_["CONTENT_TYPE"] = lib::type::Optional<std::string>();
+  meta_vars_["CONTENT_TYPE"] = req.GetHeader("content-type");
   // RFC 3875 4.1.4.
   meta_vars_["GATEWAY_INTERFACE"] = lib::type::Optional<std::string>("CGI/1.1");
   // RFC 3875 4.1.5.
