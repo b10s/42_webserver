@@ -59,13 +59,13 @@ void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
   headers_[lib::utils::ToLowerAscii(key)] = value;
 }
 
-lib::type::Optional<std::string> HttpResponse::GetHeader(const std::string &key) {
+lib::type::Optional<std::string> HttpResponse::GetHeader(
+    const std::string& key) {
   std::map<std::string, std::string>::iterator it = headers_.find(key);
   if (it != headers_.end())
     return lib::type::Optional<std::string>(it->second);
   else
     return lib::type::Optional<std::string>();
-  
 }
 
 bool HttpResponse::HasHeader(const std::string& key) {
