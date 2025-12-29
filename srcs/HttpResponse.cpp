@@ -117,9 +117,7 @@ std::string HttpResponse::ToHttpString() const {
   // field in any message that contains a Transfer-Encoding header field.
   bool has_transfer_encoding = final_headers.count("transfer-encoding");
   if (!has_content_length && !has_transfer_encoding) {
-    std::stringstream len_ss;
-    len_ss << body_.length();
-    final_headers["content-length"] = len_ss.str();
+    final_headers["content-length"] = lib::utils::ToString(body_.length());
   }
 
   // Output Headers
