@@ -10,8 +10,8 @@ TEST(CgiResponseParserTest, BasicSuccess) {
   HttpResponse res = cgi::ParseCgiResponse(output);
 
   EXPECT_EQ(res.GetStatus(), lib::http::kOk);
-  EXPECT_TRUE(res.HasHeader("Content-Type"));
-  EXPECT_EQ(res.GetHeader("Content-Type").Value(), "text/html");
+  EXPECT_TRUE(res.HasHeader("content-type"));
+  EXPECT_EQ(res.GetHeader("content-type").Value(), "text/html");
   EXPECT_EQ(res.GetBody(), "Hello, CGI!");
 }
 
@@ -31,7 +31,7 @@ TEST(CgiResponseParserTest, WithLocationHeader) {
   HttpResponse res = cgi::ParseCgiResponse(output);
 
   EXPECT_EQ(res.GetStatus(), lib::http::kFound);
-  EXPECT_EQ(res.GetHeader("Location").Value(), "http://example.com");
+  EXPECT_EQ(res.GetHeader("location").Value(), "http://example.com");
 }
 
 TEST(CgiResponseParserTest, WithExtraHeaders) {
@@ -40,7 +40,7 @@ TEST(CgiResponseParserTest, WithExtraHeaders) {
       "MyValue\r\n\r\nBody";
   HttpResponse res = cgi::ParseCgiResponse(output);
 
-  EXPECT_EQ(res.GetHeader("X-Custom-Header").Value(), "MyValue");
+  EXPECT_EQ(res.GetHeader("x-custom-header").Value(), "MyValue");
 }
 
 TEST(CgiResponseParserTest, MissingSeparator) {
