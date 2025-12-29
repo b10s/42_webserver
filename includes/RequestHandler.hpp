@@ -11,7 +11,7 @@ class RequestHandler {
   ~RequestHandler();
 
   HttpResponse Run();
-  std::string ResolveFullPath() const;  // for testing purpose
+  std::string ResolveFilesystemPath() const;  // for testing purpose
 
  private:
   RequestHandler();  // shouldn't use default constructor

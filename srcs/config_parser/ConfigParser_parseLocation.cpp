@@ -3,16 +3,13 @@
 namespace {
 
 bool IsValidLocationName(const std::string& name) {
-  if (name.empty() || name[0] != '/')
-    return false;
-  if (name.find("..") != std::string::npos)
-    return false;
-  if (name.find("//") != std::string::npos)
-    return false;
+  if (name.empty() || name[0] != '/') return false;
+  if (name.find("..") != std::string::npos) return false;
+  if (name.find("//") != std::string::npos) return false;
   return true;
 }
 
-}
+}  // namespace
 
 /*
 I made the trailing slash in Location names optional for simplicity.
