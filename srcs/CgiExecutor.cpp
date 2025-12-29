@@ -176,8 +176,11 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.1.
-  meta_vars_["AUTH_TYPE"] = lib::type::Optional<std::string>(
-      lib::utils::GetFirstToken(req.GetHeader("authorization"), " "));
+  lib::type::Optional<std::string> auth = req.GetHeader("authorization");
+
+  meta_vars_["AUTH_TYPE"] = auth.HasValue()
+                                ? lib::utils::GetFirstToken(auth.Value(), " ")
+                                : lib::type::Optional<std::string>();
   // RFC 3875 4.1.2.
   meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
   // RFC 3875 4.1.3.
