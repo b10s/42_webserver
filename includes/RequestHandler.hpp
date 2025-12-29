@@ -15,15 +15,6 @@ class RequestHandler {
   void PrepareRoutingContext();
   std::string ResolveFilesystemPath() const;  // for testing purpose
 
-  // for tests (read-only)
-  const LocationMatch& GetLocationMatchForTest() const {
-    return location_match_;
-  }
-
-  const std::string& GetFilesystemPathForTest() const {
-    return filesystem_path_;
-  }
-
  private:
   RequestHandler();  // shouldn't use default constructor
   ServerConfig conf_;
