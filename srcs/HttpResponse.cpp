@@ -5,6 +5,7 @@
 
 #include "lib/exception/InvalidHeader.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
@@ -56,6 +57,15 @@ void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
     throw lib::exception::InvalidHeader();
   }
   headers_[lib::utils::ToLowerAscii(key)] = value;
+}
+
+lib::type::Optional<std::string> HttpResponse::GetHeader(const std::string &key) {
+  std::map<std::string, std::string>::iterator it = headers_.find(key);
+  if (it != headers_.end())
+    return lib::type::Optional<std::string>(it->second);
+  else
+    return lib::type::Optional<std::string>();
+  
 }
 
 bool HttpResponse::HasHeader(const std::string& key) {
