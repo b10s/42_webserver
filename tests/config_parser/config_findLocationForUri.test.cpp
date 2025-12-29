@@ -4,7 +4,6 @@
 #include <string>
 
 #include "ConfigParser.hpp"
-#include "LocationMatch.hpp"
 
 // Unit tests
 // ServerConfig::MatchLocation():

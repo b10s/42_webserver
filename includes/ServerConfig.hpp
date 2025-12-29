@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "Location.hpp"
-#include "LocationMatch.hpp"
 #include "lib/http/Status.hpp"
+#include "LocationMatch.hpp"
 
 class ServerConfig {
  private:

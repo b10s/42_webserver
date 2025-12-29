@@ -10,20 +10,16 @@
 #include "lib/http/Status.hpp"
 #include "lib/utils/file_utils.hpp"
 
-RequestHandler::RequestHandler() {
-}
-
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
-  // very simple file path sample
-  full_path_ = conf.GetLocations()[0].GetRoot() + req.GetUri() +
-               conf.GetLocations()[0].GetIndexFiles()[0];
+  // location_match_.loc = NULL;
+  PrepareRoutingContext();
 }
 
-RequestHandler::~RequestHandler() {
-}
+RequestHandler::~RequestHandler() {}
 
 HttpResponse RequestHandler::Run() {
+  // PrepareRoutingContext();
   lib::http::Method method = req_.GetMethod();
   if (method == lib::http::kGet) {
     HandleGet();
@@ -34,6 +30,12 @@ HttpResponse RequestHandler::Run() {
   return res_;
 }
 
+void RequestHandler::PrepareRoutingContext() {
+  const std::string req_uri = req_.GetUri();
+  location_match_ = conf_.FindLocationForUri(req_uri);
+  filesystem_path_ = ResolveFilesystemPath();
+}
+
 /*
 Resolves the request URI into an absolute filesystem path
 suitable for open(), stat(), and read().
@@ -42,25 +44,28 @@ TODO: check file existence and permissions, detect dangerous paths
 return 308 if uri is a directory but missing trailing '/' (normalize)?
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
+  if (location_match_.loc == NULL) {
+    throw std::runtime_error("No matching location found for URI: " +
+                             req_.GetUri()); // TODO: return HTTP 404?
+  }
   const std::string req_uri = req_.GetUri();
-  LocationMatch match = conf_.FindLocationForUri(req_uri);
-  std::string path = match.loc->GetRoot() + match.remainder;
+  std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
   bool is_directory =
       (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
   if (is_directory) {
-    if (match.loc->GetIndexFiles().empty()) {
+    if (location_match_.loc->GetIndexFiles().empty()) {
       throw std::runtime_error("No index files configured for location");
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
-    path += match.loc->GetIndexFiles()[0];
+    path += location_match_.loc->GetIndexFiles()[0];
   }
   return path;
 }
 
 void RequestHandler::HandleGet() {
-  const std::string path = ResolveFilesystemPath();
+  const std::string path = filesystem_path_;
   std::string body = lib::utils::ReadFile(path);
   res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
   res_.SetBody(body);

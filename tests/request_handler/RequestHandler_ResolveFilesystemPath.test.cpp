@@ -1,11 +1,16 @@
 #include <gtest/gtest.h>
+
+#include "ServerConfig.hpp"
+#include "Location.hpp"
 #include "RequestHandler.hpp"
+#include "HttpRequest.hpp"
 
 class RequestHandlerTest : public ::testing::Test {
 protected:
     ServerConfig config;
     void SetUp() override {
         Location location;
+        location.SetName("/");
         location.SetRoot("/var/www/html");
         location.AddIndex("index.html");
         config.AddLocation(location);
