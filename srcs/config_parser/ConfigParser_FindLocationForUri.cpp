@@ -64,3 +64,9 @@ LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
   }
   return best;
 }
+
+LocationMatch ServerConfig::ResolveLocationForUri(
+    const std::string& uri) const {
+  LocationMatch result;
+  result.loc = &FindLocationForUri(uri);
+}
