@@ -22,7 +22,8 @@ HttpRequest::HttpRequest()
       buffer_read_pos_(0),
       next_chunk_size_(-1),
       keep_alive_(false),
-      progress_(kHeader) {
+      progress_(kHeader),
+      client_ip_() {
 }
 
 HttpRequest::HttpRequest(const HttpRequest& src) {
@@ -44,6 +45,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     next_chunk_size_ = src.next_chunk_size_;
     keep_alive_ = src.keep_alive_;
     progress_ = src.progress_;
+    client_ip_ = src.client_ip_;
   }
   return *this;
 }

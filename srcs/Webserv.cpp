@@ -1,5 +1,7 @@
 #include "Webserv.hpp"
 
+#include <arpa/inet.h>
+
 #include <csignal>   // For signal(), SIGPIPE, SIG_IGN
 #include <iostream>  // For std::cout, std::cerr
 #include <stdexcept>
@@ -57,6 +59,7 @@ void Webserv::Run() {
           continue;
         }
         epoll_.Addsocket(client_fd);
+        requests_[client_fd].SetClientIp(inet_ntoa(client_addr.sin_addr));
       } else {
         // client fd
         if (events[i].events & EPOLLIN) {

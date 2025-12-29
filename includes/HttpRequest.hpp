@@ -133,6 +133,14 @@ class HttpRequest {
     return progress_ == kDone;
   }  // for test purposes
 
+  const std::string& GetClientIp() const {
+    return client_ip_;
+  }
+
+  void SetClientIp(const std::string& ip) {
+    client_ip_ = ip;
+  }
+
   Progress GetProgress() const {  // IsDone だけじゃ足りないとき用
     return progress_;
   }
@@ -155,6 +163,7 @@ class HttpRequest {
 
  private:
   Progress progress_;  // progress is initially kHeader
+  std::string client_ip_;
 };
 
 #endif  // HTTPREQUEST_HPP_

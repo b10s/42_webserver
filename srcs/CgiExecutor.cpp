@@ -190,15 +190,16 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.5.
   meta_vars_["PATH_INFO"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.6.
-  meta_vars_["PATH_TRANSLATED"] =
-      lib::type::Optional<std::string>();
+  meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
   meta_vars_["QUERY_STRING"] =
       lib::type::Optional<std::string>(CreateQueryString(req.GetQuery()));
   // RFC 3875 4.1.8.
-  meta_vars_["REMOTE_ADDR"] = lib::type::Optional<std::string>();
+  meta_vars_["REMOTE_ADDR"] =
+      lib::type::Optional<std::string>(req.GetClientIp());
   // RFC 3875 4.1.9.
-  meta_vars_["REMOTE_HOST"] = lib::type::Optional<std::string>();
+  meta_vars_["REMOTE_HOST"] =
+      lib::type::Optional<std::string>(req.GetClientIp());
   // RFC 3875 4.1.10.
   meta_vars_["REMOTE_IDENT"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.11.
@@ -209,7 +210,8 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.13.
   meta_vars_["SCRIPT_NAME"] = lib::type::Optional<std::string>(req.GetUri());
   // RFC 3875 4.1.14.
-  meta_vars_["SERVER_NAME"] = lib::type::Optional<std::string>(req.GetHostName());
+  meta_vars_["SERVER_NAME"] =
+      lib::type::Optional<std::string>(req.GetHostName());
   // RFC 3875 4.1.15.
   meta_vars_["SERVER_PORT"] =
       lib::type::Optional<std::string>(lib::utils::ToString(req.GetHostPort()));
