@@ -62,11 +62,12 @@ std::string RequestHandler::ResolveFullPath() const {
 
 void RequestHandler::HandleGet() {
   const std::string path = ResolveFullPath();
+  // if location.cgi == enalbed or disabled?
   std::string body = lib::utils::ReadFile(path);
   res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
   res_.SetBody(body);
   res_.SetStatus(lib::http::kOk);
-
+  // else?
   CgiExecutor cgi(req_, path);
   res_ = cgi.Run();
 }

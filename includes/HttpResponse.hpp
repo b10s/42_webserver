@@ -17,6 +17,7 @@ class HttpResponse {
   void SetStatus(lib::http::Status status);
   lib::http::Status GetStatus();
   void AddHeader(const std::string& key, const std::string& value);
+  bool HasHeader(const std::string& key);
   void SetBody(const std::string& body);
   std::string GetBody() const;
   std::string ToHttpString() const;

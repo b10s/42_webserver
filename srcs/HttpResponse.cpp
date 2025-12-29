@@ -58,6 +58,14 @@ void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
   headers_[lib::utils::ToLowerAscii(key)] = value;
 }
 
+bool HttpResponse::HasHeader(const std::string& key) {
+  std::map<std::string, std::string>::iterator it = headers_.find(key);
+  if (it != headers_.end())
+    return true;
+  else
+    return false;
+}
+
 void HttpResponse::SetBody(const std::string& body) {
   body_ = body;
 }

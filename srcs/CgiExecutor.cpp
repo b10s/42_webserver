@@ -86,8 +86,7 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
   if (header_end == std::string::npos) {
     // RFC 3875 Violation: No header-body separator
     response.SetStatus(lib::http::kInternalServerError);
-    response.SetBody(
-        "CGI output missing header-body separator. Must conform to RFC 3875.");
+    response.EnsureDefaultErrorContent();
     return response;
   }
 
@@ -130,8 +129,7 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
               static_cast<lib::http::Status>(status_code_opt.Value()));
         } else {
           response.SetStatus(lib::http::kInternalServerError);
-          response.SetBody("CGI output contains malformed Status header: " +
-                           val);
+          response.EnsureDefaultErrorContent();
           return response;
         }
       } else if (key == "Location") {
@@ -144,14 +142,14 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
       }
     } else {
       response.SetStatus(lib::http::kInternalServerError);
-      response.SetBody("CGI output contains malformed header line: " + line);
+      response.EnsureDefaultErrorContent();
       return response;
     }
   }
 
   if (!response.HasHeader("content-type")) {
     response.SetStatus(lib::http::kInternalServerError);
-    response.SetBody("CGI output missing Content-Type header. Must conform to RFC 3875.");
+    response.EnsureDefaultErrorContent();
     return response;
   }
   return response;
