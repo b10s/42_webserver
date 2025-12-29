@@ -8,7 +8,7 @@
 // "/img/"). Any non-trivial normalization or dangerous patterns (e.g. "//",
 // "..", percent-decoding) are handled later in the security/path-validation
 // phase.
-static std::string TrimTrailingSlashExceptRoot(const std::string& s) {
+std::string ServerConfig::TrimTrailingSlashExceptRoot(const std::string& s) {
   if (s.size() <= 1) return s;  // "/"
   size_t end = s.size();
   while (end > 1 && s[end - 1] == '/') {

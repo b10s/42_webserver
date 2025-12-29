@@ -105,11 +105,15 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
   {
     LocationMatch m1 = server.FindLocationForUri("/kapouet");
     LocationMatch m2 = server.FindLocationForUri("/kapouet/");
+    LocationMatch m3 = server.FindLocationForUri("/kapouet////");
     ASSERT_NE(m1.loc, static_cast<const Location*>(NULL));
     ASSERT_NE(m2.loc, static_cast<const Location*>(NULL));
+    ASSERT_NE(m3.loc, static_cast<const Location*>(NULL));
     EXPECT_EQ(m1.loc->GetName(), "/kapouet");
     EXPECT_EQ(m2.loc->GetName(), "/kapouet");
+    EXPECT_EQ(m3.loc->GetName(), "/kapouet");
     EXPECT_EQ(m1.remainder, "/");
     EXPECT_EQ(m2.remainder, "/");
+    EXPECT_EQ(m3.remainder, "/");
   }
 }

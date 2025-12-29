@@ -38,9 +38,8 @@ HttpResponse RequestHandler::Run() {
 Resolves the request URI into an absolute filesystem path
 suitable for open(), stat(), and read().
 
-TODO: check file existence and permissions, detect dangerous paths (e.g.,
-../)
-return 308 if uri is a directory but missing trailing '/' (normalize)
+TODO: check file existence and permissions, detect dangerous paths 
+return 308 if uri is a directory but missing trailing '/' (normalize)?
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
   const std::string req_uri = req_.GetUri();

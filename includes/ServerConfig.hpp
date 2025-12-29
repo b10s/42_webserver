@@ -26,6 +26,8 @@ class ServerConfig {
   bool has_listen_;
   bool has_server_name_;
   bool has_max_body_;
+  static std::string TrimTrailingSlashExceptRoot(const std::string& s);
+  bool IsPathPrefix(const std::string& uri, const std::string& prefix) const;
 
  public:
   ServerConfig();
@@ -34,7 +36,6 @@ class ServerConfig {
   void SetPort(const unsigned short& port);
   void SetServerName(const std::string& server_name);
   void SetMaxBodySize(int size);
-  bool IsPathPrefix(const std::string& uri, const std::string& prefix) const;
   LocationMatch FindLocationForUri(const std::string& uri) const;
 
   void SetErrorPage(lib::http::Status status, const std::string& path) {
@@ -73,12 +74,18 @@ class ServerConfig {
     return result;
   }
 
+  /*
+  check for duplicate location names after normalization
+  /img and /img/ are considered the same
+  */
   void AddLocation(const Location& location) {
-    // check for duplicate location names
+    const std::string normalized_name =
+        TrimTrailingSlashExceptRoot(location.GetName());
     for (size_t i = 0; i < locations_.size(); ++i) {
-      if (locations_[i].GetName() == location.GetName()) {
-        throw std::runtime_error("Duplicate location name: " +
-                                 location.GetName());
+      const std::string existing_name =
+          TrimTrailingSlashExceptRoot(locations_[i].GetName());
+      if (existing_name == normalized_name) {
+        throw std::runtime_error("Duplicate location name: " + normalized_name);
       }
     }
     locations_.push_back(location);
@@ -90,16 +97,3 @@ class ServerConfig {
 };
 
 #endif
-
-// array of array of string and int
-
-// [
-//   {127.0.0.1, 8080},
-//   {192.168.0.1, 80},
-//   ...
-// ]
-
-// test_conf new ServerConfig();
-
-// test_conf.host_ == "asdsad"
-// test_conf.port_ == 8080
