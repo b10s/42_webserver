@@ -4,7 +4,7 @@
 void ConfigParser::ParseAutoIndex(Location* location) {
   std::string token = Tokenize(content);
   if (token.empty()) {
-    throw std::runtime_error("Syntax error : expected autoindex value" + token);
+    throw std::runtime_error("Syntax error: expected autoindex value" + token);
   }
   if (token != "on" && token != "off") {
     throw std::runtime_error("Invalid autoindex value: " + token);

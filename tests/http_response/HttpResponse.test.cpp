@@ -5,7 +5,7 @@
 #include "lib/http/Status.hpp"
 
 TEST(HttpResponseTest, DefaultConstructor) {
-  HttpResponse response;
+  HttpResponse response(lib::http::kOk);
   std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 200 OK"), std::string::npos);
@@ -15,15 +15,14 @@ TEST(HttpResponseTest, DefaultConstructor) {
 }
 
 TEST(HttpResponseTest, SetStatus) {
-  HttpResponse response;
-  response.SetStatus(lib::http::kNotFound);
+  HttpResponse response(lib::http::kNotFound);
   std::string output = response.ToHttpString();
   
   EXPECT_NE(output.find("HTTP/1.1 404 Not Found"), std::string::npos);
 }
 
 TEST(HttpResponseTest, AddHeader) {
-  HttpResponse response;
+  HttpResponse response(lib::http::kOk);
   response.AddHeader("Content-Type", "application/json");
   response.AddHeader("X-Custom-Header", "MyValue");
   response.AddHeader("content-type", "text/html");
@@ -44,7 +43,7 @@ TEST(HttpResponseTest, AddHeader) {
 }
 
 TEST(HttpResponseTest, SetBody) {
-  HttpResponse response;
+  HttpResponse response(lib::http::kOk);
   std::string body = "Hello, World!";
   response.SetBody(body);
   response.AddHeader("content-length", std::to_string(body.length()));
@@ -67,8 +66,7 @@ TEST(HttpResponseTest, SetBody) {
 }
 
 TEST(HttpResponseTest, FullResponse) {
-  HttpResponse response;
-  response.SetStatus(lib::http::kCreated);
+  HttpResponse response(lib::http::kCreated);
   response.AddHeader("Content-Type", "text/plain");
   std::string body = "Created Successfully";
   response.SetBody(body);

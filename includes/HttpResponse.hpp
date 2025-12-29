@@ -5,16 +5,21 @@
 #include <string>
 
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 
 class HttpResponse {
  public:
   HttpResponse();
+  HttpResponse(lib::http::Status);
   ~HttpResponse();
   HttpResponse(const HttpResponse& other);
   HttpResponse& operator=(const HttpResponse& other);
 
   void SetStatus(lib::http::Status status);
+  lib::http::Status GetStatus();
   void AddHeader(const std::string& key, const std::string& value);
+  lib::type::Optional<std::string> GetHeader(const std::string& key);
+  bool HasHeader(const std::string& key);
   void SetBody(const std::string& body);
   std::string GetBody() const;
   std::string ToHttpString() const;

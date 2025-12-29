@@ -5,10 +5,17 @@
 
 #include "lib/exception/InvalidHeader.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
 
 HttpResponse::HttpResponse()
     : status_code_(200), reason_phrase_("OK"), version_("HTTP/1.1") {
+}
+
+HttpResponse::HttpResponse(lib::http::Status status)
+    : status_code_(status),
+      reason_phrase_(lib::http::StatusToString(status)),
+      version_("HTTP/1.1") {
 }
 
 HttpResponse::~HttpResponse() {
@@ -38,6 +45,10 @@ void HttpResponse::SetStatus(lib::http::Status status) {
   reason_phrase_ = lib::http::StatusToString(status);
 }
 
+lib::http::Status HttpResponse::GetStatus() {
+  return static_cast<lib::http::Status>(status_code_);
+}
+
 void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
   if (key.find('\r') != std::string::npos ||
       key.find('\n') != std::string::npos ||
@@ -46,6 +57,23 @@ void HttpResponse::AddHeader(const std::string& key, const std::string& value) {
     throw lib::exception::InvalidHeader();
   }
   headers_[lib::utils::ToLowerAscii(key)] = value;
+}
+
+lib::type::Optional<std::string> HttpResponse::GetHeader(
+    const std::string& key) {
+  std::map<std::string, std::string>::iterator it = headers_.find(key);
+  if (it != headers_.end())
+    return lib::type::Optional<std::string>(it->second);
+  else
+    return lib::type::Optional<std::string>();
+}
+
+bool HttpResponse::HasHeader(const std::string& key) {
+  std::map<std::string, std::string>::iterator it = headers_.find(key);
+  if (it != headers_.end())
+    return true;
+  else
+    return false;
 }
 
 void HttpResponse::SetBody(const std::string& body) {
@@ -111,9 +139,7 @@ std::string HttpResponse::ToHttpString() const {
   // field in any message that contains a Transfer-Encoding header field.
   bool has_transfer_encoding = final_headers.count("transfer-encoding");
   if (!has_content_length && !has_transfer_encoding) {
-    std::stringstream len_ss;
-    len_ss << body_.length();
-    final_headers["content-length"] = len_ss.str();
+    final_headers["content-length"] = lib::utils::ToString(body_.length());
   }
 
   // Output Headers

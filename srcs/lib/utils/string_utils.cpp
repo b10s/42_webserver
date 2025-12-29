@@ -2,6 +2,9 @@
 
 #include <cctype>
 #include <sstream>
+#include <string>
+
+#include "lib/type/Optional.hpp"
 
 namespace lib {
 namespace utils {
@@ -40,6 +43,13 @@ bool StartsWith(const std::string& str, const std::string& prefix) {
     return false;
   }
   return str.compare(0, prefix.size(), prefix) == 0;
+}
+
+lib::type::Optional<std::string> GetFirstToken(const std::string& str,
+                                               const std::string& delimiter) {
+  std::basic_string<char>::size_type pos = str.find(delimiter);
+  if (pos == std::string::npos) return lib::type::Optional<std::string>();
+  return lib::type::Optional<std::string>(str.substr(0, pos));
 }
 
 }  // namespace utils

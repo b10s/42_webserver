@@ -11,6 +11,7 @@
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 
 // http
 namespace http {
@@ -112,7 +113,7 @@ class HttpRequest {
   const unsigned short& GetHostPort() const;
   const std::string& GetVersion() const;
   const Dict& GetHeader() const;
-  const std::string& GetHeader(const std::string& key) const;
+  lib::type::Optional<std::string> GetHeader(const std::string& key) const;
   const Dict& GetQuery() const;
   const std::string& GetBody() const;
 
@@ -131,6 +132,14 @@ class HttpRequest {
   bool IsDone() const {
     return progress_ == kDone;
   }  // for test purposes
+
+  const std::string& GetClientIp() const {
+    return client_ip_;
+  }
+
+  void SetClientIp(const std::string& ip) {
+    client_ip_ = ip;
+  }
 
   Progress GetProgress() const {  // IsDone だけじゃ足りないとき用
     return progress_;
@@ -154,6 +163,7 @@ class HttpRequest {
 
  private:
   Progress progress_;  // progress is initially kHeader
+  std::string client_ip_;
 };
 
 #endif  // HTTPREQUEST_HPP_

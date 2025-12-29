@@ -1,5 +1,6 @@
 #include "Epoll.hpp"
 
+#include <asm-generic/socket.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <sys/epoll.h>
@@ -28,7 +29,8 @@ Epoll::~Epoll() {
 void Epoll::AddServer(unsigned short port) {
   int server_fd = socket(PF_INET, SOCK_STREAM, 0);
   if (server_fd == -1) {
-    throw std::runtime_error("socket() failed." + std::string(strerror(errno)));
+    throw std::runtime_error("socket() failed. " +
+                             std::string(strerror(errno)));
   }
   int opt = 1;
   int ret;
@@ -46,12 +48,13 @@ void Epoll::AddServer(unsigned short port) {
 
   ret = bind(server_fd, (sockaddr*)&server_addr, sizeof(sockaddr_in));
   if (ret == -1) {
-    throw std::runtime_error("bind() failed." + std::string(strerror(errno)));
+    throw std::runtime_error("bind() failed. " + std::string(strerror(errno)));
   }
 
   ret = listen(server_fd, SOMAXCONN);
   if (ret == -1) {
-    throw std::runtime_error("listen() failed." + std::string(strerror(errno)));
+    throw std::runtime_error("listen() failed. " +
+                             std::string(strerror(errno)));
   }
 
   Addsocket(server_fd);
@@ -61,7 +64,7 @@ void Epoll::AddServer(unsigned short port) {
 void Epoll::CreateInstance() {
   epoll_fd_ = epoll_create1(0);
   if (epoll_fd_ == -1) {
-    throw std::runtime_error("epoll_create1() failed." +
+    throw std::runtime_error("epoll_create1() failed. " +
                              std::string(strerror(errno)));
   }
 }
@@ -74,7 +77,7 @@ void Epoll::Addsocket(int socket_fd) {
   ev.data.fd = socket_fd;
   ret = epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket_fd, &ev);
   if (ret == -1) {
-    throw std::runtime_error("epoll_ctl() failed." +
+    throw std::runtime_error("epoll_ctl() failed. " +
                              std::string(strerror(errno)));
   }
 }
@@ -87,7 +90,7 @@ void Epoll::ModSocket(int socket_fd, uint32_t events) {
   ev.data.fd = socket_fd;
   ret = epoll_ctl(epoll_fd_, EPOLL_CTL_MOD, socket_fd, &ev);
   if (ret == -1) {
-    throw std::runtime_error("epoll_ctl() failed." +
+    throw std::runtime_error("epoll_ctl() failed. " +
                              std::string(strerror(errno)));
   }
 }
@@ -96,7 +99,7 @@ void Epoll::RemoveSocket(int socket_fd) {
   int ret;
   ret = epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket_fd, NULL);
   if (ret == -1) {
-    throw std::runtime_error("epoll_ctr() failed." +
+    throw std::runtime_error("epoll_ctr() failed. " +
                              std::string(strerror(errno)));
   }
 }
@@ -105,7 +108,7 @@ int Epoll::Wait() {
   int ret;
   ret = epoll_wait(epoll_fd_, events_, kMaxEvents, -1);
   if (ret == -1) {
-    throw std::runtime_error("epoll_wait() failed." +
+    throw std::runtime_error("epoll_wait() failed. " +
                              std::string(strerror(errno)));
   }
   return ret;

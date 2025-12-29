@@ -53,3 +53,16 @@ TEST(StringUtilsTest, StrToUnsignedShort_Invalid) {
   EXPECT_FALSE(lib::utils::StrToUnsignedShort("   ").HasValue());
   EXPECT_FALSE(lib::utils::StrToUnsignedShort("12 34").HasValue());
 }
+
+TEST(StringUtilsTest, ToString) {
+  EXPECT_EQ(lib::utils::ToString("Hello"), "Hello");
+  EXPECT_EQ(lib::utils::ToString(123), "123");
+  EXPECT_EQ(lib::utils::ToString(-123), "-123");
+  EXPECT_EQ(lib::utils::ToString(123.456), "123.456");
+}
+
+TEST(StringUtilsTest, GetFirstToken) {
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic hogehoge", " ").Value(), "Basic");
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic    hogehoge", " ").Value(), "Basic");
+  EXPECT_FALSE(lib::utils::GetFirstToken("hogehoge", " ").HasValue());
+}

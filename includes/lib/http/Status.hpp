@@ -12,6 +12,7 @@ enum Status {
   kAccepted = 202,
   kNoContent = 204,
   kResetContent = 205,
+  kFound = 302,
   kTemporaryRedirect = 307,
   kBadRequest = 400,
   kUnauthorized = 401,

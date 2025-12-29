@@ -3,6 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
+#include "CgiExecutor.hpp"
 #include "HttpRequest.hpp"
 #include "ServerConfig.hpp"
 #include "lib/http/Method.hpp"
@@ -66,11 +67,16 @@ std::string RequestHandler::ResolveFilesystemPath() const {
 }
 
 void RequestHandler::HandleGet() {
-  const std::string path = filesystem_path_;
-  std::string body = lib::utils::ReadFile(path);
-  res_.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(path));
-  res_.SetBody(body);
-  res_.SetStatus(lib::http::kOk);
+  if (location_match_.loc->GetCgiEnabled()) {
+    CgiExecutor cgi(req_, filesystem_path_);
+    res_ = cgi.Run();
+  } else {
+    std::string body = lib::utils::ReadFile(filesystem_path_);
+    res_.AddHeader("Content-Type",
+                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res_.SetBody(body);
+    res_.SetStatus(lib::http::kOk);
+  }
 }
 
 void RequestHandler::HandlePost() {
