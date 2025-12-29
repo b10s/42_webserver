@@ -39,13 +39,6 @@ void Epoll::AddServer(unsigned short port) {
     throw std::runtime_error("setsockopt() failed. " +
                              std::string(strerror(errno)));
   }
-  int opt = 1;
-  int ret;
-  ret = setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
-  if (ret == -1) {
-    throw std::runtime_error("setsockopt() failed. " +
-                             std::string(strerror(errno)));
-  }
 
   sockaddr_in server_addr;
   lib::utils::Bzero(&server_addr, sizeof(server_addr));
