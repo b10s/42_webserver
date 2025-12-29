@@ -3,6 +3,7 @@
 
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "LocationMatch.hpp"
 #include "ServerConfig.hpp"
 
 class RequestHandler {
@@ -11,7 +12,8 @@ class RequestHandler {
   ~RequestHandler();
 
   HttpResponse Run();
-  std::string ResolveFullPath() const;  // for testing purpose
+  void PrepareRoutingContext();
+  std::string ResolveFilesystemPath() const;  // for testing purpose
 
  private:
   RequestHandler();  // shouldn't use default constructor
@@ -19,7 +21,8 @@ class RequestHandler {
   HttpRequest req_;
   HttpResponse res_;
 
-  std::string full_path_;
+  LocationMatch location_match_;
+  std::string filesystem_path_;
   void HandleGet();
   void HandlePost();
   void HandleDelete();
