@@ -62,7 +62,7 @@ TEST(StringUtilsTest, ToString) {
 }
 
 TEST(StringUtilsTest, GetFirstToken) {
-  EXPECT_EQ(lib::utils::GetFirstToken(lib::type::Optional<std::string>("Basic hogehoge"), " ").Value(), "Basic");
-  EXPECT_EQ(lib::utils::GetFirstToken(lib::type::Optional<std::string>("Basic    hogehoge"), " ").Value(), "Basic");
-  EXPECT_FALSE(lib::utils::GetFirstToken(lib::type::Optional<std::string>("hogehoge"), " ").HasValue());
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic hogehoge", " ").Value(), "Basic");
+  EXPECT_EQ(lib::utils::GetFirstToken("Basic    hogehoge", " ").Value(), "Basic");
+  EXPECT_FALSE(lib::utils::GetFirstToken("hogehoge", " ").HasValue());
 }
