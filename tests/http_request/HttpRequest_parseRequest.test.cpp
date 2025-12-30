@@ -19,7 +19,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_HappyPath) {
   EXPECT_EQ(req.GetUri(), "/index.html");
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
   EXPECT_EQ(req.GetHeader().at("host"), "example.com");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 
@@ -27,11 +27,11 @@ TEST_F(HttpRequestParseRequest, ParseRequest_HappyPath) {
 TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalParsing) {
   const char* data = "GET /index.html HTTP/1.1\r\nHost: example.com\r\n";
   req.Parse(data, strlen(data));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader); // still parsing header
+  EXPECT_EQ(req.GetState(), HttpRequest::kHeader); // still parsing header
 
   const char* data2 = "\r\n"; // end of headers 
   req.Parse(data2, strlen(data2));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 
   EXPECT_EQ(req.GetMethod(), lib::http::kGet);
   EXPECT_EQ(req.GetUri(), "/index.html");
@@ -48,17 +48,17 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalParsing_WithBodyContent)
     "\r\n";
   req.Parse(data, strlen(data));
   // progress should be kBody, body is empty at this point
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  EXPECT_EQ(req.GetState(), HttpRequest::kBody);
   EXPECT_EQ(req.GetBody(), "");
   // partial body in the second call
   const char* data2 = "Hello ";
   req.Parse(data2, strlen(data2));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);  // still not enough
+  EXPECT_EQ(req.GetState(), HttpRequest::kBody);  // still not enough
   EXPECT_EQ(req.GetBody(), ""); // body not yet advanced at this point
   // complete body in the third call
   const char* data3 = "World";
   req.Parse(data3, strlen(data3));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
   EXPECT_EQ(req.GetBody(), "Hello World");
   EXPECT_EQ(req.GetMethod(), lib::http::kPost);
   EXPECT_EQ(req.GetUri(), "/submit");
@@ -76,7 +76,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_WithChunkedTransferEncoding) {
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
   EXPECT_EQ(req.GetHeader().at("host"), "example.com");
   EXPECT_EQ(req.GetHeader().at("transfer-encoding"), "chunked");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 TEST_F(HttpRequestParseRequest, ParseRequest_WithChunkedBody_CompleteInOneCall) {
@@ -97,7 +97,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_WithChunkedBody_CompleteInOneCall) 
   EXPECT_EQ(req.GetHeader().at("host"), "example.com");
   EXPECT_EQ(req.GetHeader().at("transfer-encoding"), "chunked");
   EXPECT_EQ(req.GetBody(), "Hello World");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
@@ -109,7 +109,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
     "5\r\n"
     "Hello\r\n";
   req.Parse(data, strlen(data));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  EXPECT_EQ(req.GetState(), HttpRequest::kBody);
   EXPECT_EQ(req.GetBody(), "Hello");
 
   // second chunk + terminator
@@ -118,7 +118,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
     "0\r\n"
     "\r\n";
   req.Parse(data2, strlen(data2));
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
   EXPECT_EQ(req.GetBody(), "Hello World");
 }
 

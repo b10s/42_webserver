@@ -21,7 +21,7 @@ TEST_F(HttpRequestAdvanceHeader, AdvanceHeader_HappyPath) {
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
   EXPECT_EQ(req.GetHeader().at("host"), "example.com");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 // =============== Need more data ===============
@@ -32,14 +32,14 @@ TEST_F(HttpRequestAdvanceHeader, AdvanceHeader_HeaderLine_split_NeedMoreData) {
   EXPECT_FALSE(req.AdvanceHeader());
   EXPECT_EQ(req.GetBufferForTest(),
             "GET /index.html HTTP/1.1\r\nHost: exam");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
+  EXPECT_EQ(req.GetState(), HttpRequest::kHeader);
 }
 
 TEST_F(HttpRequestAdvanceHeader, AdvanceHeader_PartialHeaderLine_NeedMoreData) {
   req.SetBufferForTest("GET /index.html HTTP/1.1\r\nHost: example.com\r\n");
   EXPECT_FALSE(req.AdvanceHeader());
   EXPECT_EQ(req.GetBufferForTest(), "GET /index.html HTTP/1.1\r\nHost: example.com\r\n");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader);
+  EXPECT_EQ(req.GetState(), HttpRequest::kHeader);
 }
 
 // =============== Malformed requests ===============

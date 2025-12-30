@@ -10,8 +10,7 @@ const size_t HttpRequest::kMaxUriSize;
 const unsigned short HttpRequest::kDefaultPort = 8080;
 
 HttpRequest::HttpRequest()
-    : buffer_(),
-      method_(lib::http::kUnknownMethod),
+    : method_(lib::http::kUnknownMethod),
       uri_(),
       host_name_(),
       host_port_(8080),
@@ -22,7 +21,6 @@ HttpRequest::HttpRequest()
       buffer_read_pos_(0),
       next_chunk_size_(-1),
       keep_alive_(false),
-      state_(kHeader),
       client_ip_() {
 }
 

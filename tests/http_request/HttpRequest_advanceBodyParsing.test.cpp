@@ -21,7 +21,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_ContentLength_HappyPath) {
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "Hello World!");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 // request body size is 11, but data arrives in two parts
@@ -36,7 +36,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_ContentLength_SizeThenData) {
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "Hello World");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 // consume only Content-Length bytes, leaving the rest for the next request
@@ -47,7 +47,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_ContentLength_LeavesExtraDataForNextR
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "Hello World!");
   EXPECT_EQ(req.GetBufferForTest(), "NEXT");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 // ====== Happy path: chunked mode (content_length_ = -1) ========
@@ -60,7 +60,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_HappyPath) {
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "helloworld123456");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 // multiple recv calls for chunked body
@@ -93,7 +93,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_ContentLength_NeedMoreData) {
   EXPECT_FALSE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "");
   EXPECT_EQ(req.GetBufferForTest(), "Hello");
-  // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  // EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_NeedMoreData) {
@@ -103,7 +103,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_NeedMoreData) {
   EXPECT_FALSE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "hello");
   EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n8\r\nworld12");
-  // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  // EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_NeedMoreData_ChunkSize) {
@@ -113,7 +113,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_NeedMoreData_ChunkSize) {
   EXPECT_FALSE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "");
   EXPECT_EQ(req.GetBufferForTest(), "5");
-  // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  // EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 // =============== Malformed requests ===============
@@ -131,7 +131,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_Malformed_NoFinalCRLF) {
   EXPECT_FALSE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "hello");
   EXPECT_EQ(req.GetBufferForTest(), "5\r\nhello\r\n0\r\n");
-  // EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
+  // EXPECT_EQ(req.GetState(), HttpRequest::kBody);
 }
 
 TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_Malformed_ExtraDataAfterLastChunk) {
@@ -157,7 +157,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_ContentLength_ZeroLength) {
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_ZeroLength) {
@@ -167,7 +167,7 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_ZeroLength) {
   EXPECT_TRUE(req.AdvanceBody());
   EXPECT_EQ(req.GetBody(), "");
   EXPECT_EQ(req.GetBufferForTest(), "");
-  EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
+  EXPECT_EQ(req.GetState(), HttpRequest::kDone);
 }
 
 // extra data after "0\r\n\r\n" -> 400 Bad Request

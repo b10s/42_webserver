@@ -32,7 +32,6 @@ typedef std::map<std::string, std::string> Dict;
 
 class HttpRequest : public lib::parser::StreamParser {
  private:
-  std::string buffer_;
   lib::http::Method method_;
   std::string uri_;
   Dict query_;
@@ -78,12 +77,6 @@ class HttpRequest : public lib::parser::StreamParser {
   void OnExtraDataAfterDone();
 
  public:
-  enum Progress {
-    kHeader = 0,  // initial state, reading header
-    kBody,        // reading body
-    kDone         // finished parsing request
-  };
-
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes
   // (8KB) for simplicity
   static const size_t kMaxHeaderSize = 8192;
@@ -100,7 +93,7 @@ class HttpRequest : public lib::parser::StreamParser {
   HttpRequest& operator=(const HttpRequest& src);
   ~HttpRequest();
 
-  void Parse(const char* data, size_t len);
+  // void Parse(const char* data, size_t len);
   bool AdvanceHeader();
   bool AdvanceBody();
   const char* ConsumeMethod(const char* req);
@@ -144,7 +137,7 @@ class HttpRequest : public lib::parser::StreamParser {
     client_ip_ = ip;
   }
 
-  Progress GetProgress() const {  // IsDone だけじゃ足りないとき用
+  State GetState() const {  // IsDone だけじゃ足りないとき用
     return state_;
   }
 
@@ -160,12 +153,11 @@ class HttpRequest : public lib::parser::StreamParser {
     content_length_ = len;
   }
 
-  void SetProgressForTest(Progress p) {
+  void SetStateForTest(State p) {
     state_ = p;
   }
 
  private:
-  Progress state_;  // progress is initially kHeader
   std::string client_ip_;
 };
 
