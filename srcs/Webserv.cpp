@@ -17,7 +17,8 @@
 #include "socket/ClientSocket.hpp"
 #include "socket/ServerSocket.hpp"
 
-Webserv::Webserv() : epoll_fd_(-1) {}
+Webserv::Webserv() : epoll_fd_(-1) {
+}
 
 Webserv::~Webserv() {
   for (std::map<int, ASocket*>::iterator it = sockets_.begin();

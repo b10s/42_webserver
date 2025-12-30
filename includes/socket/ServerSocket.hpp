@@ -1,8 +1,6 @@
 #ifndef SERVERSOCKET_HPP
 #define SERVERSOCKET_HPP
 
-#include "socket/ASocket.hpp"
-
 #include "ServerConfig.hpp"
 #include "socket/ASocket.hpp"
 
@@ -15,7 +13,7 @@ class ServerSocket : public ASocket {
 
  private:
   ServerSocket();
- const ServerConfig& config_;
+  const ServerConfig& config_;
 };
 
 #endif

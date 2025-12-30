@@ -10,9 +10,11 @@
 #include "socket/ClientSocket.hpp"
 
 ServerSocket::ServerSocket(int fd, const ServerConfig& config)
-    : ASocket(fd), config_(config) {}
+    : ASocket(fd), config_(config) {
+}
 
-ServerSocket::~ServerSocket() {}
+ServerSocket::~ServerSocket() {
+}
 
 SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;

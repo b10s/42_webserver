@@ -1,16 +1,18 @@
 #ifndef CLIENTSOCKET_HPP
 #define CLIENTSOCKET_HPP
 
-#include "lib/exception/ConnectionClosed.hpp"
+#include <string>
+
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
+#include "lib/exception/ConnectionClosed.hpp"
 #include "socket/ASocket.hpp"
-#include <string>
 
 class ClientSocket : public ASocket {
  public:
-  ClientSocket(int fd, const ServerConfig& config, const std::string& client_ip);
+  ClientSocket(int fd, const ServerConfig& config,
+               const std::string& client_ip);
   virtual ~ClientSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);

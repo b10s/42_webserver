@@ -14,7 +14,8 @@ ClientSocket::ClientSocket(int fd, const ServerConfig& config,
   request_.SetClientIp(client_ip);
 }
 
-ClientSocket::~ClientSocket() {}
+ClientSocket::~ClientSocket() {
+}
 
 SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;

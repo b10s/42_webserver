@@ -10,7 +10,8 @@ struct SocketResult {
   ASocket* new_socket;
   bool remove_socket;
 
-  SocketResult() : new_socket(NULL), remove_socket(false) {}
+  SocketResult() : new_socket(NULL), remove_socket(false) {
+  }
 };
 
 class ASocket {
