@@ -86,7 +86,7 @@ void Webserv::HandleEpollIn(int fd) {
   } else {
     HttpRequest& req = requests_[fd];
     try {
-      req.ParseRequest(buffer, bytes_received);
+      req.Parse(buffer, bytes_received);
       if (req.IsDone()) {
         const ServerConfig* conf = FindServerConfigByPort(req.GetHostPort());
         if (conf == NULL) return;

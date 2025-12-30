@@ -28,7 +28,7 @@ std::string::size_type HttpRequest::FindEndOfHeader(
  *  - consumed data is removed from buffer_
  *  - progress is updated to BODY when header parsing completes
  */
-bool HttpRequest::AdvanceHeaderParsing() {
+bool HttpRequest::AdvanceHeader() {
   std::string::size_type end_of_header = FindEndOfHeader(buffer_);
   if (end_of_header == std::string::npos) {
     return false;  // need more data
@@ -46,6 +46,6 @@ bool HttpRequest::AdvanceHeaderParsing() {
         lib::http::kInternalServerError);
   }
   buffer_.erase(0, end_of_header);
-  progress_ = kBody;
+  state_ = kBody;
   return true;
 }

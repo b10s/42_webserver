@@ -13,7 +13,7 @@
  *
  * @post
  *  - body_: appended with newly parsed body data
- *  - progress_: updated to kDone if finished
+ *  - state_: updated to kDone if finished
  *  - buffer_: updated to remove consumed data
  */
 // TODO: maybe I should not throw bad request for extensions(trailing section)
@@ -29,11 +29,11 @@ ValidateBodyHeaders in ConsumeBodyHeaders ensures the following conditions:
   - If "Transfer-Encoding: chunked" is present:
       content_length_ == -1 and the "transfer-encoding" header exists.
 */
-bool HttpRequest::AdvanceBodyParsing() {
+bool HttpRequest::AdvanceBody() {
   try {
     const bool has_transfer_encoding = headers_.count("transfer-encoding");
     if (content_length_ == 0 && !has_transfer_encoding) {
-      progress_ = kDone;
+      state_ = kDone;
       return true;
     }
     if (content_length_ >= 0) {
@@ -56,7 +56,7 @@ bool HttpRequest::AdvanceContentLengthBody() {
     throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
   }
   if (need == 0) {
-    progress_ = kDone;
+    state_ = kDone;
     return true;
   }
   if (buffer_.size() < need) {
@@ -64,7 +64,7 @@ bool HttpRequest::AdvanceContentLengthBody() {
   }
   body_.assign(buffer_.data(), need);
   buffer_.erase(0, need);  // erase consumed data
-  progress_ = kDone;
+  state_ = kDone;
   return true;
 }
 
@@ -93,7 +93,7 @@ bool HttpRequest::AdvanceChunkedBody() {
           buffer_.erase(0, buffer_read_pos_);  // erase consumed data
           buffer_read_pos_ = 0;
           next_chunk_size_ = -1;
-          progress_ = kDone;
+          state_ = kDone;
         }
         return done;
       }
@@ -146,7 +146,7 @@ bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   buffer_.clear();  // erase consumed data including last chunk
-  progress_ = kDone;
+  state_ = kDone;
   return true;
 }
 
