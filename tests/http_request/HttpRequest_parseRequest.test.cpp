@@ -14,7 +14,7 @@ class HttpRequestParseRequest : public ::testing::Test {
 // =============== Happy path: parse request ===============
 TEST_F(HttpRequestParseRequest, ParseRequest_HappyPath) {
   const char* data = "GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   EXPECT_EQ(req.GetMethod(), lib::http::kGet);
   EXPECT_EQ(req.GetUri(), "/index.html");
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
@@ -26,11 +26,11 @@ TEST_F(HttpRequestParseRequest, ParseRequest_HappyPath) {
 // Incremental parsing (calling ParseRequest multiple times with partial data)
 TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalParsing) {
   const char* data = "GET /index.html HTTP/1.1\r\nHost: example.com\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kHeader); // still parsing header
 
   const char* data2 = "\r\n"; // end of headers 
-  req.ParseRequest(data2, strlen(data2));
+  req.Parse(data2, strlen(data2));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
 
   EXPECT_EQ(req.GetMethod(), lib::http::kGet);
@@ -46,18 +46,18 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalParsing_WithBodyContent)
     "Host: example.com\r\n"
     "Content-Length: 11\r\n"
     "\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   // progress should be kBody, body is empty at this point
   EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
   EXPECT_EQ(req.GetBody(), "");
   // partial body in the second call
   const char* data2 = "Hello ";
-  req.ParseRequest(data2, strlen(data2));
+  req.Parse(data2, strlen(data2));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);  // still not enough
   EXPECT_EQ(req.GetBody(), ""); // body not yet advanced at this point
   // complete body in the third call
   const char* data3 = "World";
-  req.ParseRequest(data3, strlen(data3));
+  req.Parse(data3, strlen(data3));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
   EXPECT_EQ(req.GetBody(), "Hello World");
   EXPECT_EQ(req.GetMethod(), lib::http::kPost);
@@ -70,7 +70,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalParsing_WithBodyContent)
 // Requests with chunked transfer encoding
 TEST_F(HttpRequestParseRequest, ParseRequest_WithChunkedTransferEncoding) {
   const char* data = "POST /submit HTTP/1.1\r\nHost: example.com\r\nTransfer-Encoding: chunked\r\n\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   EXPECT_EQ(req.GetMethod(), lib::http::kPost);
   EXPECT_EQ(req.GetUri(), "/submit");
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
@@ -90,7 +90,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_WithChunkedBody_CompleteInOneCall) 
     " World\r\n"
     "0\r\n"
     "\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   EXPECT_EQ(req.GetMethod(), lib::http::kPost);
   EXPECT_EQ(req.GetUri(), "/submit");
   EXPECT_EQ(req.GetVersion(), "HTTP/1.1");
@@ -108,7 +108,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
     "\r\n"
     "5\r\n"
     "Hello\r\n";
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kBody);
   EXPECT_EQ(req.GetBody(), "Hello");
 
@@ -117,7 +117,7 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
     " World\r\n"
     "0\r\n"
     "\r\n";
-  req.ParseRequest(data2, strlen(data2));
+  req.Parse(data2, strlen(data2));
   EXPECT_EQ(req.GetProgress(), HttpRequest::kDone);
   EXPECT_EQ(req.GetBody(), "Hello World");
 }
@@ -125,24 +125,24 @@ TEST_F(HttpRequestParseRequest, ParseRequest_IncrementalChunkedBody) {
 // =============== Error cases: parse request ===============
 TEST_F(HttpRequestParseRequest, ParseRequest_Error_ExtraDataAfterDone) {
   const char* data = "GET /index.html HTTP/1.1\r\nHost: example.com\r\n\r\n"; 
-  req.ParseRequest(data, strlen(data));
+  req.Parse(data, strlen(data));
   const char* data2 = "EXTRA DATA";
-  EXPECT_THROW(req.ParseRequest(data2, strlen(data2)), lib::exception::ResponseStatusException);
+  EXPECT_THROW(req.Parse(data2, strlen(data2)), lib::exception::ResponseStatusException);
 }
 
 // Malformed requests (invalid headers, missing required fields)
 TEST_F(HttpRequestParseRequest, ParseRequest_Error_MissingHostHeader) {
   const char* data = "GET /index.html HTTP/1.1\r\n\r\n";
-  EXPECT_THROW(req.ParseRequest(data, strlen(data)), lib::exception::ResponseStatusException);
+  EXPECT_THROW(req.Parse(data, strlen(data)), lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseRequest, ParseRequest_Error_InvalidHeaderFormat) {
   const char* data = "GET /index.html HTTP/1.1\r\nInvalid-Header\r\n\r\n";
-  EXPECT_THROW(req.ParseRequest(data, strlen(data)), lib::exception::ResponseStatusException);
+  EXPECT_THROW(req.Parse(data, strlen(data)), lib::exception::ResponseStatusException);
 }
 
 TEST_F(HttpRequestParseRequest, ParseRequest_Error_ExceedMaxHeaderSize) {
   std::string largeHeader = "GET /index.html HTTP/1.1\r\n";
   largeHeader += std::string(HttpRequest::kMaxHeaderSize, 'A') + ": value\r\n\r\n";
-  EXPECT_THROW(req.ParseRequest(largeHeader.c_str(), strlen(largeHeader.c_str())), lib::exception::ResponseStatusException);
+  EXPECT_THROW(req.Parse(largeHeader.c_str(), strlen(largeHeader.c_str())), lib::exception::ResponseStatusException);
 }

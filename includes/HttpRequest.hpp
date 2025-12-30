@@ -12,6 +12,7 @@
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/type/Optional.hpp"
+#include "lib/parser/StreamParser.hpp"
 
 // http
 namespace http {
@@ -29,7 +30,7 @@ inline bool IsVisibleAscii(char c) {
 
 typedef std::map<std::string, std::string> Dict;
 
-class HttpRequest {
+class HttpRequest : public lib::parser::StreamParser {
  private:
   std::string buffer_;
   lib::http::Method method_;
@@ -67,12 +68,14 @@ class HttpRequest {
   void ParseContentLength(const std::string& s);
   void ParseTransferEncoding(const std::string& s);
   void ParseConnectionDirective();
-  // AdvanceBodyParsing helpers
+  // AdvanceBody helpers
   bool AdvanceContentLengthBody();
   bool AdvanceChunkedBody();
   bool ParseChunkSize(size_t& pos, size_t& chunk_size);
   bool ValidateFinalCRLF(size_t& pos);
   bool AppendChunkData(size_t& pos, size_t chunk_size);
+  void OnInternalStateError();
+  void OnExtraDataAfterDone();
 
  public:
   enum Progress {
@@ -97,9 +100,9 @@ class HttpRequest {
   HttpRequest& operator=(const HttpRequest& src);
   ~HttpRequest();
 
-  void ParseRequest(const char* data, size_t len);
-  bool AdvanceHeaderParsing();
-  bool AdvanceBodyParsing();
+  void Parse(const char* data, size_t len);
+  bool AdvanceHeader();
+  bool AdvanceBody();
   const char* ConsumeMethod(const char* req);
   const char* ConsumeVersion(const char* req);
   const char* ConsumeUri(const char* req);
@@ -130,7 +133,7 @@ class HttpRequest {
   }
 
   bool IsDone() const {
-    return progress_ == kDone;
+    return state_ == kDone;
   }  // for test purposes
 
   const std::string& GetClientIp() const {
@@ -142,7 +145,7 @@ class HttpRequest {
   }
 
   Progress GetProgress() const {  // IsDone だけじゃ足りないとき用
-    return progress_;
+    return state_;
   }
 
   void SetBufferForTest(const std::string& s) {
@@ -158,11 +161,11 @@ class HttpRequest {
   }
 
   void SetProgressForTest(Progress p) {
-    progress_ = p;
+    state_ = p;
   }
 
  private:
-  Progress progress_;  // progress is initially kHeader
+  Progress state_;  // progress is initially kHeader
   std::string client_ip_;
 };
 

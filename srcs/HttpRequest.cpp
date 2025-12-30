@@ -22,7 +22,7 @@ HttpRequest::HttpRequest()
       buffer_read_pos_(0),
       next_chunk_size_(-1),
       keep_alive_(false),
-      progress_(kHeader),
+      state_(kHeader),
       client_ip_() {
 }
 
@@ -44,7 +44,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     buffer_read_pos_ = src.buffer_read_pos_;
     next_chunk_size_ = src.next_chunk_size_;
     keep_alive_ = src.keep_alive_;
-    progress_ = src.progress_;
+    state_ = src.state_;
     client_ip_ = src.client_ip_;
   }
   return *this;
@@ -100,4 +100,12 @@ lib::type::Optional<std::string> HttpRequest::GetHeader(
 
 const std::string& HttpRequest::GetBody() const {
   return body_;
+}
+
+void HttpRequest::OnInternalStateError() {
+  throw lib::exception::ResponseStatusException(lib::http::kInternalServerError);
+}
+
+void HttpRequest::OnExtraDataAfterDone() {
+  throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
 }

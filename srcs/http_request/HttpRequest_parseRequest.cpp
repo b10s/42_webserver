@@ -9,22 +9,22 @@
  *        - BAD_REQUEST: malformed request
  *        - INTERNAL_SERVER_ERROR: unexpected error during parsing
  */
-void HttpRequest::ParseRequest(const char* data, size_t len) {
+void HttpRequest::Parse(const char* data, size_t len) {
   try {
     buffer_.append(data, len);
 
     for (;;) {
-      switch (progress_) {
+      switch (state_) {
         case kHeader:
-          if (!AdvanceHeaderParsing()) return;
-          if (progress_ != kBody) {
+          if (!AdvanceHeader()) return;
+          if (state_ != kBody) {
             throw lib::exception::ResponseStatusException(
                 lib::http::kInternalServerError);
           }
           continue;
         case kBody:
-          if (!AdvanceBodyParsing()) return;
-          if (progress_ != kDone) {
+          if (!AdvanceBody()) return;
+          if (state_ != kDone) {
             throw lib::exception::ResponseStatusException(
                 lib::http::kInternalServerError);
           }
