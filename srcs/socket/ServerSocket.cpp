@@ -26,11 +26,12 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
       return result;
     }
 
-    // Set non-blocking
     int flags = fcntl(client_fd, F_GETFL, 0);
     fcntl(client_fd, F_SETFL, flags | O_NONBLOCK);
 
-    ClientSocket* client_socket = new ClientSocket(client_fd, config_);
+    std::string client_ip = inet_ntoa(client_addr.sin_addr);
+    ClientSocket* client_socket =
+        new ClientSocket(client_fd, config_, client_ip);
 
     epoll_event ev;
     ev.events = EPOLLIN;
@@ -42,12 +43,7 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
       return result;
     }
 
-    // TODO: Webserv used to set client IP here:
-    // requests_[client_fd].SetClientIp(inet_ntoa(client_addr.sin_addr));
-    // We should probably add a SetClientIp method to ClientSocket or pass it in constructor.
-
-    std::cout << "Accepted connection from " << inet_ntoa(client_addr.sin_addr)
-              << std::endl;
+    std::cout << "Accepted connection from " << client_ip << std::endl;
 
     result.new_socket = client_socket;
   }

@@ -30,7 +30,7 @@ Webserv::~Webserv() {
 }
 
 Webserv::Webserv(const std::string& config_file) {
-  signal(SIGPIPE, SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);  // avoid client disconnect crashes
 
   ConfigParser config_parser;
   config_parser.LoadFile(config_file);

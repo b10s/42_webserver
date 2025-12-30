@@ -14,7 +14,8 @@ class ServerSocket : public ASocket {
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
 
  private:
-  const ServerConfig& config_;
+  ServerSocket();
+ const ServerConfig& config_;
 };
 
 #endif

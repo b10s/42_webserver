@@ -8,8 +8,11 @@
 
 #include "RequestHandler.hpp"
 
-ClientSocket::ClientSocket(int fd, const ServerConfig& config)
-    : ASocket(fd), config_(config) {}
+ClientSocket::ClientSocket(int fd, const ServerConfig& config,
+                           const std::string& client_ip)
+    : ASocket(fd), config_(config) {
+  request_.SetClientIp(client_ip);
+}
 
 ClientSocket::~ClientSocket() {}
 

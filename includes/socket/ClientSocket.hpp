@@ -10,12 +10,13 @@
 
 class ClientSocket : public ASocket {
  public:
-  ClientSocket(int fd, const ServerConfig& config);
+  ClientSocket(int fd, const ServerConfig& config, const std::string& client_ip);
   virtual ~ClientSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
 
  private:
+  ClientSocket();
   const ServerConfig& config_;
   HttpRequest request_;
   HttpResponse response_;
