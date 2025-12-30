@@ -7,7 +7,6 @@
 
 #include "lib/type/Optional.hpp"
 
-
 namespace lib {
 namespace parser {
 
@@ -21,14 +20,13 @@ namespace parser {
 // - When state becomes kDone, Parse() returns.
 class StreamParser {
  public:
-  enum State {
-    kHeader = 0,
-    kBody = 1,
-    kDone = 2
-  };
+  enum State { kHeader = 0, kBody = 1, kDone = 2 };
 
-  StreamParser() : state_(kHeader) {}
-  virtual ~StreamParser() {}
+  StreamParser() : state_(kHeader) {
+  }
+
+  virtual ~StreamParser() {
+  }
 
   void Parse(const char* data, size_t len) {
     buffer_.append(data, len);

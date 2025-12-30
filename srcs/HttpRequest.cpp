@@ -103,7 +103,8 @@ const std::string& HttpRequest::GetBody() const {
 }
 
 void HttpRequest::OnInternalStateError() {
-  throw lib::exception::ResponseStatusException(lib::http::kInternalServerError);
+  throw lib::exception::ResponseStatusException(
+      lib::http::kInternalServerError);
 }
 
 void HttpRequest::OnExtraDataAfterDone() {

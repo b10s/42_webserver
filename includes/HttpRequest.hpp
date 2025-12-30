@@ -11,8 +11,8 @@
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
-#include "lib/type/Optional.hpp"
 #include "lib/parser/StreamParser.hpp"
+#include "lib/type/Optional.hpp"
 
 // http
 namespace http {
