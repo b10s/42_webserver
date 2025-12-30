@@ -25,7 +25,7 @@ class ClientSocket : public ASocket {
   std::string output_buffer_;
 
   void HandleEpollIn(int epoll_fd);
-  void HandleEpollOut(int epoll_fd);
+  void HandleEpollOut();
 
   static const size_t kBufferSize = 1024;
 };

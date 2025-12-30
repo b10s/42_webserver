@@ -24,7 +24,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
       HandleEpollIn(epoll_fd);
     }
     if (events & EPOLLOUT) {
-      HandleEpollOut(epoll_fd);
+      HandleEpollOut();
     }
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;
@@ -58,8 +58,7 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
   }
 }
 
-void ClientSocket::HandleEpollOut(int epoll_fd) {
-  (void)epoll_fd;
+void ClientSocket::HandleEpollOut() {
   if (output_buffer_.empty()) return;
 
   ssize_t bytes_sent =
