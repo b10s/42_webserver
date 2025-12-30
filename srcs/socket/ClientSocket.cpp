@@ -45,7 +45,7 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
     throw lib::exception::ConnectionClosed();
   }
 
-  request_.ParseRequest(buffer, bytes_received);
+  request_.Parse(buffer, bytes_received);
   if (request_.IsDone()) {
     RequestHandler handler(config_, request_);
     response_ = handler.Run();
