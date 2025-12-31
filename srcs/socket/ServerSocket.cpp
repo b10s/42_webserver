@@ -67,18 +67,19 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
       ClientSocket* client_socket =
           new ClientSocket(client_fd, config_, client_ip);
 
-    epoll_event ev;
-    ev.events = EPOLLIN;
-    ev.data.ptr = client_socket;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket->GetFd(), &ev) == -1) {
-      std::cerr << "Failed to add client socket to epoll" << std::endl;
-      delete client_socket;
-      return result;
-    }
+      epoll_event ev;
+      ev.events = EPOLLIN;
+      ev.data.ptr = client_socket;
+      if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_socket->GetFd(), &ev) ==
+          -1) {
+        std::cerr << "Failed to add client socket to epoll" << std::endl;
+        delete client_socket;
+        return result;
+      }
 
-    std::cout << "Accepted connection from " << client_ip << std::endl;
+      std::cout << "Accepted connection from " << client_ip << std::endl;
 
-    result.new_socket = client_socket;
+      result.new_socket = client_socket;
     } catch (const std::exception& e) {
       std::cerr << "Error creating ClientSocket: " << e.what() << std::endl;
     }
