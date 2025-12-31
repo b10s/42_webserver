@@ -41,7 +41,6 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
       std::cerr << "Failed to add client socket to epoll" << std::endl;
       delete client_socket;
-      close(client_fd);
       return result;
     }
 

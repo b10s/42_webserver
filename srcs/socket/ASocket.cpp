@@ -6,7 +6,7 @@ ASocket::ASocket(int fd) : fd_(fd) {
 ASocket::~ASocket() {
   if (fd_ != -1) {
     close(fd_);
-    fd = -1;
+    fd_ = -1;
   }
 }
 

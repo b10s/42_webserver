@@ -21,13 +21,7 @@ Webserv::Webserv() : epoll_fd_(-1) {
 }
 
 Webserv::~Webserv() {
-  for (std::map<int, ASocket*>::iterator it = sockets_.begin();
-       it != sockets_.end(); ++it) {
-    delete it->second;
-  }
-  if (epoll_fd_ != -1) {
-    close(epoll_fd_);
-  }
+  ClearResources();
 }
 
 Webserv::Webserv(const std::string& config_file) {
@@ -45,51 +39,56 @@ Webserv::Webserv(const std::string& config_file) {
                              std::string(strerror(errno)));
   }
 
-  for (std::map<unsigned short, ServerConfig>::const_iterator it =
-           port_to_server_configs_.begin();
-       it != port_to_server_configs_.end(); ++it) {
-    unsigned short port = it->first;
-    const ServerConfig& config = it->second;
+  try {
+    for (std::map<unsigned short, ServerConfig>::const_iterator it =
+             port_to_server_configs_.begin();
+         it != port_to_server_configs_.end(); ++it) {
+      unsigned short port = it->first;
+      const ServerConfig& config = it->second;
 
-    int server_fd = socket(PF_INET, SOCK_STREAM, 0);
-    if (server_fd == -1) {
-      throw std::runtime_error("socket() failed. " +
-                               std::string(strerror(errno)));
+      int server_fd = socket(PF_INET, SOCK_STREAM, 0);
+      if (server_fd == -1) {
+        throw std::runtime_error("socket() failed. " +
+                                 std::string(strerror(errno)));
+      }
+
+      int opt = 1;
+      if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
+          -1) {
+        throw std::runtime_error("setsockopt() failed. " +
+                                 std::string(strerror(errno)));
+      }
+
+      sockaddr_in server_addr;
+      lib::utils::Bzero(&server_addr, sizeof(server_addr));
+      server_addr.sin_family = AF_INET;
+      server_addr.sin_addr.s_addr = INADDR_ANY;
+      server_addr.sin_port = htons(port);
+
+      if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+        throw std::runtime_error("bind() failed. " +
+                                 std::string(strerror(errno)));
+      }
+
+      if (listen(server_fd, SOMAXCONN) == -1) {
+        throw std::runtime_error("listen() failed. " +
+                                 std::string(strerror(errno)));
+      }
+
+      ServerSocket* server_socket = new ServerSocket(server_fd, config);
+      sockets_[server_fd] = server_socket;
+
+      epoll_event ev;
+      ev.events = EPOLLIN;
+      ev.data.ptr = server_socket;
+      if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, server_fd, &ev) == -1) {
+        throw std::runtime_error("epoll_ctl() failed. " +
+                                 std::string(strerror(errno)));
+      }
     }
-
-    int opt = 1;
-    if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
-        -1) {
-      throw std::runtime_error("setsockopt() failed. " +
-                               std::string(strerror(errno)));
-    }
-
-    sockaddr_in server_addr;
-    lib::utils::Bzero(&server_addr, sizeof(server_addr));
-    server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = INADDR_ANY;
-    server_addr.sin_port = htons(port);
-
-    if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
-      throw std::runtime_error("bind() failed. " +
-                               std::string(strerror(errno)));
-    }
-
-    if (listen(server_fd, SOMAXCONN) == -1) {
-      throw std::runtime_error("listen() failed. " +
-                               std::string(strerror(errno)));
-    }
-
-    ServerSocket* server_socket = new ServerSocket(server_fd, config);
-    sockets_[server_fd] = server_socket;
-
-    epoll_event ev;
-    ev.events = EPOLLIN;
-    ev.data.ptr = server_socket;
-    if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, server_fd, &ev) == -1) {
-      throw std::runtime_error("epoll_ctl() failed. " +
-                               std::string(strerror(errno)));
-    }
+  } catch (...) {
+    ClearResources();
+    throw;
   }
 }
 
@@ -144,4 +143,16 @@ const ServerConfig* Webserv::FindServerConfigByPort(
     return &it->second;
   }
   return NULL;
+}
+
+void Webserv::ClearResources() {
+  for (std::map<int, ASocket*>::iterator it = sockets_.begin();
+       it != sockets_.end(); ++it) {
+    delete it->second;
+  }
+  sockets_.clear();
+  if (epoll_fd_ != -1) {
+    close(epoll_fd_);
+    epoll_fd_ = -1;
+  }
 }
