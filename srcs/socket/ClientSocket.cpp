@@ -1,5 +1,6 @@
 #include "socket/ClientSocket.hpp"
 
+#include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -12,6 +13,8 @@
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
+  int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
+  fcntl(fd_.GetFd(), F_SETFL, flags | O_NONBLOCK);
   request_.SetClientIp(client_ip);
 }
 
