@@ -63,8 +63,13 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     }
 
     std::string client_ip = inet_ntoa(client_addr.sin_addr);
-    ClientSocket* client_socket =
-        new ClientSocket(client_fd, config_, client_ip);
+    try {
+      ClientSocket* client_socket =
+          new ClientSocket(client_fd, config_, client_ip);
+    } catch (const std::exception& e) {
+      std::cerr << "Failed to create client socket: " << e.what() << std::endl;
+      return result;
+    }
 
     epoll_event ev;
     ev.events = EPOLLIN;

@@ -5,7 +5,10 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <cerrno>
+#include <cstring>
 #include <iostream>
+#include <stdexcept>
 
 #include "RequestHandler.hpp"
 #include "lib/type/Fd.hpp"
@@ -14,7 +17,14 @@ ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
   int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
-  fcntl(fd_.GetFd(), F_SETFL, flags | O_NONBLOCK);
+  if (flags == -1) {
+    throw std::runtime_error("fcntl(F_GETFL) failed. " +
+                             std::string(strerror(errno)));
+  }
+  if (fcntl(fd_.GetFd(), F_SETFL, flags | O_NONBLOCK) == -1) {
+    throw std::runtime_error("fcntl(F_SETFL) failed. " +
+                             std::string(strerror(errno)));
+  }
   request_.SetClientIp(client_ip);
 }
 
