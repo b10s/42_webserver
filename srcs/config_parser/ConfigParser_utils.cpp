@@ -22,6 +22,8 @@ std::map<std::string, TokenType> CreateTokenTable() {
   m.insert(std::make_pair(config_tokens::kUploadPath, kTokenUploadPath));
   m.insert(std::make_pair(config_tokens::kRedirect, kTokenRedirect));
   m.insert(std::make_pair(config_tokens::kCgi, kTokenCgi));
+  m.insert(std::make_pair(config_tokens::kCgiAllowedExtensions,
+                          kTokenCgiAllowedExtensions));
   return m;
 }
 
