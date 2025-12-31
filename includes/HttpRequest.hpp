@@ -93,7 +93,6 @@ class HttpRequest : public lib::parser::StreamParser {
   HttpRequest& operator=(const HttpRequest& src);
   ~HttpRequest();
 
-  // void Parse(const char* data, size_t len);
   bool AdvanceHeader();
   bool AdvanceBody();
   const char* ConsumeMethod(const char* req);

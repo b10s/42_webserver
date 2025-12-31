@@ -5,7 +5,6 @@
 #include <string>
 
 #include "ConfigParser.hpp"
-#include "Epoll.hpp"
 #include "ServerConfig.hpp"
 #include "Webserv.hpp"
 #include "lib/utils/Bzero.hpp"
@@ -17,12 +16,8 @@ int main(int argc, char* argv[]) {
 
     std::cout << "Loading configuration from: " << config_file << std::endl;
 
-    // Initialize webserver
     Webserv webserver(config_file);
     webserver.Run();
-
-    // Run test
-    // webserver.TestConfiguration();
 
   } catch (const std::exception& e) {
     std::cerr << "Error: " << e.what() << std::endl;
