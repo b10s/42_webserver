@@ -16,7 +16,7 @@ struct SocketResult {
 
 class ASocket {
  public:
-  ASocket(int fd);
+  explicit ASocket(int fd);
   virtual ~ASocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
