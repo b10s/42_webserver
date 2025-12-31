@@ -24,7 +24,7 @@ class CgiExecutor {
   std::vector<std::string> GetMetaVars() const;
   void InitializeMetaVars(const HttpRequest&);
 
-  Location loc_;
+  const Location& loc_;
   std::string script_path_;
 
  public:
