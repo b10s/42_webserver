@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+#include "lib/type/Fd.hpp"
 
 class ASocket;
 
@@ -23,7 +24,7 @@ class ASocket {
   int GetFd() const;
 
  protected:
-  int fd_;
+  lib::type::Fd fd_;
 
  private:
   ASocket();
