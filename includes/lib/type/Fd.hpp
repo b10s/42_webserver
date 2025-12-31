@@ -1,8 +1,6 @@
 #ifndef FD_HPP_
 #define FD_HPP_
 
-#include <unistd.h>
-
 namespace lib {
 namespace type {
 
@@ -11,38 +9,15 @@ class Fd {
   int fd_;
 
  public:
-  Fd() : fd_(-1) {};
-  explicit Fd(int fd) : fd_(fd) {};
+  Fd();
+  explicit Fd(int fd);
+  ~Fd();
 
-  ~Fd() {
-    Reset();
-  };
+  void Reset(int new_fd = -1);
+  int GetFd() const;
 
-  void Reset(int new_fd = -1) {
-    if (fd_ != -1) {
-      close(fd_);
-    }
-    fd_ = new_fd;
-  }
-
-  int GetFd() const {
-    return fd_;
-  }
-
-  Fd(Fd& other) : fd_(other.fd_) {
-    other.fd_ = -1;
-  }
-
-  Fd& operator=(Fd& other) {
-    if (this != &other) {
-      if (fd_ != -1) {
-        close(fd_);
-      }
-      fd_ = other.fd_;
-      other.fd_ = -1;
-    }
-    return *this;
-  }
+  Fd(Fd& other);
+  Fd& operator=(Fd& other);
 };
 
 }  // namespace type
