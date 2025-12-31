@@ -10,6 +10,7 @@
 #include "lib/http/MimeType.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/utils/file_utils.hpp"
+#include "FileValidater.hpp"
 
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
@@ -63,6 +64,10 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();
   }
+  // Validate the path for security
+    if (!FileValidator::IsValidFilePath(path, location_match_.loc->GetRoot())) {
+        throw std::runtime_error("Invalid path: " + path);
+    }
   return path;
 }
 

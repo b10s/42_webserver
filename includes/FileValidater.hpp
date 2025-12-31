@@ -4,15 +4,15 @@
 
 class FileValidator {
 public:
-    static bool IsValidPath(const std::string& path);
-    static std::string SanitizePath(const std::string& path);
+    static std::string NormalizePath(const std::string& path);
+    // checks if the path contains unsafe characters (NUL or control characters)
+    static bool ContainsUnsafeChars(const std::string& path);
+    // checks if the resolved and normalized path is under the document root
     static bool IsPathUnderDocumentRoot(const std::string& path, 
                                        const std::string& document_root);
-    static bool ContainsDangerousPattern(const std::string& path);
-    
-private:
-    static std::string NormalizePath(const std::string& path);
-    static std::string ResolvePath(const std::string& path);
+    // validates the file path (contains no "..", no unsafe chars, and is under doc root)
+    static bool IsValidFilePath(const std::string& path, 
+                                const std::string& document_root);
 };
 
 #endif  // FILEVALIDATER_HPP_
