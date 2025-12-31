@@ -12,7 +12,7 @@ const unsigned short HttpRequest::kDefaultPort = 8080;
 HttpRequest::HttpRequest()
     : method_(lib::http::kUnknownMethod),
       uri_(),
-      query_(),
+      query_string_(),
       host_name_(),
       host_port_(8080),
       version_(),
@@ -28,7 +28,7 @@ HttpRequest::HttpRequest(const HttpRequest& src)
     : lib::parser::StreamParser(src),
       method_(src.method_),
       uri_(src.uri_),
-      query_(src.query_),
+      query_string_(src.query_string_),
       host_name_(src.host_name_),
       host_port_(src.host_port_),
       version_(src.version_),
@@ -45,7 +45,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     lib::parser::StreamParser::operator=(src);
     method_ = src.method_;
     uri_ = src.uri_;
-    query_ = src.query_;
+    query_string_ = src.query_string_;
     host_name_ = src.host_name_;
     host_port_ = src.host_port_;
     version_ = src.version_;
@@ -78,8 +78,8 @@ void HttpRequest::SetUri(const std::string& uri) {
   uri_ = uri;
 }
 
-const Dict& HttpRequest::GetQuery() const {
-  return query_;
+const std::string& HttpRequest::GetQuery() const {
+  return query_string_;
 }
 
 const std::string& HttpRequest::GetHostName() const {

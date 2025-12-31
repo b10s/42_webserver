@@ -18,25 +18,6 @@
 #include "lib/utils/string_utils.hpp"
 
 namespace {
-std::string CreateQueryString(const Dict& queries) {
-  if (queries.empty()) {
-    return "";
-  }
-  std::string query_string;
-
-  for (Dict::const_iterator it = queries.begin(); it != queries.end(); ++it) {
-    if (it != queries.begin()) {
-      query_string += "&";
-    }
-    query_string += it->first;
-    if (!it->second.empty()) {
-      query_string += "=" + it->second;
-    }
-  }
-
-  return query_string;
-}
-
 lib::type::Optional<std::string> ReadShebang(const std::string& file_path) {
   std::ifstream file(file_path.c_str());
   std::string line;
@@ -74,7 +55,6 @@ void ClosePipe(int fd[2]) {
   close(fd[0]);
   close(fd[1]);
 }
-
 }  // namespace
 
 CgiExecutor::CgiExecutor(const HttpRequest& req,
@@ -122,8 +102,7 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.6.
   meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
-  meta_vars_["QUERY_STRING"] =
-      lib::type::Optional<std::string>(CreateQueryString(req.GetQuery()));
+  meta_vars_["QUERY_STRING"] = lib::type::Optional<std::string>(req.GetQuery());
   // RFC 3875 4.1.8.
   meta_vars_["REMOTE_ADDR"] =
       lib::type::Optional<std::string>(req.GetClientIp());
@@ -131,8 +110,11 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["REMOTE_HOST"] =
       lib::type::Optional<std::string>(req.GetClientIp());
   // RFC 3875 4.1.10.
+  // The server may choose not to support this feature, or not to request the
+  // data for efficiency reasons, or not to return available identity data.
   meta_vars_["REMOTE_IDENT"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.11.
+  // The server doesn't support authentication yet.
   meta_vars_["REMOTE_USER"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.12.
   meta_vars_["REQUEST_METHOD"] = lib::type::Optional<std::string>(

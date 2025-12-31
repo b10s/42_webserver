@@ -20,7 +20,7 @@ class HttpRequest : public lib::parser::StreamParser {
  private:
   lib::http::Method method_;
   std::string uri_;
-  Dict query_;
+  std::string query_string_;
   std::string host_name_;
   unsigned short host_port_;
   std::string version_;
@@ -95,7 +95,7 @@ class HttpRequest : public lib::parser::StreamParser {
   const std::string& GetVersion() const;
   const Dict& GetHeader() const;
   lib::type::Optional<std::string> GetHeader(const std::string& key) const;
-  const Dict& GetQuery() const;
+  const std::string& GetQuery() const;
   const std::string& GetBody() const;
 
   long GetContentLength() const {

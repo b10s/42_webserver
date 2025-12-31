@@ -30,34 +30,10 @@ inline const char* ConsumeUntilStopChar(const char* req, std::size_t& len,
 // read query--- req points to the next char after '?'
 // len is the length of the URI part read so far (including '?')
 const char* HttpRequest::ConsumeQuery(const char* req, std::size_t& len) {
-  while (true) {
-    const char* key_begin = req;
-    const char* key_end = ConsumeUntilStopChar(req, len, " =&");
-    std::string key(key_begin, key_end - key_begin);  // key should not be empty
-    req = key_end;
-    if (key.empty())
-      throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-    std::string val;  // val can be empty so initialize as empty
-    if (*req == '=') {
-      ++req;  // skip '='
-      ++len;  // add '=' to length
-      BumpOrThrow(len);
-      const char* val_begin = req;
-      const char* val_end = ConsumeUntilStopChar(req, len, " &");
-      val.assign(val_begin, val_end - val_begin);
-      req = val_end;
-    }
-    query_[key] = val;
-    // next pair or end
-    if (*req == '&') {
-      ++req;
-      ++len;  // add '&' to length
-      BumpOrThrow(len);
-    } else {
-      break;
-    }
-  }
-  return req;
+  const char* start = req;
+  const char* end = ConsumeUntilStopChar(req, len, " ");
+  query_string_.assign(start, end - start);
+  return end;
 }
 
 const char* HttpRequest::ConsumeUri(const char* req) {
