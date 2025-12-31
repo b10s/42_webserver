@@ -41,17 +41,35 @@ lib::type::Optional<std::string> CreatePathInfo(
     const std::string& ext = extensions[i];
     if (ext.empty()) continue;
 
-    size_t pos = path.find(ext);
+    // Search from the end of the path to find the most relevant occurrence
+    // of the extension and ensure it is properly delimited within a
+    // path component.
+    size_t pos = path.rfind(ext);
     while (pos != std::string::npos) {
       size_t ext_end = pos + ext.length();
+
+      // The extension must be at the end of the path or immediately
+      // followed by a '/' to terminate the path component.
       if (ext_end == path.length() || path[ext_end] == '/') {
-        if (pos < min_pos) {
-          min_pos = pos;
-          found_ext_len = ext.length();
+        // Additionally, ensure the extension is not directly preceded
+        // by a '/' (which would make the extension a whole path
+        // component like "/.py/"), unless it is at the very start
+        // of the path.
+        if (pos == 0 || path[pos - 1] != '/') {
+          // Among all valid matches, keep the one that appears
+          // earliest in the path to preserve existing semantics.
+          if (pos < min_pos) {
+            min_pos = pos;
+            found_ext_len = ext.length();
+          }
+          break;
         }
+      }
+
+      if (pos == 0) {
         break;
       }
-      pos = path.find(ext, ext_end);
+      pos = path.rfind(ext, pos - 1);
     }
   }
 
