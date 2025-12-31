@@ -1,11 +1,12 @@
 #include "HttpRequest.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
+#include "lib/http/CharValidation.hpp"
 #include "lib/http/Status.hpp"
 
 const char* HttpRequest::ConsumeVersion(const char* req) {
   std::size_t len = 0;
   while (req[len] && req[len] != '\r') {
-    if (!http::IsVisibleAscii(req[len])) {
+    if (!lib::http::IsVisibleAscii(req[len])) {
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     ++len;

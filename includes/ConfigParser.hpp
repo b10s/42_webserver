@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 
+#include <cctype>  // for std::isalnum, std::isprint
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -11,7 +12,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-// #include <cctype> // for std::isalnum, std::isprint
 
 #include "Location.hpp"
 #include "ServerConfig.hpp"
