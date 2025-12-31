@@ -16,6 +16,7 @@ class Webserv {
   std::map<unsigned short, ServerConfig> port_to_server_configs_;
   int epoll_fd_;
   std::map<int, ASocket*> sockets_;
+  void ClearResources();
 
   static const int kMaxEvents = 10;
 
