@@ -18,25 +18,6 @@
 #include "lib/utils/string_utils.hpp"
 
 namespace {
-std::string CreateQueryString(const Dict& queries) {
-  if (queries.empty()) {
-    return "";
-  }
-  std::string query_string;
-
-  for (Dict::const_iterator it = queries.begin(); it != queries.end(); ++it) {
-    if (it != queries.begin()) {
-      query_string += "&";
-    }
-    query_string += it->first;
-    if (!it->second.empty()) {
-      query_string += "=" + it->second;
-    }
-  }
-
-  return query_string;
-}
-
 lib::type::Optional<std::string> ReadShebang(const std::string& file_path) {
   std::ifstream file(file_path.c_str());
   std::string line;
@@ -68,6 +49,12 @@ std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
   }
   envp.push_back(NULL);
   return envp;
+}
+
+void PrintEnv(const std::vector<std::string>& envs) {
+  for (size_t i = 0; i < envs.size(); ++i) {
+    std::cout << envs[i] << std::endl;
+  }
 }
 
 void ClosePipe(int fd[2]) {
@@ -123,7 +110,7 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
   meta_vars_["QUERY_STRING"] =
-      lib::type::Optional<std::string>(CreateQueryString(req.GetQuery()));
+      lib::type::Optional<std::string>(req.GetQuery());
   // RFC 3875 4.1.8.
   meta_vars_["REMOTE_ADDR"] =
       lib::type::Optional<std::string>(req.GetClientIp());
@@ -154,6 +141,7 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 }
 
 HttpResponse CgiExecutor::Run() {
+  PrintEnv(GetMetaVars());
   try {
     int pipe_in[2], pipe_out[2];
 
