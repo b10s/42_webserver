@@ -18,30 +18,6 @@
 #include "lib/utils/string_utils.hpp"
 
 namespace {
-lib::type::Optional<std::string> ReadShebang(const std::string& file_path) {
-  std::ifstream file(file_path.c_str());
-  std::string line;
-
-  if (file.is_open()) {
-    std::getline(file, line);
-  }
-
-  if (line.length() < 2 || line[0] != '#' || line[1] != '!') {
-    return lib::type::Optional<std::string>();
-  }
-
-  // skip "#!"
-  std::string script_path = line.substr(2);
-
-  std::string::size_type start_pos = 0;
-  while (start_pos < script_path.length() &&
-         std::isspace(static_cast<unsigned char>(script_path[start_pos]))) {
-    start_pos++;
-  }
-
-  return lib::type::Optional<std::string>(script_path.substr(start_pos));
-}
-
 std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
   std::vector<char*> envp;
   for (size_t i = 0; i < envs.size(); ++i) {
@@ -159,7 +135,6 @@ HttpResponse CgiExecutor::Run() {
       close(pipe_in[kReadEnd]);
       close(pipe_out[kWriteEnd]);
 
-      lib::type::Optional<std::string> shebang = ReadShebang(script_path_);
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
       execve(script_path_.c_str(), argv, envp.data());
       std::cout << "Status: 500 Internal Server Error\r\nContent-Type: "
