@@ -1,10 +1,6 @@
 #include "Webserv.hpp"
 
-#include <arpa/inet.h>
-#include <fcntl.h>
-#include <netinet/in.h>
 #include <sys/epoll.h>
-#include <sys/socket.h>
 #include <unistd.h>
 
 #include <csignal>
@@ -14,7 +10,6 @@
 
 #include "ConfigParser.hpp"
 #include "lib/type/Fd.hpp"
-#include "lib/utils/Bzero.hpp"
 #include "socket/ClientSocket.hpp"
 #include "socket/ServerSocket.hpp"
 
@@ -44,40 +39,9 @@ Webserv::Webserv(const std::string& config_file) {
     for (std::map<unsigned short, ServerConfig>::const_iterator it =
              port_to_server_configs_.begin();
          it != port_to_server_configs_.end(); ++it) {
-      unsigned short port = it->first;
       const ServerConfig& config = it->second;
 
-      lib::type::Fd server_fd(socket(PF_INET, SOCK_STREAM, 0));
-      if (server_fd.GetFd() == -1) {
-        throw std::runtime_error("socket() failed. " +
-                                 std::string(strerror(errno)));
-      }
-
-      int opt = 1;
-      if (setsockopt(server_fd.GetFd(), SOL_SOCKET, SO_REUSEADDR, &opt,
-                     sizeof(opt)) == -1) {
-        throw std::runtime_error("setsockopt() failed. " +
-                                 std::string(strerror(errno)));
-      }
-
-      sockaddr_in server_addr;
-      lib::utils::Bzero(&server_addr, sizeof(server_addr));
-      server_addr.sin_family = AF_INET;
-      server_addr.sin_addr.s_addr = INADDR_ANY;
-      server_addr.sin_port = htons(port);
-
-      if (bind(server_fd.GetFd(), (sockaddr*)&server_addr,
-               sizeof(server_addr)) == -1) {
-        throw std::runtime_error("bind() failed. " +
-                                 std::string(strerror(errno)));
-      }
-
-      if (listen(server_fd.GetFd(), SOMAXCONN) == -1) {
-        throw std::runtime_error("listen() failed. " +
-                                 std::string(strerror(errno)));
-      }
-
-      ServerSocket* server_socket = new ServerSocket(server_fd, config);
+      ServerSocket* server_socket = new ServerSocket(config);
       sockets_[server_socket->GetFd()] = server_socket;
 
       epoll_event ev;

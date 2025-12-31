@@ -26,9 +26,9 @@ class ASocket {
 
  protected:
   lib::type::Fd fd_;
+  ASocket();
 
  private:
-  ASocket();
 };
 
 #endif

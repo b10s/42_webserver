@@ -3,6 +3,9 @@
 ASocket::ASocket(lib::type::Fd fd) : fd_(fd) {
 }
 
+ASocket::ASocket() {
+}
+
 ASocket::~ASocket() {
 }
 

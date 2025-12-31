@@ -2,16 +2,47 @@
 
 #include <arpa/inet.h>
 #include <fcntl.h>
+#include <netinet/in.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 
+#include <cerrno>
+#include <cstring>
 #include <iostream>
+#include <stdexcept>
 
 #include "lib/type/Fd.hpp"
+#include "lib/utils/Bzero.hpp"
 #include "socket/ClientSocket.hpp"
 
-ServerSocket::ServerSocket(lib::type::Fd fd, const ServerConfig& config)
-    : ASocket(fd), config_(config) {
+ServerSocket::ServerSocket(const ServerConfig& config)
+    : ASocket(), config_(config) {
+  fd_.Reset(socket(PF_INET, SOCK_STREAM, 0));
+  if (fd_.GetFd() == -1) {
+    throw std::runtime_error("socket() failed. " +
+                             std::string(strerror(errno)));
+  }
+
+  int opt = 1;
+  if (setsockopt(fd_.GetFd(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
+      -1) {
+    throw std::runtime_error("setsockopt() failed. " +
+                             std::string(strerror(errno)));
+  }
+
+  sockaddr_in server_addr;
+  lib::utils::Bzero(&server_addr, sizeof(server_addr));
+  server_addr.sin_family = AF_INET;
+  server_addr.sin_addr.s_addr = INADDR_ANY;
+  server_addr.sin_port = htons(config_.GetPort());
+
+  if (bind(fd_.GetFd(), (sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+    throw std::runtime_error("bind() failed. " + std::string(strerror(errno)));
+  }
+
+  if (listen(fd_.GetFd(), SOMAXCONN) == -1) {
+    throw std::runtime_error("listen() failed. " + std::string(strerror(errno)));
+  }
 }
 
 ServerSocket::~ServerSocket() {
@@ -29,9 +60,6 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
       std::cerr << "Failed to accept fd:" << client_fd.GetFd() << std::endl;
       return result;
     }
-
-    int flags = fcntl(client_fd.GetFd(), F_GETFL, 0);
-    fcntl(client_fd.GetFd(), F_SETFL, flags | O_NONBLOCK);
 
     std::string client_ip = inet_ntoa(client_addr.sin_addr);
     ClientSocket* client_socket =
