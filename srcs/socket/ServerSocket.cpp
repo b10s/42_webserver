@@ -66,10 +66,6 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     try {
       ClientSocket* client_socket =
           new ClientSocket(client_fd, config_, client_ip);
-    } catch (const std::exception& e) {
-      std::cerr << "Failed to create client socket: " << e.what() << std::endl;
-      return result;
-    }
 
     epoll_event ev;
     ev.events = EPOLLIN;
@@ -83,6 +79,9 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     std::cout << "Accepted connection from " << client_ip << std::endl;
 
     result.new_socket = client_socket;
+    } catch (const std::exception& e) {
+      std::cerr << "Error creating ClientSocket: " << e.what() << std::endl;
+    }
   }
   return result;
 }
