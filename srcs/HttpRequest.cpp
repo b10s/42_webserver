@@ -25,8 +25,19 @@ HttpRequest::HttpRequest()
 }
 
 HttpRequest::HttpRequest(const HttpRequest& src)
-    : lib::parser::StreamParser(src) {
-  *this = src;
+    : lib::parser::StreamParser(src),
+      method_(src.method_),
+      uri_(src.uri_),
+      query_(src.query_),
+      host_name_(src.host_name_),
+      host_port_(src.host_port_),
+      version_(src.version_),
+      headers_(src.headers_),
+      body_(src.body_),
+      content_length_(src.content_length_),
+      next_chunk_size_(src.next_chunk_size_),
+      keep_alive_(src.keep_alive_),
+      client_ip_(src.client_ip_) {
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
