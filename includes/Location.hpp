@@ -15,7 +15,7 @@ class Location {
   std::string name_;
   std::string root_;
   bool autoindex_;
-  std::vector<std::string> index_files_;  // multiple index files allowed
+  std::string index_file_;
   std::string upload_path_;
   std::string redirect_;
   bool cgi_enabled_;
@@ -82,20 +82,16 @@ class Location {
     return autoindex_;
   }
 
-  void AddIndex(const std::string& index) {
-    index_files_.push_back(index);
+  void SetIndexFile(const std::string& index) {
+    if (has_index_directive_) {
+      throw std::runtime_error("Duplicate index directive");
+    }
+    index_file_ = index;
+    has_index_directive_ = true;
   }
 
-  bool HasIndexDirective() const {
-    return has_index_directive_;
-  }
-
-  void SetHasIndexDirective(bool has) {
-    has_index_directive_ = has;
-  }
-
-  const std::vector<std::string>& GetIndexFiles() const {
-    return index_files_;
+  const std::string& GetIndexFile() const {
+    return index_file_;
   }
 
   void SetUploadPath(const std::string& path) {

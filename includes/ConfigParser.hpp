@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+// #include <cctype> // for std::isalnum, std::isprint
 
 #include "Location.hpp"
 #include "ServerConfig.hpp"
@@ -77,6 +78,8 @@ class ConfigParser {
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
   }
+
+  bool IsSafeIndexFilename(const std::string& filename) const;
 };
 
 template <typename T, typename Setter>

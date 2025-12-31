@@ -7,8 +7,8 @@
 namespace lib {
 namespace utils {
 
+// OS file system utilities
 bool IsDirectory(const std::string& path);
-
 std::string ReadFile(const std::string& filename);
 
 }  // namespace utils
