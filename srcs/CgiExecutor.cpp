@@ -51,12 +51,6 @@ std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
   return envp;
 }
 
-void PrintEnv(const std::vector<std::string>& envs) {
-  for (size_t i = 0; i < envs.size(); ++i) {
-    std::cout << envs[i] << std::endl;
-  }
-}
-
 void ClosePipe(int fd[2]) {
   close(fd[0]);
   close(fd[1]);
@@ -142,7 +136,6 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 }
 
 HttpResponse CgiExecutor::Run() {
-  PrintEnv(GetMetaVars());
   try {
     int pipe_in[2], pipe_out[2];
 
