@@ -22,7 +22,7 @@ class StreamParser {
  public:
   enum State { kHeader = 0, kBody = 1, kDone = 2 };
 
-  StreamParser() : state_(kHeader) {
+  StreamParser() : buffer_read_pos_(0), state_(kHeader) {
   }
 
   virtual ~StreamParser() {
@@ -51,6 +51,7 @@ class StreamParser {
  protected:
   // Derived classes use these.
   std::string buffer_;
+  size_t buffer_read_pos_;
   State state_;
 
   // Derived classes implement these.
