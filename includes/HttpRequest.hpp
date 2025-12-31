@@ -20,16 +20,16 @@ class HttpRequest : public lib::parser::StreamParser {
  private:
   lib::http::Method method_;
   std::string uri_;
-  Dict query_;
+  std::string query_string_;
   std::string host_name_;
   unsigned short host_port_;
   std::string version_;
   Dict headers_;
   std::string body_;
   long content_length_;
-  size_t buffer_read_pos_;  // the position in buffer_ which has been read
   std::ptrdiff_t next_chunk_size_;  // -1: waiting for chunk size line
   bool keep_alive_;
+  std::string client_ip_;
 
   static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
@@ -95,7 +95,7 @@ class HttpRequest : public lib::parser::StreamParser {
   const std::string& GetVersion() const;
   const Dict& GetHeader() const;
   lib::type::Optional<std::string> GetHeader(const std::string& key) const;
-  const Dict& GetQuery() const;
+  const std::string& GetQuery() const;
   const std::string& GetBody() const;
 
   long GetContentLength() const {
@@ -141,9 +141,6 @@ class HttpRequest : public lib::parser::StreamParser {
   void SetStateForTest(State p) {
     state_ = p;
   }
-
- private:
-  std::string client_ip_;
 };
 
 #endif  // HTTPREQUEST_HPP_

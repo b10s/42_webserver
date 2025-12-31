@@ -12,37 +12,48 @@ const unsigned short HttpRequest::kDefaultPort = 8080;
 HttpRequest::HttpRequest()
     : method_(lib::http::kUnknownMethod),
       uri_(),
+      query_string_(),
       host_name_(),
       host_port_(8080),
       version_(),
       headers_(),
       body_(),
       content_length_(-1),  // default: unknown length, chunked possible
-      buffer_read_pos_(0),
       next_chunk_size_(-1),
       keep_alive_(false),
       client_ip_() {
 }
 
-HttpRequest::HttpRequest(const HttpRequest& src) {
-  *this = src;
+HttpRequest::HttpRequest(const HttpRequest& src)
+    : lib::parser::StreamParser(src),
+      method_(src.method_),
+      uri_(src.uri_),
+      query_string_(src.query_string_),
+      host_name_(src.host_name_),
+      host_port_(src.host_port_),
+      version_(src.version_),
+      headers_(src.headers_),
+      body_(src.body_),
+      content_length_(src.content_length_),
+      next_chunk_size_(src.next_chunk_size_),
+      keep_alive_(src.keep_alive_),
+      client_ip_(src.client_ip_) {
 }
 
 HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
   if (this != &src) {
-    buffer_ = src.buffer_;
+    lib::parser::StreamParser::operator=(src);
     method_ = src.method_;
     uri_ = src.uri_;
+    query_string_ = src.query_string_;
     host_name_ = src.host_name_;
     host_port_ = src.host_port_;
     version_ = src.version_;
     headers_ = src.headers_;
     body_ = src.body_;
     content_length_ = src.content_length_;
-    buffer_read_pos_ = src.buffer_read_pos_;
     next_chunk_size_ = src.next_chunk_size_;
     keep_alive_ = src.keep_alive_;
-    state_ = src.state_;
     client_ip_ = src.client_ip_;
   }
   return *this;
@@ -67,8 +78,8 @@ void HttpRequest::SetUri(const std::string& uri) {
   uri_ = uri;
 }
 
-const Dict& HttpRequest::GetQuery() const {
-  return query_;
+const std::string& HttpRequest::GetQuery() const {
+  return query_string_;
 }
 
 const std::string& HttpRequest::GetHostName() const {

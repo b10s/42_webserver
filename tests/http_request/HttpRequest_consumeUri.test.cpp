@@ -19,6 +19,7 @@ TEST_F(HttpRequestParseUri, PathOnly_SetsUri_AdvancesToSpace) {
 
   ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
   EXPECT_EQ("/index.html", req.GetUri());
+  EXPECT_EQ("", req.GetQuery());
   EXPECT_EQ(s.c_str() + std::strlen("/index.html "), p);
 }
 
@@ -29,10 +30,7 @@ TEST_F(HttpRequestParseUri, PathWithQuery_KeyValuePairs) {
   ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
   EXPECT_EQ("/search", req.GetUri());
 
-  const std::map<std::string, std::string>& q = req.GetQuery();
-  ASSERT_EQ(2u, q.size());
-  EXPECT_EQ("cats", q.at("q"));
-  EXPECT_EQ("2", q.at("page"));
+  EXPECT_EQ("q=cats&page=2", req.GetQuery());
 
   EXPECT_EQ(s.c_str() + std::strlen("/search?q=cats&page=2 "), p);
 }
@@ -44,9 +42,7 @@ TEST_F(HttpRequestParseUri, QueryAllowsSlashAndQuestion_AsData) {
   ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
   EXPECT_EQ("/p", req.GetUri());
 
-  const auto& q = req.GetQuery();
-  ASSERT_EQ(1u, q.size());
-  EXPECT_EQ("/login?m=1", q.at("next"));
+  EXPECT_EQ("next=/login?m=1", req.GetQuery());
 
   EXPECT_EQ(s.c_str() + std::strlen("/p?next=/login?m=1 "), p);
 }
@@ -56,10 +52,7 @@ TEST_F(HttpRequestParseUri, EmptyValueAllowed) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
-  const auto& q = req.GetQuery();
-  ASSERT_EQ(2u, q.size());
-  EXPECT_EQ("", q.at("x"));
-  EXPECT_EQ("1", q.at("y"));
+  EXPECT_EQ("x=&y=1", req.GetQuery());
   EXPECT_EQ(s.c_str() + std::strlen("/p?x=&y=1 "), p);
 }
 
@@ -181,27 +174,17 @@ TEST_F(HttpRequestParseUri, QueryOnlyKeys_NoValues) {
   const char* p = NULL;
 
   ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
-  const auto& q = req.GetQuery();
-  ASSERT_EQ(3u, q.size());
-  EXPECT_EQ("", q.at("a"));
-  EXPECT_EQ("", q.at("b"));
-  EXPECT_EQ("", q.at("c"));
+  EXPECT_EQ("a&b&c", req.GetQuery());
   EXPECT_EQ(s.c_str() + std::strlen("/p?a&b&c "), p);
 }
 
-// we don't allow trailing '&' that implies empty key
-TEST_F(HttpRequestParseUri,
-       QueryWithTrailingAmpersand_TreatAsErrorOrEmptyNextKey) {
+// we now allow trailing '&' because we treat query as raw string
+TEST_F(HttpRequestParseUri, QueryWithTrailingAmpersand_NowAllowed) {
   std::string s = "/p?a=1& HTTP/1.1";
-  EXPECT_THROW(
-      {
-        try {
-          req.ConsumeUri(s.c_str());
-        } catch (const lib::exception::ResponseStatusException& e) {
-          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
-          throw;
-        }
-      },
-      lib::exception::ResponseStatusException);
+  const char* p = NULL;
+  
+  ASSERT_NO_THROW(p = req.ConsumeUri(s.c_str()));
+  EXPECT_EQ("a=1&", req.GetQuery());
+  EXPECT_EQ(s.c_str() + std::strlen("/p?a=1& "), p);
 }
 
