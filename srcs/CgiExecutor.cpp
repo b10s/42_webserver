@@ -62,6 +62,19 @@ lib::type::Optional<std::string> CreatePathInfo(
   return lib::type::Optional<std::string>();
 }
 
+bool IsScriptExtensionAllowed(const std::string& script_path,
+                              const std::vector<std::string>& extensions) {
+  for (size_t i = 0; i < extensions.size(); ++i) {
+    const std::string& ext = extensions[i];
+    if (script_path.length() >= ext.length() &&
+        script_path.compare(script_path.length() - ext.length(), ext.length(),
+                            ext) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // void PrintEnvp(const std::vector<char*>& envp) {
 //   for (size_t i = 0; envp[i] != NULL; ++i) {
 //     std::cout << "envp[" << i << "]: " << envp[i] << std::endl;
@@ -99,9 +112,11 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   lib::type::Optional<std::string> path_info =
       CreatePathInfo(script_path_, loc_.GetCgiAllowedExtensions());
-  std::string executable_path = script_path_.substr(
-      0, script_path_.length() - path_info.Value().length());
-
+  std::string executable_path =
+      path_info.HasValue()
+          ? script_path_.substr(
+                0, script_path_.length() - path_info.Value().length())
+          : script_path_;
   // RFC 3875 4.1.1.
   lib::type::Optional<std::string> auth = req.GetHeader("authorization");
   meta_vars_["AUTH_TYPE"] = auth.HasValue()
@@ -140,8 +155,10 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
       lib::http::MethodToString(req.GetMethod()));
   // RFC 3875 4.1.13.
   std::string uri = req.GetUri();
-  meta_vars_["SCRIPT_NAME"] = lib::type::Optional<std::string>(
-      uri.substr(0, uri.length() - path_info.Value().length()));
+  meta_vars_["SCRIPT_NAME"] =
+      path_info.HasValue() ? lib::type::Optional<std::string>(uri.substr(
+                                 0, uri.length() - path_info.Value().length()))
+                           : lib::type::Optional<std::string>(uri);
   // RFC 3875 4.1.14.
   meta_vars_["SERVER_NAME"] =
       lib::type::Optional<std::string>(req.GetHostName());
@@ -159,6 +176,9 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 }
 
 HttpResponse CgiExecutor::Run() {
+  if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
+    return HttpResponse(lib::http::kForbidden);
+
   try {
     int pipe_in[2], pipe_out[2];
 
@@ -221,7 +241,6 @@ HttpResponse CgiExecutor::Run() {
       return res;
     }
   } catch (std::exception& e) {
-    HttpResponse res(lib::http::kInternalServerError);
-    return res;
+    return HttpResponse(lib::http::kInternalServerError);
   }
 }
