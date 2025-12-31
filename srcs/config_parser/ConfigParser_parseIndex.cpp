@@ -3,7 +3,7 @@
 
 bool ConfigParser::IsSafeIndexFilename(const std::string& filename) const {
   if (filename.empty()) return false;
-  if (filename.find("..") != std::string::npos) return false;
+  if (filename.find("../") != std::string::npos) return false;
   if (filename.find('/') != std::string::npos)
     return false;  // absolute path or subdir
   for (size_t i = 0; i < filename.size(); ++i) {
