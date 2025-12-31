@@ -24,10 +24,11 @@ class CgiExecutor {
   std::vector<std::string> GetMetaVars() const;
   void InitializeMetaVars(const HttpRequest&);
 
+  Location loc_;
   std::string script_path_;
 
  public:
-  CgiExecutor(const HttpRequest&, const std::string&);
+  CgiExecutor(const HttpRequest&, const Location&, const std::string&);
   ~CgiExecutor();
 
   HttpResponse Run();

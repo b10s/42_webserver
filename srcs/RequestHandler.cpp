@@ -68,7 +68,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
 
 void RequestHandler::HandleGet() {
   if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, filesystem_path_);
+    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     res_ = cgi.Run();
   } else {
     std::string body = lib::utils::ReadFile(filesystem_path_);

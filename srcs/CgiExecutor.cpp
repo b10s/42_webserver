@@ -31,12 +31,48 @@ void ClosePipe(int fd[2]) {
   close(fd[0]);
   close(fd[1]);
 }
+
+lib::type::Optional<std::string> CreatePathInfo(
+    const std::string& path, const std::vector<std::string>& extensions) {
+  size_t min_pos = std::string::npos;
+  size_t found_ext_len = 0;
+
+  for (size_t i = 0; i < extensions.size(); ++i) {
+    const std::string& ext = extensions[i];
+    if (ext.empty()) continue;
+
+    size_t pos = path.find(ext);
+    while (pos != std::string::npos) {
+      size_t ext_end = pos + ext.length();
+      if (ext_end == path.length() || path[ext_end] == '/') {
+        if (pos < min_pos) {
+          min_pos = pos;
+          found_ext_len = ext.length();
+        }
+        break;
+      }
+      pos = path.find(ext, ext_end);
+    }
+  }
+
+  if (min_pos != std::string::npos) {
+    return lib::type::Optional<std::string>(
+        path.substr(min_pos + found_ext_len));
+  }
+  return lib::type::Optional<std::string>();
+}
+
+// void PrintEnvp(const std::vector<char*>& envp) {
+//   for (size_t i = 0; envp[i] != NULL; ++i) {
+//     std::cout << "envp[" << i << "]: " << envp[i] << std::endl;
+//   }
+// }
 }  // namespace
 
-CgiExecutor::CgiExecutor(const HttpRequest& req,
-                         const std::string& script_path) {
+CgiExecutor::CgiExecutor(const HttpRequest& req, const Location& loc,
+                         const std::string& script_path)
+    : loc_(loc), script_path_(script_path) {
   InitializeMetaVars(req);
-  script_path_ = script_path;
 }
 
 CgiExecutor::~CgiExecutor() {
@@ -61,9 +97,13 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 }
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
+  lib::type::Optional<std::string> path_info =
+      CreatePathInfo(script_path_, loc_.GetCgiAllowedExtensions());
+  std::string executable_path = script_path_.substr(
+      0, script_path_.length() - path_info.Value().length());
+
   // RFC 3875 4.1.1.
   lib::type::Optional<std::string> auth = req.GetHeader("authorization");
-
   meta_vars_["AUTH_TYPE"] = auth.HasValue()
                                 ? lib::utils::GetFirstToken(auth.Value(), " ")
                                 : lib::type::Optional<std::string>();
@@ -74,9 +114,12 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.4.
   meta_vars_["GATEWAY_INTERFACE"] = lib::type::Optional<std::string>("CGI/1.1");
   // RFC 3875 4.1.5.
-  meta_vars_["PATH_INFO"] = lib::type::Optional<std::string>();
+  meta_vars_["PATH_INFO"] = path_info;
   // RFC 3875 4.1.6.
-  meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
+  meta_vars_["PATH_TRANSLATED"] =
+      path_info.HasValue()
+          ? lib::type::Optional<std::string>(loc_.GetRoot() + path_info.Value())
+          : lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
   meta_vars_["QUERY_STRING"] = lib::type::Optional<std::string>(req.GetQuery());
   // RFC 3875 4.1.8.
@@ -96,7 +139,9 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["REQUEST_METHOD"] = lib::type::Optional<std::string>(
       lib::http::MethodToString(req.GetMethod()));
   // RFC 3875 4.1.13.
-  meta_vars_["SCRIPT_NAME"] = lib::type::Optional<std::string>(req.GetUri());
+  std::string uri = req.GetUri();
+  meta_vars_["SCRIPT_NAME"] = lib::type::Optional<std::string>(
+      uri.substr(0, uri.length() - path_info.Value().length()));
   // RFC 3875 4.1.14.
   meta_vars_["SERVER_NAME"] =
       lib::type::Optional<std::string>(req.GetHostName());
@@ -109,6 +154,8 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.17.
   meta_vars_["SERVER_SOFTWARE"] =
       lib::type::Optional<std::string>("webserv/1.0");
+
+  script_path_ = executable_path;
 }
 
 HttpResponse CgiExecutor::Run() {
@@ -136,6 +183,7 @@ HttpResponse CgiExecutor::Run() {
       close(pipe_out[kWriteEnd]);
 
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
+      // PrintEnvp(envp);
       execve(script_path_.c_str(), argv, envp.data());
       std::cout << "Status: 500 Internal Server Error\r\nContent-Type: "
                    "text/plain\r\n\r\n";

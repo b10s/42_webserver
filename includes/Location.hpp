@@ -151,10 +151,6 @@ class Location {
   bool GetCgiEnabled() const {
     return cgi_enabled_;
   }
-
-  std::vector<std::string> GetCgiAllowedExtensions() {
-    return cgi_allowed_extensions_;
-  }
 };
 
 #endif  // LOCATION_HPP_
