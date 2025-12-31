@@ -11,16 +11,21 @@ class Fd {
   int fd_;
 
  public:
+  Fd() : fd_(-1) {};
   explicit Fd(int fd) : fd_(fd) {};
 
   ~Fd() {
-    if (fd_ != -1) {
-      close(fd_);
-      fd_ = -1;
-    }
+    Reset();
   };
 
-  operator int() const {
+  void Reset(int new_fd = -1) {
+    if (fd_ != -1) {
+      close(fd_);
+    }
+    fd_ = new_fd;
+  }
+
+  int GetFd() const {
     return fd_;
   }
 
@@ -38,13 +43,6 @@ class Fd {
     }
     return *this;
   }
-
-  int GetFd() {
-    return fd_;
-  }
-
- private:
-  Fd();
 };
 
 }  // namespace type

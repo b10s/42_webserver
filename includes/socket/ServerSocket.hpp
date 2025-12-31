@@ -6,7 +6,7 @@
 
 class ServerSocket : public ASocket {
  public:
-  ServerSocket(lib::type::Fd& fd, const ServerConfig& config);
+  ServerSocket(lib::type::Fd fd, const ServerConfig& config);
   virtual ~ServerSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);

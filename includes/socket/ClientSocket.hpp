@@ -12,7 +12,7 @@
 
 class ClientSocket : public ASocket {
  public:
-  ClientSocket(lib::type::Fd& fd, const ServerConfig& config,
+  ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                const std::string& client_ip);
   virtual ~ClientSocket();
 

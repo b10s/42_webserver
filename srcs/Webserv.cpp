@@ -13,6 +13,7 @@
 #include <stdexcept>
 
 #include "ConfigParser.hpp"
+#include "lib/type/Fd.hpp"
 #include "lib/utils/Bzero.hpp"
 #include "socket/ClientSocket.hpp"
 #include "socket/ServerSocket.hpp"
@@ -33,8 +34,8 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
-  epoll_fd_ = epoll_create1(0);
-  if (epoll_fd_ == -1) {
+  epoll_fd_.Reset(epoll_create1(0));
+  if (epoll_fd_.GetFd() == -1) {
     throw std::runtime_error("epoll_create1() failed. " +
                              std::string(strerror(errno)));
   }
@@ -47,14 +48,14 @@ Webserv::Webserv(const std::string& config_file) {
       const ServerConfig& config = it->second;
 
       lib::type::Fd server_fd(socket(PF_INET, SOCK_STREAM, 0));
-      if (server_fd == -1) {
+      if (server_fd.GetFd() == -1) {
         throw std::runtime_error("socket() failed. " +
                                  std::string(strerror(errno)));
       }
 
       int opt = 1;
-      if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
-          -1) {
+      if (setsockopt(server_fd.GetFd(), SOL_SOCKET, SO_REUSEADDR, &opt,
+                     sizeof(opt)) == -1) {
         throw std::runtime_error("setsockopt() failed. " +
                                  std::string(strerror(errno)));
       }
@@ -65,23 +66,25 @@ Webserv::Webserv(const std::string& config_file) {
       server_addr.sin_addr.s_addr = INADDR_ANY;
       server_addr.sin_port = htons(port);
 
-      if (bind(server_fd, (sockaddr*)&server_addr, sizeof(server_addr)) == -1) {
+      if (bind(server_fd.GetFd(), (sockaddr*)&server_addr,
+               sizeof(server_addr)) == -1) {
         throw std::runtime_error("bind() failed. " +
                                  std::string(strerror(errno)));
       }
 
-      if (listen(server_fd, SOMAXCONN) == -1) {
+      if (listen(server_fd.GetFd(), SOMAXCONN) == -1) {
         throw std::runtime_error("listen() failed. " +
                                  std::string(strerror(errno)));
       }
 
       ServerSocket* server_socket = new ServerSocket(server_fd, config);
-      sockets_[server_fd] = server_socket;
+      sockets_[server_socket->GetFd()] = server_socket;
 
       epoll_event ev;
       ev.events = EPOLLIN;
       ev.data.ptr = server_socket;
-      if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, server_fd, &ev) == -1) {
+      if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_ADD, server_socket->GetFd(),
+                    &ev) == -1) {
         throw std::runtime_error("epoll_ctl() failed. " +
                                  std::string(strerror(errno)));
       }
@@ -95,7 +98,7 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   epoll_event events[kMaxEvents];
   while (true) {
-    int nfds = epoll_wait(epoll_fd_, events, kMaxEvents, -1);
+    int nfds = epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, -1);
     if (nfds == -1) {
       std::cerr << "epoll_wait() failed. " << strerror(errno) << std::endl;
       continue;
@@ -103,7 +106,8 @@ void Webserv::Run() {
 
     for (int i = 0; i < nfds; ++i) {
       ASocket* socket = static_cast<ASocket*>(events[i].data.ptr);
-      SocketResult result = socket->HandleEvent(epoll_fd_, events[i].events);
+      SocketResult result =
+          socket->HandleEvent(epoll_fd_.GetFd(), events[i].events);
 
       if (result.new_socket) {
         sockets_[result.new_socket->GetFd()] = result.new_socket;
@@ -151,8 +155,4 @@ void Webserv::ClearResources() {
     delete it->second;
   }
   sockets_.clear();
-  if (epoll_fd_ != -1) {
-    close(epoll_fd_);
-    epoll_fd_ = -1;
-  }
 }

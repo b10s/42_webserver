@@ -18,14 +18,14 @@ struct SocketResult {
 
 class ASocket {
  public:
-  explicit ASocket(lib::type::Fd& fd);
+  explicit ASocket(lib::type::Fd fd);
   virtual ~ASocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
-  lib::type::Fd& GetFd() const;
+  int GetFd() const;
 
  protected:
-  lib::type::Fd& fd_;
+  lib::type::Fd fd_;
 
  private:
   ASocket();

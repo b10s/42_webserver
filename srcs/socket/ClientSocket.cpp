@@ -9,7 +9,7 @@
 #include "RequestHandler.hpp"
 #include "lib/type/Fd.hpp"
 
-ClientSocket::ClientSocket(lib::type::Fd& fd, const ServerConfig& config,
+ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
   request_.SetClientIp(client_ip);
