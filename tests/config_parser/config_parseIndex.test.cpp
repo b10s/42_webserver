@@ -5,7 +5,7 @@
 
 #include "ConfigParser.hpp"
 
-// set up a helper to call ParseAutoIndex
+// set up a helper to call ParseIndex
 static void callParseIndex(const std::string& input, Location* loc) {
   ConfigParser parser;
   parser.content = input;
@@ -15,24 +15,27 @@ static void callParseIndex(const std::string& input, Location* loc) {
 TEST(ConfigParser, ParseIndex_SingleIndex) {
   Location loc;
   EXPECT_NO_THROW(callParseIndex("index.html;", &loc));
-  std::vector<std::string> indexes = loc.GetIndexFiles();
-  ASSERT_EQ(indexes.size(), 1);
-  EXPECT_EQ(indexes[0], "index.html");
+  EXPECT_EQ(loc.GetIndexFile(), std::string("index.html"));
 }
 
-TEST(ConfigParser, ParseIndex_MultipleIndexes) {
+TEST(ConfigParser, ParseIndex_MultipleIndexes_Throws) {
   Location loc;
-  EXPECT_NO_THROW(callParseIndex("index.html index.htm index.php;", &loc));
-  std::vector<std::string> indexes = loc.GetIndexFiles();
-  ASSERT_EQ(indexes.size(), 3);
-  EXPECT_EQ(indexes[0], "index.html");
-  EXPECT_EQ(indexes[1], "index.htm");
-  EXPECT_EQ(indexes[2], "index.php");
+  EXPECT_THROW(callParseIndex("index.html index.htm index.php;", &loc),
+               std::runtime_error);
 }
 
 TEST(ConfigParser, ParseIndex_MissingSemicolon_Throws) {
   Location loc;
-  EXPECT_THROW(callParseIndex("index.html index.htm index.php", &loc),
+  EXPECT_THROW(callParseIndex("index.html", &loc),
                std::runtime_error);
-  EXPECT_THROW(callParseIndex("index.html", &loc), std::runtime_error);
+}
+
+TEST(ConfigParser, ParseIndex_UnsafeFilename_Throws) {
+  Location loc;
+  EXPECT_THROW(callParseIndex("../etc/passwd;", &loc),
+               std::runtime_error);
+  EXPECT_THROW(callParseIndex("index file.html;", &loc),
+               std::runtime_error);
+  EXPECT_THROW(callParseIndex("index<file>.html;", &loc),
+               std::runtime_error);
 }

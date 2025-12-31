@@ -3,6 +3,7 @@
 
 #include "HttpRequest.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
+#include "lib/http/CharValidation.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/utils/string_utils.hpp"
@@ -26,7 +27,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
                                         std::string& value, size_t& total_len) {
   size_t i = 0;
   while (req[i] && req[i] != ':') {
-    if (!http::IsValidHeaderChar(req[i])) {
+    if (!lib::http::IsValidHeaderChar(req[i])) {
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     BumpLenOrThrow(total_len, 1);
@@ -43,7 +44,7 @@ const char* HttpRequest::ReadHeaderLine(const char* req, std::string& key,
   req += i;
   size_t vlen = 0;
   while (req[vlen] && req[vlen] != '\r') {
-    if (!http::IsValidHeaderChar(req[vlen])) {
+    if (!lib::http::IsValidHeaderChar(req[vlen])) {
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     BumpLenOrThrow(total_len, 1);

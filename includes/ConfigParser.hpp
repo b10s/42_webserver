@@ -3,6 +3,7 @@
 
 #include <sys/stat.h>
 
+#include <cctype>  // for std::isalnum, std::isprint
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
@@ -77,6 +78,8 @@ class ConfigParser {
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
   }
+
+  bool IsSafeIndexFilename(const std::string& filename) const;
 };
 
 template <typename T, typename Setter>
