@@ -1,4 +1,5 @@
 #include "Location.hpp"
+#include "ConfigParser.hpp"
 
 Location::Location()
     : methods_(),
