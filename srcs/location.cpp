@@ -5,7 +5,7 @@ Location::Location()
       name_("/"),
       root_("./"),
       autoindex_(false),
-      index_files_(),
+      index_file_(),
       upload_path_(),
       redirect_(),
       cgi_enabled_(false),

@@ -57,11 +57,11 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   bool is_directory =
       (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
   if (is_directory) {
-    if (location_match_.loc->GetIndexFiles().empty()) {
+    if (location_match_.loc->GetIndexFile().empty()) {
       throw std::runtime_error("No index files configured for location");
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
-    path += location_match_.loc->GetIndexFiles()[0];
+    path += location_match_.loc->GetIndexFile();
   }
   return path;
 }

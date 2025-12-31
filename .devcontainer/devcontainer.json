@@ -5,8 +5,9 @@
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "mcr.microsoft.com/devcontainers/base:noble",
 	"features": {
-		"ghcr.io/devcontainers-extra/features/cmake:1": {}
-	}
+		"ghcr.io/devcontainers-extra/features/cmake:1": {},
+		"ghcr.io/devcontainers/features/python:1": {}
+	},
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -15,7 +16,7 @@
 	// "forwardPorts": [],
 
 	// Use 'postCreateCommand' to run commands after the container is created.
-	// "postCreateCommand": "uname -a",
+	"postCreateCommand": "bash .devcontainer/setup.sh"
 
 	// Configure tool-specific properties.
 	// "customizations": {},

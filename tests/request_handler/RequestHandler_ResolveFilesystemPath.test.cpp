@@ -12,7 +12,7 @@ protected:
         Location location;
         location.SetName("/");
         location.SetRoot("/var/www/html");
-        location.AddIndex("index.html");
+        location.SetIndexFile("index.html");
         config.AddLocation(location);
     }
 };
@@ -83,7 +83,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_LocationSpecificRoot) {
     Location kapouetLocation;
     kapouetLocation.SetName("/kapouet");
     kapouetLocation.SetRoot("/tmp/www");
-    kapouetLocation.AddIndex("index.html");
+    kapouetLocation.SetIndexFile("index.html");
     config.AddLocation(kapouetLocation);
 
     // Test URI /kapouet/pouic/toto

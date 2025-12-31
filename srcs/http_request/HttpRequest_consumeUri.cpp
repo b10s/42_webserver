@@ -1,5 +1,6 @@
 #include "HttpRequest.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
+#include "lib/http/CharValidation.hpp"
 #include "lib/http/Status.hpp"
 
 inline void BumpOrThrow(std::size_t& len) {
@@ -19,7 +20,7 @@ inline const char* ConsumeUntilStopChar(const char* req, std::size_t& len,
     }
     ++len;
     BumpOrThrow(len);
-    if (!http::IsVisibleAscii(*req))
+    if (!lib::http::IsVisibleAscii(*req))
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     ++req;
   }
