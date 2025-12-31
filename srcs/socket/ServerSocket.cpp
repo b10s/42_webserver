@@ -41,7 +41,8 @@ ServerSocket::ServerSocket(const ServerConfig& config)
   }
 
   if (listen(fd_.GetFd(), SOMAXCONN) == -1) {
-    throw std::runtime_error("listen() failed. " + std::string(strerror(errno)));
+    throw std::runtime_error("listen() failed. " +
+                             std::string(strerror(errno)));
   }
 }
 
