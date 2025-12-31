@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
 
 void ConfigParser::ParseRoot(Location* location) {
   ParseSimpleDirective(location, &Location::SetRoot, "root directory path");

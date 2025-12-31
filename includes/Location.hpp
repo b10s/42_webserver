@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "lib/http/Method.hpp"
+#include "lib/utils/string_utils.hpp"
 
 class Location {
  private:
@@ -19,6 +20,7 @@ class Location {
   std::string upload_path_;
   std::string redirect_;
   bool cgi_enabled_;
+  std::vector<std::string> cgi_allowed_extensions_;
   bool has_allow_methods_;  // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
@@ -26,9 +28,26 @@ class Location {
   bool has_upload_path_;
   bool has_redirect_;
   bool has_cgi_enabled_;
+  bool has_cgi_allowed_extensions_;
 
  public:
   Location();
+
+  void AddCgiAllowedExtension(const std::string& ext) {
+    cgi_allowed_extensions_.push_back(ext);
+  }
+
+  void SetHasCgiAllowedExtensions(bool has) {
+    has_cgi_allowed_extensions_ = has;
+  }
+
+  const std::vector<std::string>& GetCgiAllowedExtensions() const {
+    return cgi_allowed_extensions_;
+  }
+
+  bool HasCgiAllowedExtensions() const {
+    return has_cgi_allowed_extensions_;
+  }
 
   void AddMethod(lib::http::Method method) {
     methods_.insert(method);
@@ -131,6 +150,10 @@ class Location {
 
   bool GetCgiEnabled() const {
     return cgi_enabled_;
+  }
+
+  std::vector<std::string> GetCgiAllowedExtensions() {
+    return cgi_allowed_extensions_;
   }
 };
 
