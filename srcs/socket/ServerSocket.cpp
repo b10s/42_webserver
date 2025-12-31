@@ -7,9 +7,10 @@
 
 #include <iostream>
 
+#include "lib/type/Fd.hpp"
 #include "socket/ClientSocket.hpp"
 
-ServerSocket::ServerSocket(int fd, const ServerConfig& config)
+ServerSocket::ServerSocket(lib::type::Fd& fd, const ServerConfig& config)
     : ASocket(fd), config_(config) {
 }
 
@@ -21,7 +22,8 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
   if (events & EPOLLIN) {
     sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
-    int client_fd = accept(fd_, (sockaddr*)&client_addr, &client_addr_len);
+    lib::type::Fd client_fd(
+        accept(fd_, (sockaddr*)&client_addr, &client_addr_len));
 
     if (client_fd == -1) {
       std::cerr << "Failed to accept fd:" << client_fd << std::endl;
@@ -38,7 +40,7 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     epoll_event ev;
     ev.events = EPOLLIN;
     ev.data.ptr = client_socket;
-    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd, &ev) == -1) {
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fd.GetFd(), &ev) == -1) {
       std::cerr << "Failed to add client socket to epoll" << std::endl;
       delete client_socket;
       return result;

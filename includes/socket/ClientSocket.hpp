@@ -7,11 +7,12 @@
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
 #include "lib/exception/ConnectionClosed.hpp"
+#include "lib/type/Fd.hpp"
 #include "socket/ASocket.hpp"
 
 class ClientSocket : public ASocket {
  public:
-  ClientSocket(int fd, const ServerConfig& config,
+  ClientSocket(lib::type::Fd& fd, const ServerConfig& config,
                const std::string& client_ip);
   virtual ~ClientSocket();
 

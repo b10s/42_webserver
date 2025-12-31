@@ -1,11 +1,11 @@
 #include "socket/ASocket.hpp"
 
-ASocket::ASocket(int fd) : fd_(fd) {
+ASocket::ASocket(lib::type::Fd& fd) : fd_(fd) {
 }
 
 ASocket::~ASocket() {
 }
 
-int ASocket::GetFd() const {
+lib::type::Fd& ASocket::GetFd() const {
   return fd_;
 }

@@ -46,7 +46,7 @@ Webserv::Webserv(const std::string& config_file) {
       unsigned short port = it->first;
       const ServerConfig& config = it->second;
 
-      int server_fd = socket(PF_INET, SOCK_STREAM, 0);
+      lib::type::Fd server_fd(socket(PF_INET, SOCK_STREAM, 0));
       if (server_fd == -1) {
         throw std::runtime_error("socket() failed. " +
                                  std::string(strerror(errno)));

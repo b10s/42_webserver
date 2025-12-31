@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <unistd.h>
+
 #include "lib/type/Fd.hpp"
 
 class ASocket;
@@ -17,14 +18,14 @@ struct SocketResult {
 
 class ASocket {
  public:
-  explicit ASocket(int fd);
+  explicit ASocket(lib::type::Fd& fd);
   virtual ~ASocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
-  int GetFd() const;
+  lib::type::Fd& GetFd() const;
 
  protected:
-  lib::type::Fd fd_;
+  lib::type::Fd& fd_;
 
  private:
   ASocket();

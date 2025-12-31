@@ -39,6 +39,10 @@ class Fd {
     return *this;
   }
 
+  int GetFd() {
+    return fd_;
+  }
+
  private:
   Fd();
 };
