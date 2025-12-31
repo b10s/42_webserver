@@ -108,8 +108,7 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.6.
   meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
-  meta_vars_["QUERY_STRING"] =
-      lib::type::Optional<std::string>(req.GetQuery());
+  meta_vars_["QUERY_STRING"] = lib::type::Optional<std::string>(req.GetQuery());
   // RFC 3875 4.1.8.
   meta_vars_["REMOTE_ADDR"] =
       lib::type::Optional<std::string>(req.GetClientIp());
@@ -117,7 +116,8 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["REMOTE_HOST"] =
       lib::type::Optional<std::string>(req.GetClientIp());
   // RFC 3875 4.1.10.
-  // The server may choose not to support this feature, or not to request the data for efficiency reasons, or not to return available identity data.
+  // The server may choose not to support this feature, or not to request the
+  // data for efficiency reasons, or not to return available identity data.
   meta_vars_["REMOTE_IDENT"] = lib::type::Optional<std::string>();
   // RFC 3875 4.1.11.
   // The server doesn't support authentication yet.
