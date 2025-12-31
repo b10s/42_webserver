@@ -6,7 +6,7 @@
 
 class ServerSocket : public ASocket {
  public:
-  ServerSocket(int fd, const ServerConfig& config);
+  explicit ServerSocket(const ServerConfig& config);
   virtual ~ServerSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
