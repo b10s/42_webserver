@@ -7,5 +7,5 @@ ASocket::~ASocket() {
 }
 
 int ASocket::GetFd() const {
-  return fd_;
+  return fd_.GetFd();
 }

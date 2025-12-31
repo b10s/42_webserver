@@ -29,18 +29,18 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     }
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;
-    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_, NULL);
+    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
   } catch (const std::exception& e) {
     std::cerr << "ClientSocket error: " << e.what() << std::endl;
     result.remove_socket = true;
-    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_, NULL);
+    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
   }
   return result;
 }
 
 void ClientSocket::HandleEpollIn(int epoll_fd) {
   char buffer[kBufferSize];
-  ssize_t bytes_received = recv(fd_, buffer, sizeof(buffer), 0);
+  ssize_t bytes_received = recv(fd_.GetFd(), buffer, sizeof(buffer), 0);
 
   if (bytes_received <= 0) {
     throw lib::exception::ConnectionClosed();
@@ -55,7 +55,7 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
     epoll_event ev;
     ev.events = EPOLLOUT;
     ev.data.ptr = this;
-    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_, &ev);
+    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
   }
 }
 
@@ -63,7 +63,7 @@ void ClientSocket::HandleEpollOut() {
   if (output_buffer_.empty()) return;
 
   ssize_t bytes_sent =
-      send(fd_, output_buffer_.c_str(), output_buffer_.length(), 0);
+      send(fd_.GetFd(), output_buffer_.c_str(), output_buffer_.length(), 0);
 
   if (bytes_sent == -1) {
     throw lib::exception::ConnectionClosed();
