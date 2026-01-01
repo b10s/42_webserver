@@ -213,7 +213,11 @@ HttpResponse CgiExecutor::Run() {
     std::vector<char*> envp = CreateEnvp(meta_vars);
 
     int pid = fork();
-    if (pid < 0) throw std::runtime_error("fork error");
+    if (pid < 0) {
+      ClosePipe(pipe_in);
+      ClosePipe(pipe_out);
+      throw std::runtime_error("fork error");
+    }
 
     std::string req_method = GetMetaVar("REQUEST_METHOD");
 
