@@ -1,11 +1,13 @@
 #ifndef FILE_UTILS_HPP_
 #define FILE_UTILS_HPP_
 #include <sys/stat.h>
-#include <string>
+#include <unistd.h>
+
 #include <cerrno>
+#include <string>
+
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
-#include <unistd.h>
 
 namespace lib {
 namespace utils {
