@@ -1,5 +1,5 @@
-#ifndef FileValidater_HPP_
-#define FileValidater_HPP_
+#ifndef FILEVALIDATER_HPP_
+#define FILEVALIDATER_HPP_
 #include <string>
 #include <vector>
 
@@ -32,4 +32,4 @@ class FileValidater {
   static bool ContainsUnsafeChars(const std::string& path);
 };
 
-#endif  // FileValidater_HPP_
+#endif  // FILEVALIDATER_HPP_
