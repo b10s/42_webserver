@@ -4,26 +4,28 @@
 #include <vector>
 
 class FileValidator {
-public:
-    // validates the file path (contains no "..", no unsafe chars, and is under doc root)
-    static bool IsValidFilePath(const std::string& path, 
-                                const std::string& document_root);
+ public:
+  // validates the file path (contains no "..", no unsafe chars, and is under
+  // doc root)
+  static bool IsValidFilePath(const std::string& path,
+                              const std::string& document_root);
 
-private:
-    static bool ContainsUnsafeChars(const std::string& path);
-    static bool ContainsDotDotSegments(const std::string& path);
-    static std::string NormalizeSlashes(const std::string& path);
-    static std::vector<std::string> SplitPathSegments(const std::string& path);
-    static std::string RemoveSingleDotSegments(const std::string& path);
-    static bool IsPathUnderDocumentRoot(const std::string& path, 
-                                       const std::string& document_root);
+ private:
+  static bool ContainsUnsafeChars(const std::string& path);
+  static bool ContainsDotDotSegments(const std::string& path);
+  static std::string NormalizeSlashes(const std::string& path);
+  static std::vector<std::string> SplitPathSegments(const std::string& path);
+  static std::string RemoveSingleDotSegments(const std::string& path);
+  static bool IsPathUnderDocumentRoot(const std::string& path,
+                                      const std::string& document_root);
 };
 
 #endif  // FILEVALIDATER_HPP_
 
 /*
 config：実装をシンプルにするため厳しくしている
-実行時入力（URI）：互換性のため 表記は緩める、その代わり docroot 逸脱は絶対に防ぐ
+実行時入力（URI）：互換性のため 表記は緩める、その代わり docroot
+逸脱は絶対に防ぐ
 
 configより緩める
 - URI 中の /（パス区切り）は当然許可
@@ -31,7 +33,8 @@ configより緩める
 厳しくする（＝ここが本丸）
 - decode 後に NUL(\0) / 制御文字は拒否
 - .. は path segment として拒否（/a/../b や %2e%2e も）
-- root + remainder を作ったあと、正規化（canonicalize）して docroot 配下かチェック（これが “本当に逃げられない” ガード）
+- root + remainder を作ったあと、正規化（canonicalize）して docroot
+配下かチェック（これが “本当に逃げられない” ガード）
 
 共通化できそうな部分
 - ContainsCtlOrWhitespace(s)
