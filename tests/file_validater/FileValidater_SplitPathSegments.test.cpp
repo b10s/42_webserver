@@ -2,7 +2,7 @@
 
 #include "FileValidator.hpp"
 
-TEST(FileValidaterTest, SplitPathSegments_BasicCases) {
+TEST(FileValidatorTest, SplitPathSegments_BasicCases) {
   std::vector<std::string> expected1 = {"a", "b", "c"};
   EXPECT_EQ(FileValidator::SplitPathSegments("/a/b/c"), expected1);
 
@@ -13,7 +13,7 @@ TEST(FileValidaterTest, SplitPathSegments_BasicCases) {
   EXPECT_EQ(FileValidator::SplitPathSegments("/leading/and/trailing/"), expected3);
 }
 
-TEST(FileValidaterTest, SplitPathSegments_EdgeCases) {
+TEST(FileValidatorTest, SplitPathSegments_EdgeCases) {
   std::vector<std::string> expected1 = {};
   EXPECT_EQ(FileValidator::SplitPathSegments("/"), expected1);
 

@@ -12,14 +12,14 @@
 namespace lib {
 namespace utils {
 
-// OS file system utilities
+// TODO: refactoring ResolveFilesystemPath may obsolete this function
 bool IsDirectory(const std::string& path);
-std::string ReadFile(const std::string& filename);
+
+std::string ReadFileOrThrow(const std::string& filename);
 
 // file existence and permission checks
 // if no access, throw 403(kForbidden) or 404(kNotFound)
 lib::http::Status MapErrnoToStatus(int e);
-void EnsureReadableRegularFileOrThrow(const std::string& path);
 void EnsureExecutableRegularFileOrThrow(const std::string& path);
 
 }  // namespace utils

@@ -2,7 +2,7 @@
 
 #include "FileValidator.hpp"
 
-TEST(FileValidaterTest, RemoveSingleDotSegments_RemovesSingleDotSegments) {
+TEST(FileValidatorTest, RemoveSingleDotSegments_RemovesSingleDotSegments) {
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/a/./b/c/./d"), "/a/b/c/d");
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/./a/b/c/."), "/a/b/c");
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/a/b/c"), "/a/b/c");
@@ -10,7 +10,7 @@ TEST(FileValidaterTest, RemoveSingleDotSegments_RemovesSingleDotSegments) {
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/a/././b/././c/."), "/a/b/c");
 }
 
-TEST(FileValidaterTest, RemoveSingleDotSegments_HandlesEdgeCases) {
+TEST(FileValidatorTest, RemoveSingleDotSegments_HandlesEdgeCases) {
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/."), "/");
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/./"), "/");
   EXPECT_EQ(FileValidator::RemoveSingleDotSegments("/a/."), "/a");

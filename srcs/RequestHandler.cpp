@@ -54,7 +54,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
   // Validate the path for security
-  FileValidator::ValidateAndNormalizePath(path, location_match_.loc->GetRoot());
+  path = FileValidator::ValidateAndNormalizePath(path, location_match_.loc->GetRoot());
   // TODO: create AppendIndexIfDirectory(path, req_uri, index)
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
@@ -75,8 +75,7 @@ void RequestHandler::HandleGet() {
     CgiExecutor cgi(req_, filesystem_path_);
     res_ = cgi.Run();
   } else {
-    lib::utils::EnsureReadableRegularFileOrThrow(filesystem_path_);
-    std::string body = lib::utils::ReadFile(filesystem_path_);
+    std::string body = lib::utils::ReadFileOrThrow(filesystem_path_);
     res_.AddHeader("Content-Type",
                    lib::http::DetectMimeTypeFromPath(filesystem_path_));
     res_.SetBody(body);

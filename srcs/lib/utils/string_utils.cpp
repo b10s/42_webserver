@@ -45,7 +45,7 @@ bool StartsWith(const std::string& str, const std::string& prefix) {
   return str.compare(0, prefix.size(), prefix) == 0;
 }
 
-lib::type::Optional<std::string> GetFirstToken(const std::string& str,
+lib::type::Optional<std::string>c(const std::string& str,
                                                const std::string& delimiter) {
   std::basic_string<char>::size_type pos = str.find(delimiter);
   if (pos == std::string::npos) return lib::type::Optional<std::string>();
