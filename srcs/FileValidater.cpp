@@ -32,8 +32,8 @@ bool FileValidator::ContainsUnsafeChars(const std::string& path) {
 // reject: "/a/../b", "/..", "/a/..", "../a", ".."
 bool FileValidator::ContainsDotDotSegments(const std::string& path) {
   std::vector<std::string> segments = SplitPathSegments(path);
-  for (const std::string& segment : segments) {
-    if (segment == "..") return true;
+  for (size_t i = 0; i < segments.size(); ++i) {
+    if (segments[i] == "..") return true;
   }
   return false;
 }
