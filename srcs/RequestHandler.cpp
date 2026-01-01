@@ -53,6 +53,12 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   }
   const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
+  // Validate the path for security
+  if (!FileValidator::IsValidFilePath(path, location_match_.loc->GetRoot())) {
+    // 400 bad request is a reasonable response for unsafe paths
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
+  // TODO: create AppendIndexIfDirectory(path, req_uri, index)
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
   bool is_directory =
@@ -64,11 +70,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();
   }
-  // Validate the path for security
-  if (!FileValidator::IsValidFilePath(path, location_match_.loc->GetRoot())) {
-    throw std::runtime_error("Invalid path: " +
-                             path);  // TODO: throw 400 or 403 or 404?
-  }
+  // TODO: file existence and permission checks, if no access, throw 403 or 404
   return path;
 }
 
