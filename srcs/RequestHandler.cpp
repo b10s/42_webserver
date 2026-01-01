@@ -54,10 +54,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
   // Validate the path for security
-  if (!FileValidater::IsValidFilePath(path, location_match_.loc->GetRoot())) {
-    // 400 bad request is a reasonable response for unsafe paths
-    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
-  }
+  FileValidater::ValidateAndNormalizePath(path, location_match_.loc->GetRoot());
   // TODO: create AppendIndexIfDirectory(path, req_uri, index)
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');

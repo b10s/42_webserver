@@ -2,7 +2,7 @@
 
 #include "FileValidater.hpp"
 
-TEST(FileValidaterTest,ContainsDotDotSegments_RejectsDotDotSegments) {
+TEST(FileValidaterTest, ContainsDotDotSegments_RejectsDotDotSegments) {
   EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/../a"));
   EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/a/../b"));
   EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/a/.."));
@@ -10,7 +10,7 @@ TEST(FileValidaterTest,ContainsDotDotSegments_RejectsDotDotSegments) {
   EXPECT_TRUE(FileValidater::ContainsDotDotSegments("../a"));
 }
 
-TEST(FileValidaterTest,ContainsDotDotSegments_AcceptsSafePaths) {
+TEST(FileValidaterTest, ContainsDotDotSegments_AcceptsSafePaths) {
   EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a..b"));
   EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/..b"));
   EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/b.."));

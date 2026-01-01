@@ -25,8 +25,10 @@ class FileValidater {
   static bool IsPathUnderDocumentRoot(const std::string& path,
                                       const std::string& document_root);
 
-  static bool IsValidFilePath(const std::string& path,
-                              const std::string& document_root);
+  // static bool IsValidFilePath(const std::string& path,
+  //                             const std::string& document_root);
+  static std::string ValidateAndNormalizePath(const std::string& path,
+                                              const std::string& document_root);
 
  private:
   static bool ContainsUnsafeChars(const std::string& path);

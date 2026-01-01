@@ -1,7 +1,6 @@
 #include "FileValidater.hpp"
 
-#include <iostream>
-
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/CharValidation.hpp"
 
 /*
@@ -18,11 +17,11 @@ ContainsDotDotSegment(path):
 I don't think we need to resolve symlinks in this project
 */
 
-// Check for spaces or control characters
+// Check for control characters (allow spaces)
 bool FileValidater::ContainsUnsafeChars(const std::string& path) {
   for (size_t i = 0; i < path.size(); ++i) {
     char c = path[i];
-    if (!lib::http::IsVisibleAscii(c)) {
+    if (!lib::http::IsValidHeaderChar(c)) {
       return true;
     }
   }
@@ -101,12 +100,18 @@ bool FileValidater::IsPathUnderDocumentRoot(const std::string& path,
 }
 
 // path always starts with "/" (absolute path)
-bool FileValidater::IsValidFilePath(const std::string& path,
-                                    const std::string& document_root) {
-  if (ContainsUnsafeChars(path)) return false;
+std::string FileValidater::ValidateAndNormalizePath(
+    const std::string& path, const std::string& document_root) {
+  if (ContainsUnsafeChars(path)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   std::string normalized_path = NormalizeSlashes(path);
   normalized_path = RemoveSingleDotSegments(normalized_path);
-  if (ContainsDotDotSegments(normalized_path)) return false;
-  if (!IsPathUnderDocumentRoot(normalized_path, document_root)) return false;
-  return true;
+  if (ContainsDotDotSegments(normalized_path)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
+  if (!IsPathUnderDocumentRoot(normalized_path, document_root)) {
+    throw lib::exception::ResponseStatusException(lib::http::kNotFound);
+  }
+  return normalized_path;
 }
