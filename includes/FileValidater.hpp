@@ -20,7 +20,7 @@ class FileValidator {
                                       const std::string& document_root);
 };
 
-#endif  // FILEVALIDATER_HPP_
+#endif  // FILEVALIDATOR_HPP_
 
 /*
 config：実装をシンプルにするため厳しくしている
