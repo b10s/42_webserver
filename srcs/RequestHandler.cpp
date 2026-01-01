@@ -26,8 +26,11 @@ HttpResponse RequestHandler::Run() {
   if (method == lib::http::kGet) {
     HandleGet();
   } else if (method == lib::http::kPost) {
+    HandlePost();
   } else if (method == lib::http::kDelete) {
+    HandleDelete();
   } else {
+    return HttpResponse(lib::http::kNotImplemented);
   }
   return res_;
 }
@@ -80,7 +83,27 @@ void RequestHandler::HandleGet() {
 }
 
 void RequestHandler::HandlePost() {
+  if (location_match_.loc->GetCgiEnabled()) {
+    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    res_ = cgi.Run();
+  } else {
+    std::string body = lib::utils::ReadFile(filesystem_path_);
+    res_.AddHeader("Content-Type",
+                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res_.SetBody(body);
+    res_.SetStatus(lib::http::kOk);
+  }
 }
 
 void RequestHandler::HandleDelete() {
+  if (location_match_.loc->GetCgiEnabled()) {
+    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    res_ = cgi.Run();
+  } else {
+    std::string body = lib::utils::ReadFile(filesystem_path_);
+    res_.AddHeader("Content-Type",
+                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res_.SetBody(body);
+    res_.SetStatus(lib::http::kOk);
+  }
 }

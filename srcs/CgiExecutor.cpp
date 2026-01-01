@@ -1,6 +1,7 @@
 #include "CgiExecutor.hpp"
 
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <cctype>
 #include <cerrno>
@@ -102,7 +103,7 @@ bool IsScriptExtensionAllowed(const std::string& script_path,
 
 CgiExecutor::CgiExecutor(const HttpRequest& req, const Location& loc,
                          const std::string& script_path)
-    : loc_(loc), script_path_(script_path) {
+    : loc_(loc), script_path_(script_path), body_(req.GetBody()) {
   InitializeMetaVars(req);
 }
 
@@ -193,6 +194,8 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   script_path_ = executable_path;
 }
 
+// GET and DELETE methods are handled same. POST method requires the body to be
+// passed to STDIN of the CGI script.
 HttpResponse CgiExecutor::Run() {
   if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
     return HttpResponse(lib::http::kForbidden);
@@ -212,6 +215,8 @@ HttpResponse CgiExecutor::Run() {
     int pid = fork();
     if (pid < 0) throw std::runtime_error("fork error");
 
+    std::string req_method = GetMetaVar("REQUEST_METHOD");
+
     if (pid == 0) {  // Child process
       close(pipe_in[kWriteEnd]);
       close(pipe_out[kReadEnd]);
@@ -221,22 +226,16 @@ HttpResponse CgiExecutor::Run() {
       close(pipe_out[kWriteEnd]);
 
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
-      // PrintEnvp(envp);
       execve(script_path_.c_str(), argv, envp.data());
-      std::cout << "Status: 500 Internal Server Error\r\nContent-Type: "
-                   "text/plain\r\n\r\n";
-      std::cout << "Execve failed: " << std::strerror(errno) << std::endl;
       exit(1);
     } else {  // Parent process
       close(pipe_in[kReadEnd]);
-      std::string req_method = GetMetaVar("REQUEST_METHOD");
-      if (req_method == "GET") {
-        close(pipe_out[kWriteEnd]);
-      } else if (req_method == "POST") {
-        ;
-      } else if (req_method == "DELETE") {
-        ;
+      close(pipe_out[kWriteEnd]);
+
+      if (req_method == "POST") {
+        write(pipe_in[kWriteEnd], body_.c_str(), body_.length());
       }
+      close(pipe_in[kWriteEnd]);
 
       std::string cgi_output;
       // でかいデータもいい感じに取得する。epollで同じのやった気がする。
@@ -249,12 +248,15 @@ HttpResponse CgiExecutor::Run() {
              0) {
         cgi_output.append(buffer, bytes_read);
       }
-      ClosePipe(pipe_out);
+      close(pipe_out[kReadEnd]);
 
       int status;
       waitpid(pid, &status, 0);
 
-      std::cout << "cgi output: " << cgi_output << std::endl;
+      if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+        return HttpResponse(lib::http::kInternalServerError);
+      }
+
       HttpResponse res = cgi::ParseCgiResponse(cgi_output);
       return res;
     }

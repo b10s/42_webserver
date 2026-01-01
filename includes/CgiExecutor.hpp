@@ -26,6 +26,7 @@ class CgiExecutor {
 
   const Location& loc_;
   std::string script_path_;
+  std::string body_;
 
  public:
   CgiExecutor(const HttpRequest&, const Location&, const std::string&);
