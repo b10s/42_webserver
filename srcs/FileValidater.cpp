@@ -19,7 +19,7 @@ I don't think we need to resolve symlinks in this project
 */
 
 // Check for spaces or control characters
-bool FileValidator::ContainsUnsafeChars(const std::string& path) {
+bool FileValidater::ContainsUnsafeChars(const std::string& path) {
   for (size_t i = 0; i < path.size(); ++i) {
     char c = path[i];
     if (!lib::http::IsVisibleAscii(c)) {
@@ -30,7 +30,7 @@ bool FileValidator::ContainsUnsafeChars(const std::string& path) {
 }
 
 // reject: "/a/../b", "/..", "/a/..", "../a", ".."
-bool FileValidator::ContainsDotDotSegments(const std::string& path) {
+bool FileValidater::ContainsDotDotSegments(const std::string& path) {
   std::vector<std::string> segments = SplitPathSegments(path);
   for (size_t i = 0; i < segments.size(); ++i) {
     if (segments[i] == "..") return true;
@@ -39,7 +39,7 @@ bool FileValidator::ContainsDotDotSegments(const std::string& path) {
 }
 
 // "/////" を "/" に変換
-std::string FileValidator::NormalizeSlashes(const std::string& path) {
+std::string FileValidater::NormalizeSlashes(const std::string& path) {
   std::string result;
   bool previous_slash = false;
   for (size_t i = 0; i < path.size(); ++i) {
@@ -59,7 +59,7 @@ std::string FileValidator::NormalizeSlashes(const std::string& path) {
 
 // split path into segments by '/'
 // もし..を今後移動に使うなら stack/deque にするかも
-std::vector<std::string> FileValidator::SplitPathSegments(
+std::vector<std::string> FileValidater::SplitPathSegments(
     const std::string& path) {
   std::vector<std::string> segments;
   size_t start = 0;
@@ -76,7 +76,7 @@ std::vector<std::string> FileValidator::SplitPathSegments(
   return segments;
 }
 
-std::string FileValidator::RemoveSingleDotSegments(const std::string& path) {
+std::string FileValidater::RemoveSingleDotSegments(const std::string& path) {
   std::string result;
   std::vector<std::string> segments = SplitPathSegments(path);
   for (size_t i = 0; i < segments.size(); ++i) {
@@ -90,7 +90,7 @@ std::string FileValidator::RemoveSingleDotSegments(const std::string& path) {
   return result;
 }
 
-bool FileValidator::IsPathUnderDocumentRoot(const std::string& path,
+bool FileValidater::IsPathUnderDocumentRoot(const std::string& path,
                                             const std::string& document_root) {
   if (document_root.empty()) return false;
   if (document_root == "/") return true;  // root matches all
@@ -101,7 +101,7 @@ bool FileValidator::IsPathUnderDocumentRoot(const std::string& path,
 }
 
 // path always starts with "/" (absolute path)
-bool FileValidator::IsValidFilePath(const std::string& path,
+bool FileValidater::IsValidFilePath(const std::string& path,
                                     const std::string& document_root) {
   if (ContainsUnsafeChars(path)) return false;
   std::string normalized_path = NormalizeSlashes(path);

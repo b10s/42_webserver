@@ -2,19 +2,19 @@
 
 #include "FileValidater.hpp"
 
-TEST(FileValidatorTest,ContainsDotDotSegments_RejectsDotDotSegments) {
-  EXPECT_TRUE(FileValidator::ContainsDotDotSegments("/../a"));
-  EXPECT_TRUE(FileValidator::ContainsDotDotSegments("/a/../b"));
-  EXPECT_TRUE(FileValidator::ContainsDotDotSegments("/a/.."));
-  EXPECT_TRUE(FileValidator::ContainsDotDotSegments(".."));
-  EXPECT_TRUE(FileValidator::ContainsDotDotSegments("../a"));
+TEST(FileValidaterTest,ContainsDotDotSegments_RejectsDotDotSegments) {
+  EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/../a"));
+  EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/a/../b"));
+  EXPECT_TRUE(FileValidater::ContainsDotDotSegments("/a/.."));
+  EXPECT_TRUE(FileValidater::ContainsDotDotSegments(".."));
+  EXPECT_TRUE(FileValidater::ContainsDotDotSegments("../a"));
 }
 
-TEST(FileValidatorTest,ContainsDotDotSegments_AcceptsSafePaths) {
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/a..b"));
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/a/..b"));
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/a/b.."));
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/a/b/c"));
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/"));
-  EXPECT_FALSE(FileValidator::ContainsDotDotSegments("/a/b/./c"));
+TEST(FileValidaterTest,ContainsDotDotSegments_AcceptsSafePaths) {
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a..b"));
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/..b"));
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/b.."));
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/b/c"));
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/"));
+  EXPECT_FALSE(FileValidater::ContainsDotDotSegments("/a/b/./c"));
 }

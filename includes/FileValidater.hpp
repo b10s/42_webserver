@@ -1,5 +1,5 @@
-#ifndef FILEVALIDATOR_HPP_
-#define FILEVALIDATOR_HPP_
+#ifndef FileValidater_HPP_
+#define FileValidater_HPP_
 #include <string>
 #include <vector>
 
@@ -15,7 +15,7 @@ configより緩い部分
 配下かチェック
 */
 
-class FileValidator {
+class FileValidater {
  public:
   // made public for testing
   static bool ContainsDotDotSegments(const std::string& path);
@@ -32,4 +32,4 @@ class FileValidator {
   static bool ContainsUnsafeChars(const std::string& path);
 };
 
-#endif  // FILEVALIDATOR_HPP_
+#endif  // FileValidater_HPP_
