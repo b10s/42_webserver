@@ -66,7 +66,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   }
   // Validate the path for security
     if (!FileValidator::IsValidFilePath(path, location_match_.loc->GetRoot())) {
-        throw std::runtime_error("Invalid path: " + path);
+        throw std::runtime_error("Invalid path: " + path); // TODO: throw 400 or 403 or 404?
     }
   return path;
 }

@@ -21,7 +21,9 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_RootDirectory) {
     HttpRequest request;
     request.SetUri("/");
     RequestHandler handler(config, request);
-    
+
+    std::string out;
+    ASSERT_NO_THROW(out = handler.ResolveFilesystemPath());
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/index.html");
 }
 
