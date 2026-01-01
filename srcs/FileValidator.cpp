@@ -1,4 +1,4 @@
-#include "FileValidater.hpp"
+#include "FileValidator.hpp"
 
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/CharValidation.hpp"
@@ -18,7 +18,7 @@ I don't think we need to resolve symlinks in this project
 */
 
 // Check for control characters (allow spaces)
-bool FileValidater::ContainsUnsafeChars(const std::string& path) {
+bool FileValidator::ContainsUnsafeChars(const std::string& path) {
   for (size_t i = 0; i < path.size(); ++i) {
     char c = path[i];
     if (!lib::http::IsValidHeaderChar(c)) {
@@ -29,7 +29,7 @@ bool FileValidater::ContainsUnsafeChars(const std::string& path) {
 }
 
 // reject: "/a/../b", "/..", "/a/..", "../a", ".."
-bool FileValidater::ContainsDotDotSegments(const std::string& path) {
+bool FileValidator::ContainsDotDotSegments(const std::string& path) {
   std::vector<std::string> segments = SplitPathSegments(path);
   for (size_t i = 0; i < segments.size(); ++i) {
     if (segments[i] == "..") return true;
@@ -38,7 +38,7 @@ bool FileValidater::ContainsDotDotSegments(const std::string& path) {
 }
 
 // "/////" を "/" に変換
-std::string FileValidater::NormalizeSlashes(const std::string& path) {
+std::string FileValidator::NormalizeSlashes(const std::string& path) {
   std::string result;
   bool previous_slash = false;
   for (size_t i = 0; i < path.size(); ++i) {
@@ -58,7 +58,7 @@ std::string FileValidater::NormalizeSlashes(const std::string& path) {
 
 // split path into segments by '/'
 // もし..を今後移動に使うなら stack/deque にするかも
-std::vector<std::string> FileValidater::SplitPathSegments(
+std::vector<std::string> FileValidator::SplitPathSegments(
     const std::string& path) {
   std::vector<std::string> segments;
   size_t start = 0;
@@ -75,7 +75,7 @@ std::vector<std::string> FileValidater::SplitPathSegments(
   return segments;
 }
 
-std::string FileValidater::RemoveSingleDotSegments(const std::string& path) {
+std::string FileValidator::RemoveSingleDotSegments(const std::string& path) {
   std::string result;
   std::vector<std::string> segments = SplitPathSegments(path);
   for (size_t i = 0; i < segments.size(); ++i) {
@@ -89,7 +89,7 @@ std::string FileValidater::RemoveSingleDotSegments(const std::string& path) {
   return result;
 }
 
-bool FileValidater::IsPathUnderDocumentRoot(const std::string& path,
+bool FileValidator::IsPathUnderDocumentRoot(const std::string& path,
                                             const std::string& document_root) {
   if (document_root.empty()) return false;
   if (document_root == "/") return true;  // root matches all
@@ -100,7 +100,7 @@ bool FileValidater::IsPathUnderDocumentRoot(const std::string& path,
 }
 
 // path always starts with "/" (absolute path)
-std::string FileValidater::ValidateAndNormalizePath(
+std::string FileValidator::ValidateAndNormalizePath(
     const std::string& path, const std::string& document_root) {
   if (ContainsUnsafeChars(path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);

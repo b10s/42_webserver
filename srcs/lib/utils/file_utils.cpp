@@ -32,5 +32,38 @@ std::string ReadFile(const std::string& filename) {
   return content;
 }
 
+// map errno -> HTTP status
+lib::http::Status MapErrnoToStatus(int e) {
+  if (e == ENOENT || e == ENOTDIR) return lib::http::kNotFound; // 404
+  if (e == EACCES) return lib::http::kForbidden; // 403
+  return lib::http::kInternalServerError;
+}
+
+void EnsureReadableRegularFileOrThrow(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) {
+    throw lib::exception::ResponseStatusException(MapErrnoToStatus(errno));
+  }
+  if (!S_ISREG(st.st_mode)) { // directory or device etc. are not valid for direct GET
+    throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+  }
+  if (access(path.c_str(), R_OK) != 0) {
+    throw lib::exception::ResponseStatusException(MapErrnoToStatus(errno));
+  }
+}
+
+void EnsureExecutableRegularFileOrThrow(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) {
+    throw lib::exception::ResponseStatusException(MapErrnoToStatus(errno));
+  }
+  if (!S_ISREG(st.st_mode)) {
+    throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+  }
+  if (access(path.c_str(), X_OK) != 0) {
+    throw lib::exception::ResponseStatusException(MapErrnoToStatus(errno));
+  }
+}
+
 }  // namespace utils
 }  // namespace lib
