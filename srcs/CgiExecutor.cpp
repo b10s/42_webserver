@@ -233,7 +233,11 @@ HttpResponse CgiExecutor::Run() {
       close(pipe_out[kWriteEnd]);
 
       if (req_method == "POST") {
-        write(pipe_in[kWriteEnd], body_.c_str(), body_.length());
+        if (write(pipe_in[kWriteEnd], body_.c_str(), body_.length()) == -1) {
+          close(pipe_in[kWriteEnd]);
+          close(pipe_out[kReadEnd]);
+          throw std::runtime_error("write error");
+        }
       }
       close(pipe_in[kWriteEnd]);
 
