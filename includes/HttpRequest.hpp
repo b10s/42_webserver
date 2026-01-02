@@ -2,12 +2,9 @@
 #define HTTPREQUEST_HPP_
 #include <cstddef>  // for std::ptrdiff_t
 #include <cstring>  // for std::tolower and std::strncmp
-#include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
 #include <map>
-#include <stdexcept>
 #include <string>
 
-#include "enums.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"

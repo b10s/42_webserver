@@ -1,13 +1,7 @@
-#include <cstdio>
-#include <fstream>
 #include <iostream>
-#include <sstream>
 #include <string>
 
-#include "ConfigParser.hpp"
-#include "ServerConfig.hpp"
 #include "Webserv.hpp"
-#include "lib/utils/Bzero.hpp"
 
 int main(int argc, char* argv[]) {
   try {

@@ -1,4 +1,5 @@
 #include "socket/ClientSocket.hpp"
+#include "lib/exception/ConnectionClosed.hpp"
 
 #include <fcntl.h>
 #include <sys/epoll.h>

@@ -6,11 +6,10 @@
 #include <csignal>
 #include <cstring>
 #include <iostream>
-#include <stdexcept>
+#include <cerrno>
 
 #include "ConfigParser.hpp"
 #include "lib/type/Fd.hpp"
-#include "socket/ClientSocket.hpp"
 #include "socket/ServerSocket.hpp"
 
 Webserv::Webserv() : epoll_fd_(-1) {

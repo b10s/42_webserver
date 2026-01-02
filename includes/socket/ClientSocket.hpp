@@ -6,7 +6,6 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
-#include "lib/exception/ConnectionClosed.hpp"
 #include "lib/type/Fd.hpp"
 #include "socket/ASocket.hpp"
 

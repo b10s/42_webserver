@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include <limits>
 
 /**
  * @brief handle body parsing advancement, either by content-length or chunked

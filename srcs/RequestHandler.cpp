@@ -1,6 +1,5 @@
 #include "RequestHandler.hpp"
 
-#include <iostream>
 #include <stdexcept>
 
 #include "CgiExecutor.hpp"
