@@ -1,5 +1,4 @@
 #include "socket/ClientSocket.hpp"
-#include "lib/exception/ConnectionClosed.hpp"
 
 #include <fcntl.h>
 #include <sys/epoll.h>
@@ -12,6 +11,7 @@
 #include <stdexcept>
 
 #include "RequestHandler.hpp"
+#include "lib/exception/ConnectionClosed.hpp"
 #include "lib/type/Fd.hpp"
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
