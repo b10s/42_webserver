@@ -15,6 +15,7 @@
 #include "lib/http/Status.hpp"
 #include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
+#include "socket/CgiSocket.hpp"
 
 namespace {
 std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
@@ -211,22 +212,16 @@ HttpResponse CgiExecutor::Run() {
       exit(1);
     } else {  // Parent process
       close(sv[1]);
+      lib::type::Fd fd(sv[0]);
+      CgiSocket cgi_socket(fd);
 
       if (req_method == "POST") {
-        if (write(sv[0], body_.c_str(), body_.length()) == -1) {
-          close(sv[0]);
+        if (cgi_socket.Send(body_) == -1) {
           throw std::runtime_error("write error");
         }
       }
 
-      std::string cgi_output;
-      char buffer[4096];
-      ssize_t bytes_read;
-
-      while ((bytes_read = read(sv[0], buffer, sizeof(buffer))) > 0) {
-        cgi_output.append(buffer, bytes_read);
-      }
-      close(sv[0]);
+      std::string cgi_output = cgi_socket.Receive();
 
       int status;
       waitpid(pid, &status, 0);
