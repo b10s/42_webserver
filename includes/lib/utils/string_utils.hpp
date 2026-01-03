@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <cctype>
 
 #include "lib/type/Optional.hpp"
 

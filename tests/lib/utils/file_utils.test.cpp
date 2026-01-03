@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <fstream>
 #include <sys/stat.h>
-#include <unistd.h>
 #include "lib/utils/file_utils.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"

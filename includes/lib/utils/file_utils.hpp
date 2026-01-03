@@ -1,10 +1,11 @@
 #ifndef FILE_UTILS_HPP_
 #define FILE_UTILS_HPP_
 #include <sys/stat.h>
-#include <unistd.h>
-
+#include <unistd.h> // for access()
 #include <cerrno>
 #include <string>
+#include <libgen.h>  // for dirname
+#include <fstream>
 
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"

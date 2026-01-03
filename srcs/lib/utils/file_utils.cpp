@@ -1,16 +1,5 @@
 #include "lib/utils/file_utils.hpp"
 
-#include <libgen.h>  // for dirname
-#include <sys/stat.h>
-#include <unistd.h>  // for access()
-
-#include <cerrno>
-#include <fstream>
-#include <stdexcept>
-
-#include "lib/exception/ResponseStatusException.hpp"
-#include "lib/http/Status.hpp"
-
 namespace lib {
 namespace utils {
 
