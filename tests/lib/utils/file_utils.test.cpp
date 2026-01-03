@@ -94,14 +94,14 @@ TEST_F(FileUtilsTest, CheckExecutableCgiScriptOrThrow_Unreadable) {
 }
 
 // Tests for CheckDeletableRegularFileOrThrow(const std::string& path)
-TEST_F(FileUtilsTest, DeletableFile_NotRegular) {
+TEST_F(FileUtilsTest, CheckDeletableRegularFileOrThrow_NotRegular) {
   EXPECT_THROW(
     lib::utils::CheckDeletableRegularFileOrThrow(base + "/dir"),
     lib::exception::ResponseStatusException
   );
 }
 
-TEST_F(FileUtilsTest, DeletableFile_NoPermission) {
+TEST_F(FileUtilsTest, CheckDeletableRegularFileOrThrow_NoPermission) {
   EXPECT_THROW(
     lib::utils::CheckDeletableRegularFileOrThrow(base + "/unwritable_dir/delete_test.txt"),
     lib::exception::ResponseStatusException
