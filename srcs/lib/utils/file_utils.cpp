@@ -86,8 +86,8 @@ and its argument must be writable buffer
 example:
   std::string path = "/a/b/c.txt";
   char* path_copy = &path[0];
-  dirname(path_copy) returns "a/b\0c.txt" (modifies path_copy)
-*/
+  // after this call, path's buffer may look like "/a/b\0c.txt" in memory,
+  // and dirname(path_copy) returns "/a/b"
 void CheckDeletableRegularFileOrThrow(const std::string& path) {
   struct stat buffer = StatOrThrow(path);
   EnsureRegularFileOrThrowForbidden(buffer);
