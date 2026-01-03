@@ -16,7 +16,6 @@
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
-  SetNonBlocking();
   request_.SetClientIp(client_ip);
 }
 

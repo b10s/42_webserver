@@ -14,14 +14,19 @@
 #include "lib/utils/Bzero.hpp"
 #include "socket/ClientSocket.hpp"
 
-ServerSocket::ServerSocket(const ServerConfig& config)
-    : ASocket(), config_(config) {
-  fd_.Reset(socket(PF_INET, SOCK_STREAM, 0));
-  if (fd_.GetFd() == -1) {
+namespace {
+lib::type::Fd CreateServerSocketFd() {
+  int fd = socket(PF_INET, SOCK_STREAM, 0);
+  if (fd == -1) {
     throw std::runtime_error("socket() failed. " +
                              std::string(strerror(errno)));
   }
+  return lib::type::Fd(fd);
+}
+}  // namespace
 
+ServerSocket::ServerSocket(const ServerConfig& config)
+    : ASocket(CreateServerSocketFd()), config_(config) {
   int opt = 1;
   if (setsockopt(fd_.GetFd(), SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) ==
       -1) {
@@ -43,7 +48,6 @@ ServerSocket::ServerSocket(const ServerConfig& config)
     throw std::runtime_error("listen() failed. " +
                              std::string(strerror(errno)));
   }
-  SetNonBlocking();
 }
 
 ServerSocket::~ServerSocket() {

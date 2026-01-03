@@ -26,17 +26,17 @@ int Fd::GetFd() const {
   return fd_;
 }
 
-Fd::Fd(Fd& other) : fd_(other.fd_) {
-  other.fd_ = -1;
+Fd::Fd(const Fd& other) : fd_(other.fd_) {
+  const_cast<Fd&>(other).fd_ = -1;
 }
 
-Fd& Fd::operator=(Fd& other) {
+Fd& Fd::operator=(const Fd& other) {
   if (this != &other) {
     if (fd_ != -1) {
       close(fd_);
     }
     fd_ = other.fd_;
-    other.fd_ = -1;
+    const_cast<Fd&>(other).fd_ = -1;
   }
   return *this;
 }

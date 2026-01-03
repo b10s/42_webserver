@@ -7,9 +7,10 @@
 #include <stdexcept>
 
 ASocket::ASocket(lib::type::Fd fd) : fd_(fd) {
-}
-
-ASocket::ASocket() {
+  if (fd_.GetFd() == -1) {
+    throw std::runtime_error("ASocket: Invalid file descriptor");
+  }
+  SetNonBlocking();
 }
 
 ASocket::~ASocket() {
@@ -20,6 +21,9 @@ int ASocket::GetFd() const {
 }
 
 void ASocket::SetNonBlocking() const {
+  if (fd_.GetFd() == -1) {
+    throw std::runtime_error("SetNonBlocking: Invalid file descriptor");
+  }
   int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
   if (flags == -1) {
     throw std::runtime_error("fcntl() failed. " + std::string(strerror(errno)));
