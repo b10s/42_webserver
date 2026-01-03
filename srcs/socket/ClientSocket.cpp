@@ -1,6 +1,5 @@
 #include "socket/ClientSocket.hpp"
 
-#include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -17,15 +16,7 @@
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
-  int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
-  if (flags == -1) {
-    throw std::runtime_error("fcntl(F_GETFL) failed. " +
-                             std::string(strerror(errno)));
-  }
-  if (fcntl(fd_.GetFd(), F_SETFL, flags | O_NONBLOCK) == -1) {
-    throw std::runtime_error("fcntl(F_SETFL) failed. " +
-                             std::string(strerror(errno)));
-  }
+  SetNonBlocking();
   request_.SetClientIp(client_ip);
 }
 

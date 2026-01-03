@@ -1,7 +1,6 @@
 #include "socket/ServerSocket.hpp"
 
 #include <arpa/inet.h>
-#include <fcntl.h>
 #include <netinet/in.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -44,6 +43,7 @@ ServerSocket::ServerSocket(const ServerConfig& config)
     throw std::runtime_error("listen() failed. " +
                              std::string(strerror(errno)));
   }
+  SetNonBlocking();
 }
 
 ServerSocket::~ServerSocket() {
