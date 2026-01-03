@@ -1,6 +1,7 @@
 #include "CgiExecutor.hpp"
 
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <cctype>
 #include <cerrno>
@@ -18,30 +19,6 @@
 #include "lib/utils/string_utils.hpp"
 
 namespace {
-lib::type::Optional<std::string> ReadShebang(const std::string& file_path) {
-  std::ifstream file(file_path.c_str());
-  std::string line;
-
-  if (file.is_open()) {
-    std::getline(file, line);
-  }
-
-  if (line.length() < 2 || line[0] != '#' || line[1] != '!') {
-    return lib::type::Optional<std::string>();
-  }
-
-  // skip "#!"
-  std::string script_path = line.substr(2);
-
-  std::string::size_type start_pos = 0;
-  while (start_pos < script_path.length() &&
-         std::isspace(static_cast<unsigned char>(script_path[start_pos]))) {
-    start_pos++;
-  }
-
-  return lib::type::Optional<std::string>(script_path.substr(start_pos));
-}
-
 std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
   std::vector<char*> envp;
   for (size_t i = 0; i < envs.size(); ++i) {
@@ -55,12 +32,79 @@ void ClosePipe(int fd[2]) {
   close(fd[0]);
   close(fd[1]);
 }
+
+lib::type::Optional<std::string> CreatePathInfo(
+    const std::string& path, const std::vector<std::string>& extensions) {
+  size_t min_pos = std::string::npos;
+  size_t found_ext_len = 0;
+
+  for (size_t i = 0; i < extensions.size(); ++i) {
+    const std::string& ext = extensions[i];
+    if (ext.empty()) continue;
+
+    // Search from the end of the path to find the most relevant occurrence
+    // of the extension and ensure it is properly delimited within a
+    // path component.
+    size_t pos = path.rfind(ext);
+    while (pos != std::string::npos) {
+      size_t ext_end = pos + ext.length();
+
+      // The extension must be at the end of the path or immediately
+      // followed by a '/' to terminate the path component.
+      if (ext_end == path.length() || path[ext_end] == '/') {
+        // Additionally, ensure the extension is not directly preceded
+        // by a '/' (which would make the extension a whole path
+        // component like "/.py/"), unless it is at the very start
+        // of the path.
+        if (pos == 0 || path[pos - 1] != '/') {
+          // Among all valid matches, keep the one that appears
+          // earliest in the path to preserve existing semantics.
+          if (pos < min_pos) {
+            min_pos = pos;
+            found_ext_len = ext.length();
+          }
+          break;
+        }
+      }
+
+      if (pos == 0) {
+        break;
+      }
+      pos = path.rfind(ext, pos - 1);
+    }
+  }
+
+  if (min_pos != std::string::npos) {
+    return lib::type::Optional<std::string>(
+        path.substr(min_pos + found_ext_len));
+  }
+  return lib::type::Optional<std::string>();
+}
+
+bool IsScriptExtensionAllowed(const std::string& script_path,
+                              const std::vector<std::string>& extensions) {
+  for (size_t i = 0; i < extensions.size(); ++i) {
+    const std::string& ext = extensions[i];
+    if (script_path.length() >= ext.length() &&
+        script_path.compare(script_path.length() - ext.length(), ext.length(),
+                            ext) == 0) {
+      return true;
+    }
+  }
+  return false;
+}
+
+// void PrintEnvp(const std::vector<char*>& envp) {
+//   for (size_t i = 0; envp[i] != NULL; ++i) {
+//     std::cout << "envp[" << i << "]: " << envp[i] << std::endl;
+//   }
+// }
 }  // namespace
 
-CgiExecutor::CgiExecutor(const HttpRequest& req,
-                         const std::string& script_path) {
+CgiExecutor::CgiExecutor(const HttpRequest& req, const Location& loc,
+                         const std::string& script_path)
+    : loc_(loc), script_path_(script_path), body_(req.GetBody()) {
   InitializeMetaVars(req);
-  script_path_ = script_path;
 }
 
 CgiExecutor::~CgiExecutor() {
@@ -85,9 +129,15 @@ std::vector<std::string> CgiExecutor::GetMetaVars() const {
 }
 
 void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
+  lib::type::Optional<std::string> path_info =
+      CreatePathInfo(script_path_, loc_.GetCgiAllowedExtensions());
+  std::string executable_path =
+      path_info.HasValue()
+          ? script_path_.substr(
+                0, script_path_.length() - path_info.Value().length())
+          : script_path_;
   // RFC 3875 4.1.1.
   lib::type::Optional<std::string> auth = req.GetHeader("authorization");
-
   meta_vars_["AUTH_TYPE"] = auth.HasValue()
                                 ? lib::utils::GetFirstToken(auth.Value(), " ")
                                 : lib::type::Optional<std::string>();
@@ -98,9 +148,12 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.4.
   meta_vars_["GATEWAY_INTERFACE"] = lib::type::Optional<std::string>("CGI/1.1");
   // RFC 3875 4.1.5.
-  meta_vars_["PATH_INFO"] = lib::type::Optional<std::string>();
+  meta_vars_["PATH_INFO"] = path_info;
   // RFC 3875 4.1.6.
-  meta_vars_["PATH_TRANSLATED"] = lib::type::Optional<std::string>();
+  meta_vars_["PATH_TRANSLATED"] =
+      path_info.HasValue()
+          ? lib::type::Optional<std::string>(loc_.GetRoot() + path_info.Value())
+          : lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
   meta_vars_["QUERY_STRING"] = lib::type::Optional<std::string>(req.GetQuery());
   // RFC 3875 4.1.8.
@@ -120,7 +173,11 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   meta_vars_["REQUEST_METHOD"] = lib::type::Optional<std::string>(
       lib::http::MethodToString(req.GetMethod()));
   // RFC 3875 4.1.13.
-  meta_vars_["SCRIPT_NAME"] = lib::type::Optional<std::string>(req.GetUri());
+  std::string uri = req.GetUri();
+  meta_vars_["SCRIPT_NAME"] =
+      path_info.HasValue() ? lib::type::Optional<std::string>(uri.substr(
+                                 0, uri.length() - path_info.Value().length()))
+                           : lib::type::Optional<std::string>(uri);
   // RFC 3875 4.1.14.
   meta_vars_["SERVER_NAME"] =
       lib::type::Optional<std::string>(req.GetHostName());
@@ -133,9 +190,16 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
   // RFC 3875 4.1.17.
   meta_vars_["SERVER_SOFTWARE"] =
       lib::type::Optional<std::string>("webserv/1.0");
+
+  script_path_ = executable_path;
 }
 
+// GET and DELETE methods are handled same. POST method requires the body to be
+// passed to STDIN of the CGI script.
 HttpResponse CgiExecutor::Run() {
+  if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
+    return HttpResponse(lib::http::kForbidden);
+
   try {
     int pipe_in[2], pipe_out[2];
 
@@ -149,7 +213,13 @@ HttpResponse CgiExecutor::Run() {
     std::vector<char*> envp = CreateEnvp(meta_vars);
 
     int pid = fork();
-    if (pid < 0) throw std::runtime_error("fork error");
+    if (pid < 0) {
+      ClosePipe(pipe_in);
+      ClosePipe(pipe_out);
+      throw std::runtime_error("fork error");
+    }
+
+    std::string req_method = GetMetaVar("REQUEST_METHOD");
 
     if (pid == 0) {  // Child process
       close(pipe_in[kWriteEnd]);
@@ -159,23 +229,21 @@ HttpResponse CgiExecutor::Run() {
       close(pipe_in[kReadEnd]);
       close(pipe_out[kWriteEnd]);
 
-      lib::type::Optional<std::string> shebang = ReadShebang(script_path_);
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
       execve(script_path_.c_str(), argv, envp.data());
-      std::cout << "Status: 500 Internal Server Error\r\nContent-Type: "
-                   "text/plain\r\n\r\n";
-      std::cout << "Execve failed: " << std::strerror(errno) << std::endl;
       exit(1);
     } else {  // Parent process
       close(pipe_in[kReadEnd]);
-      std::string req_method = GetMetaVar("REQUEST_METHOD");
-      if (req_method == "GET") {
-        close(pipe_out[kWriteEnd]);
-      } else if (req_method == "POST") {
-        ;
-      } else if (req_method == "DELETE") {
-        ;
+      close(pipe_out[kWriteEnd]);
+
+      if (req_method == "POST") {
+        if (write(pipe_in[kWriteEnd], body_.c_str(), body_.length()) == -1) {
+          close(pipe_in[kWriteEnd]);
+          close(pipe_out[kReadEnd]);
+          throw std::runtime_error("write error");
+        }
       }
+      close(pipe_in[kWriteEnd]);
 
       std::string cgi_output;
       // でかいデータもいい感じに取得する。epollで同じのやった気がする。
@@ -188,17 +256,19 @@ HttpResponse CgiExecutor::Run() {
              0) {
         cgi_output.append(buffer, bytes_read);
       }
-      ClosePipe(pipe_out);
+      close(pipe_out[kReadEnd]);
 
       int status;
       waitpid(pid, &status, 0);
 
-      std::cout << "cgi output: " << cgi_output << std::endl;
+      if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
+        return HttpResponse(lib::http::kInternalServerError);
+      }
+
       HttpResponse res = cgi::ParseCgiResponse(cgi_output);
       return res;
     }
   } catch (std::exception& e) {
-    HttpResponse res(lib::http::kInternalServerError);
-    return res;
+    return HttpResponse(lib::http::kInternalServerError);
   }
 }

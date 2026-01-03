@@ -56,6 +56,9 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
       case kTokenCgi:
         ParseCgi(&location);
         break;
+      case kTokenCgiAllowedExtensions:
+        ParseCgiAllowedExtensions(&location);
+        break;
       default:
         throw std::runtime_error("Unknown directive in location: " + token);
     }

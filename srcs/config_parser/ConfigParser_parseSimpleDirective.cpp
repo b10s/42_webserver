@@ -1,4 +1,5 @@
 #include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
 
 // TODO: normalize path
 // root = NormalizeSlashes(root);

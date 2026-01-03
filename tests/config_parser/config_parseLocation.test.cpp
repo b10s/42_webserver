@@ -52,6 +52,15 @@ TEST(ConfigParser, Location_WithCgiOff) {
   EXPECT_FALSE(locs[0].GetCgiEnabled());
 }
 
+TEST(ConfigParser, Location_WithCgiAllowedExtensions) {
+  ServerConfig sc;
+  EXPECT_NO_THROW(callParseLocation("/cgi-bin/ { cgi_allowed_extensions .py .php; }", &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  EXPECT_EQ(locs[0].GetCgiAllowedExtensions()[0], ".py");
+  EXPECT_EQ(locs[0].GetCgiAllowedExtensions()[1], ".php");
+}
+
 TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
   ServerConfig sc;
   const std::string s =

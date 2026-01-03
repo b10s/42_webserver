@@ -15,7 +15,8 @@ enum TokenType {
   kTokenIndex,
   kTokenUploadPath,
   kTokenRedirect,
-  kTokenCgi
+  kTokenCgi,
+  kTokenCgiAllowedExtensions
 };
 
 #endif  // ENUMS_HPP_
