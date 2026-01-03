@@ -37,10 +37,12 @@ protected:
   void TearDown() override {
     chmod((base + "/unreadable_non_exec.txt").c_str(), 0644);
     chmod((base + "/unwritable_dir/delete_test.txt").c_str(), 0644);
+    chmod((base + "/unwritable_dir").c_str(), 0755);
     unlink((base + "/readable_non_exec.txt").c_str());
     unlink((base + "/unreadable_non_exec.txt").c_str());
     unlink((base + "/exec.sh").c_str());
     unlink((base + "/non_exec.txt").c_str());
+    unlink((base + "/unwritable_dir/delete_test.txt").c_str());
     rmdir((base + "/unwritable_dir").c_str());
     rmdir((base + "/dir").c_str());
     rmdir(base.c_str());
