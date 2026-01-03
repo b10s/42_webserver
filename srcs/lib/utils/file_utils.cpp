@@ -1,14 +1,15 @@
 #include "lib/utils/file_utils.hpp"
-#include "lib/exception/ResponseStatusException.hpp"
-#include "lib/http/Status.hpp"
 
+#include <libgen.h>  // for dirname
 #include <sys/stat.h>
+#include <unistd.h>  // for access()
 
+#include <cerrno>
 #include <fstream>
 #include <stdexcept>
-#include <cerrno>
-#include <unistd.h> // for access()
-#include <libgen.h> // for dirname
+
+#include "lib/exception/ResponseStatusException.hpp"
+#include "lib/http/Status.hpp"
 
 namespace lib {
 namespace utils {
@@ -26,7 +27,7 @@ lib::http::Status MapErrnoToStatus(int e) {
   return lib::http::kInternalServerError;
 }
 
-// index file appending needed 
+// index file appending needed
 // when the path is a directory and method is GET
 bool IsDirectory(const std::string& path) {
   struct stat st;
@@ -38,7 +39,8 @@ struct stat StatOrThrow(const std::string& path) {
   struct stat st;
   if (stat(path.c_str(), &st) != 0) {
     int saved_errno = errno;
-    throw lib::exception::ResponseStatusException(MapErrnoToStatus(saved_errno));
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToStatus(saved_errno));
   }
   return st;
 }
@@ -46,12 +48,13 @@ struct stat StatOrThrow(const std::string& path) {
 void EnsureAccessOrThrow(const std::string& path, int mode) {
   if (access(path.c_str(), mode) != 0) {
     int saved_errno = errno;
-    throw lib::exception::ResponseStatusException(MapErrnoToStatus(saved_errno));
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToStatus(saved_errno));
   }
 }
 
-// in this project, reject non-regular files (directories, symlinks, devices, etc)
-// as forbidden (403) for simplicity
+// in this project, reject non-regular files (directories, symlinks, devices,
+// etc) as forbidden (403) for simplicity
 void EnsureRegularFileOrThrowForbidden(const struct stat& st) {
   if (!S_ISREG(st.st_mode)) {
     throw lib::exception::ResponseStatusException(http::kForbidden);
@@ -74,11 +77,13 @@ void EnsureDeletableRegularFileOrThrow(const std::string& path) {
   std::string dir_name = dirname(&path_copy[0]);
   if (stat(dir_name.c_str(), &buffer) != 0) {
     int saved_errno = errno;
-    throw lib::exception::ResponseStatusException(MapErrnoToStatus(saved_errno));
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToStatus(saved_errno));
   }
   if (access(dir_name.c_str(), W_OK | X_OK) != 0) {
     int saved_errno = errno;
-    throw lib::exception::ResponseStatusException(MapErrnoToStatus(saved_errno));
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToStatus(saved_errno));
   }
 }
 
@@ -90,7 +95,8 @@ std::string ReadStaticFileOrThrow(const std::string& filename) {
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
     int saved_errno = errno;
-    throw lib::exception::ResponseStatusException(MapErrnoToStatus(saved_errno));
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToStatus(saved_errno));
   }
   std::string content((std::istreambuf_iterator<char>(file)),
                       std::istreambuf_iterator<char>());

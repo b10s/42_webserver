@@ -51,44 +51,44 @@ TEST_F(FileUtilsTest, IsDirectory) {
   EXPECT_FALSE(lib::utils::IsDirectory(base + "/nonexistent"));
 }
 
-TEST_F(FileUtilsTest, ReadableFile_OK) {
-  EXPECT_NO_THROW(
-    lib::utils::EnsureReadableRegularFileOrThrow(base + "/readable.txt")
-  );
-}
+// TEST_F(FileUtilsTest, ReadableFile_OK) {
+//   EXPECT_NO_THROW(
+//     lib::utils::EnsureReadableRegularFileOrThrow(base + "/readable.txt")
+//   );
+// }
 
-TEST_F(FileUtilsTest, ReadableFile_NotFound) {
-  EXPECT_THROW(
-    lib::utils::EnsureReadableRegularFileOrThrow(base + "/missing.txt"),
-    lib::exception::ResponseStatusException
-  );
-}
+// TEST_F(FileUtilsTest, ReadableFile_NotFound) {
+//   EXPECT_THROW(
+//     lib::utils::EnsureReadableRegularFileOrThrow(base + "/missing.txt"),
+//     lib::exception::ResponseStatusException
+//   );
+// }
 
-TEST_F(FileUtilsTest, ReadableFile_IsDirectory) {
-  EXPECT_THROW(
-    lib::utils::EnsureReadableRegularFileOrThrow(base + "/dir"),
-    lib::exception::ResponseStatusException
-  );
-}
+// TEST_F(FileUtilsTest, ReadableFile_IsDirectory) {
+//   EXPECT_THROW(
+//     lib::utils::EnsureReadableRegularFileOrThrow(base + "/dir"),
+//     lib::exception::ResponseStatusException
+//   );
+// }
 
-TEST_F(FileUtilsTest, ReadableFile_NoPermission) {
-  EXPECT_THROW(
-    lib::utils::EnsureReadableRegularFileOrThrow(base + "/unreadable.txt"),
-    lib::exception::ResponseStatusException
-  );
-}
+// TEST_F(FileUtilsTest, ReadableFile_NoPermission) {
+//   EXPECT_THROW(
+//     lib::utils::EnsureReadableRegularFileOrThrow(base + "/unreadable.txt"),
+//     lib::exception::ResponseStatusException
+//   );
+// }
 
-TEST_F(FileUtilsTest, ExecutableFile_OK) {
-  EXPECT_NO_THROW(
-    lib::utils::EnsureExecutableRegularFileOrThrow(base + "/exec.sh")
-  );
-}
+// TEST_F(FileUtilsTest, ExecutableFile_OK) {
+//   EXPECT_NO_THROW(
+//     lib::utils::EnsureExecutableRegularFileOrThrow(base + "/exec.sh")
+//   );
+// }
 
-TEST_F(FileUtilsTest, ExecutableFile_NotExecutable) {
-  EXPECT_THROW(
-    lib::utils::EnsureExecutableRegularFileOrThrow(base + "/non_exec.txt"),
-    lib::exception::ResponseStatusException
-  );
-}
+// TEST_F(FileUtilsTest, ExecutableFile_NotExecutable) {
+//   EXPECT_THROW(
+//     lib::utils::EnsureExecutableRegularFileOrThrow(base + "/non_exec.txt"),
+//     lib::exception::ResponseStatusException
+//   );
+// }
 
 

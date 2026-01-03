@@ -25,6 +25,6 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
     throw std::runtime_error("Failed to open file: " + filename);
   }
   content = std::string((std::istreambuf_iterator<char>(file)),
-                      std::istreambuf_iterator<char>());
+                        std::istreambuf_iterator<char>());
   file.close();
 }
