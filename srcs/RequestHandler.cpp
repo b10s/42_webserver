@@ -64,6 +64,15 @@ std::string RequestHandler::ResolveFilesystemPath() const {
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
   bool is_directory =
       (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
+  /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
+  bool is_directory = false;
+  if (req_uri_ends_with_slash) {
+    is_directory = true;
+  } else {
+    struct stat st = lib::utils::StatOrThrow(path);
+    is_directory = S_ISDIR(st.st_mode);
+  }
+  */
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
       throw std::runtime_error("No index files configured for location");
@@ -79,7 +88,7 @@ void RequestHandler::HandleGet() {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     res_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadStaticFileOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
     res_.AddHeader("Content-Type",
                    lib::http::DetectMimeTypeFromPath(filesystem_path_));
     res_.SetBody(body);
@@ -92,7 +101,7 @@ void RequestHandler::HandlePost() {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     res_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadStaticFileOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
     res_.AddHeader("Content-Type",
                    lib::http::DetectMimeTypeFromPath(filesystem_path_));
     res_.SetBody(body);
@@ -105,7 +114,7 @@ void RequestHandler::HandleDelete() {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     res_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadStaticFileOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
     res_.AddHeader("Content-Type",
                    lib::http::DetectMimeTypeFromPath(filesystem_path_));
     res_.SetBody(body);

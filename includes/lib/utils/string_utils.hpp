@@ -1,10 +1,10 @@
 #ifndef LIB_UTILS_STRING_UTILS_HPP_
 #define LIB_UTILS_STRING_UTILS_HPP_
 
+#include <cctype>
 #include <sstream>
 #include <string>
 #include <vector>
-#include <cctype>
 
 #include "lib/type/Optional.hpp"
 
