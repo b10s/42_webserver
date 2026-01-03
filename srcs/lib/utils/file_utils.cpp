@@ -88,6 +88,7 @@ example:
   char* path_copy = &path[0];
   // after this call, path's buffer may look like "/a/b\0c.txt" in memory,
   // and dirname(path_copy) returns "/a/b"
+*/
 void CheckDeletableRegularFileOrThrow(const std::string& path) {
   struct stat buffer = StatOrThrow(path);
   EnsureRegularFileOrThrowForbidden(buffer);
