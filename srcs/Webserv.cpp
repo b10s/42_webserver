@@ -24,7 +24,7 @@ Webserv::Webserv(const std::string& config_file) {
   signal(SIGPIPE, SIG_IGN);  // avoid client disconnect crashes
 
   ConfigParser config_parser;
-  config_parser.LoadFile(config_file);
+  config_parser.LoadFileOrThrowRuntime(config_file);
   config_parser.Parse();
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);

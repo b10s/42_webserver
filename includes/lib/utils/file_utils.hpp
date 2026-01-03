@@ -15,7 +15,7 @@ namespace utils {
 // TODO: refactoring ResolveFilesystemPath may obsolete this function
 bool IsDirectory(const std::string& path);
 
-std::string ReadFileOrThrow(const std::string& filename);
+std::string ReadStaticFileOrThrow(const std::string& filename);
 
 // file existence and permission checks
 // if no access, throw 403(kForbidden) or 404(kNotFound)

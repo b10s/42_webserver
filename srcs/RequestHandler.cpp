@@ -75,7 +75,7 @@ void RequestHandler::HandleGet() {
     CgiExecutor cgi(req_, filesystem_path_);
     res_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadFileOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadStaticFileOrThrow(filesystem_path_);
     res_.AddHeader("Content-Type",
                    lib::http::DetectMimeTypeFromPath(filesystem_path_));
     res_.SetBody(body);
