@@ -105,7 +105,8 @@ std::string FileValidator::ValidateAndNormalizePath(
   if (ContainsUnsafeChars(path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
-  // std::string normalized_path = NormalizeSlashes(path);　// SplitPathSegments ignores multiple slashes
+  // std::string normalized_path = NormalizeSlashes(path);　// SplitPathSegments
+  // ignores multiple slashes
   std::string normalized_path = RemoveSingleDotSegments(path);
   if (ContainsDotDotSegments(normalized_path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
