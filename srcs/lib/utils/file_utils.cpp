@@ -1,10 +1,5 @@
 #include "lib/utils/file_utils.hpp"
 
-#include <sys/stat.h>
-
-#include <fstream>
-#include <stdexcept>
-
 namespace lib {
 namespace utils {
 
@@ -14,22 +9,101 @@ bool IsDirectory(const std::string& path) {
   return S_ISDIR(st.st_mode);
 }
 
-std::string ReadFile(const std::string& filename) {
-  struct stat s;
-  if (stat(filename.c_str(), &s) != 0) {
-    throw std::runtime_error("File does not exist: " + filename);
+/*
+map errno -> HTTP status
+- ENOENT(Error No ENTry/Entity) -> resource not found (404)
+- ENOTDIR(Error Not a DIRectory) -> resource not found (404)
+- EACCES          -> permission denied (403)
+- others          -> internal server error (500)
+*/
+lib::http::Status MapErrnoToHttpStatus(int e) {
+  if (e == ENOENT || e == ENOTDIR) return lib::http::kNotFound;  // 404
+  if (e == EACCES) return lib::http::kForbidden;                 // 403
+  return lib::http::kInternalServerError;
+}
+
+struct stat StatOrThrow(const std::string& path) {
+  struct stat st;
+  if (stat(path.c_str(), &st) != 0) {
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToHttpStatus(saved_errno));
   }
-  if (S_ISDIR(s.st_mode)) {
-    throw std::runtime_error(filename + " is a directory");
+  return st;
+}
+
+void EnsureAccessOrThrow(const std::string& path, int mode) {
+  if (access(path.c_str(), mode) != 0) {
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToHttpStatus(saved_errno));
   }
+}
+
+// in this project, reject non-regular files (directories, symlinks, devices,
+// etc) as forbidden (403) for simplicity
+void EnsureRegularFileOrThrowForbidden(const struct stat& st) {
+  if (!S_ISREG(st.st_mode)) {
+    throw lib::exception::ResponseStatusException(http::kForbidden);
+  }
+}
+
+// read entire file content into a string
+std::string ReadFileToStringOrThrow(const std::string& filename) {
+  struct stat buffer = StatOrThrow(filename);
+  EnsureRegularFileOrThrowForbidden(buffer);
+  EnsureAccessOrThrow(filename, R_OK);
   std::ifstream file(filename.c_str());
-  if (!file.is_open()) {
-    throw std::runtime_error("Failed to open file: " + filename);
+  if (!file.is_open()) {  // errno might be unreliable here
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToHttpStatus(saved_errno));
   }
   std::string content((std::istreambuf_iterator<char>(file)),
                       std::istreambuf_iterator<char>());
   file.close();
   return content;
+}
+
+// static file GET
+void CheckReadableRegularFileOrThrow(const std::string& path) {
+  struct stat buffer = StatOrThrow(path);
+  EnsureRegularFileOrThrowForbidden(buffer);
+  EnsureAccessOrThrow(path, R_OK);
+}
+
+// CGI script execution (GET/POST)
+void CheckExecutableCgiScriptOrThrow(const std::string& path) {
+  struct stat buffer = StatOrThrow(path);
+  EnsureRegularFileOrThrowForbidden(buffer);
+  EnsureAccessOrThrow(path, X_OK);
+}
+
+/*
+parent dir must be executable and writable when deleting a file
+dirname destroys its argument, so copy it first
+and its argument must be writable buffer
+example:
+  std::string path = "/a/b/c.txt";
+  char* path_copy = &path[0];
+  // after this call, path's buffer may look like "/a/b\0c.txt" in memory,
+  // and dirname(path_copy) returns "/a/b"
+*/
+void CheckDeletableRegularFileOrThrow(const std::string& path) {
+  struct stat buffer = StatOrThrow(path);
+  EnsureRegularFileOrThrowForbidden(buffer);
+  std::string path_copy = path;
+  std::string dir_name = dirname(&path_copy[0]);
+  if (stat(dir_name.c_str(), &buffer) != 0) {
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToHttpStatus(saved_errno));
+  }
+  if (access(dir_name.c_str(), W_OK | X_OK) != 0) {
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        MapErrnoToHttpStatus(saved_errno));
+  }
 }
 
 }  // namespace utils

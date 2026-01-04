@@ -55,7 +55,7 @@ class ConfigParser {
   ConfigParser();       // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
-  void LoadFile(const std::string& filename);
+  void LoadFileOrThrowRuntime(const std::string& filename);
 
   void Parse();
   void ParseServer();
