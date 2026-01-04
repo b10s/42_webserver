@@ -25,12 +25,12 @@ class ASocket {
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
   int GetFd() const;
-  void SetNonBlocking() const;
 
  protected:
   lib::type::Fd fd_;
   std::string read_buffer_;
   std::string write_buffer_;
+  void SetNonBlocking() const;
 };
 
 #endif
