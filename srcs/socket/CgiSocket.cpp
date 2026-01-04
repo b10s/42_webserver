@@ -4,7 +4,8 @@
 #include <unistd.h>
 
 CgiSocket::CgiSocket(lib::type::Fd fd) : ASocket(fd) {
-  // まだ CGI はノンブロッキングに対応していないため、ブロッキングモードに設定する
+  // まだ CGI
+  // はノンブロッキングに対応していないため、ブロッキングモードに設定する
   int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
   fcntl(fd_.GetFd(), F_SETFL, flags & ~O_NONBLOCK);
 }
