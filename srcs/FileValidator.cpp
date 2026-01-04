@@ -38,23 +38,23 @@ bool FileValidator::ContainsDotDotSegments(const std::string& path) {
 }
 
 // "/////" を "/" に変換
-// std::string FileValidator::NormalizeSlashes(const std::string& path) {
-//   std::string result;
-//   bool previous_slash = false;
-//   for (size_t i = 0; i < path.size(); ++i) {
-//     char c = path[i];
-//     if (c == '/') {
-//       if (!previous_slash) {
-//         result += c;
-//         previous_slash = true;
-//       }
-//     } else {
-//       result += c;
-//       previous_slash = false;
-//     }
-//   }
-//   return result;
-// }
+std::string FileValidator::NormalizeSlashes(const std::string& path) {
+  std::string result;
+  bool previous_slash = false;
+  for (size_t i = 0; i < path.size(); ++i) {
+    char c = path[i];
+    if (c == '/') {
+      if (!previous_slash) {
+        result += c;
+        previous_slash = true;
+      }
+    } else {
+      result += c;
+      previous_slash = false;
+    }
+  }
+  return result;
+}
 
 // split path into segments by '/'
 // もし..を今後移動に使うなら stack/deque にするかも
@@ -105,9 +105,8 @@ std::string FileValidator::ValidateAndNormalizePath(
   if (ContainsUnsafeChars(path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
-  // std::string normalized_path = NormalizeSlashes(path);　// SplitPathSegments
-  // ignores multiple slashes
-  std::string normalized_path = RemoveSingleDotSegments(path);
+  std::string normalized_path = NormalizeSlashes(path);
+  normalized_path = RemoveSingleDotSegments(normalized_path);
   if (ContainsDotDotSegments(normalized_path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
