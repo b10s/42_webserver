@@ -13,6 +13,7 @@
 #include "HttpResponse.hpp"
 #include "cgi/CgiResponseParser.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Fd.hpp"
 #include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
 #include "socket/CgiSocket.hpp"
@@ -188,32 +189,31 @@ HttpResponse CgiExecutor::Run() {
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
       throw std::runtime_error("socketpair error");
     }
+    lib::type::Fd sv0(sv[0]);
+    lib::type::Fd sv1(sv[1]);
 
     std::vector<std::string> meta_vars = GetMetaVars();
     std::vector<char*> envp = CreateEnvp(meta_vars);
 
     int pid = fork();
     if (pid < 0) {
-      close(sv[0]);
-      close(sv[1]);
       throw std::runtime_error("fork error");
     }
 
     std::string req_method = GetMetaVar("REQUEST_METHOD");
 
     if (pid == 0) {  // Child process
-      close(sv[0]);
-      dup2(sv[1], STDIN_FILENO);
-      dup2(sv[1], STDOUT_FILENO);
-      close(sv[1]);
+      sv0.Reset();
+      dup2(sv1.GetFd(), STDIN_FILENO);
+      dup2(sv1.GetFd(), STDOUT_FILENO);
+      sv1.Reset();
 
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
       execve(script_path_.c_str(), argv, envp.data());
       exit(1);
     } else {  // Parent process
-      close(sv[1]);
-      lib::type::Fd fd(sv[0]);
-      CgiSocket cgi_socket(fd);
+      sv1.Reset();
+      CgiSocket cgi_socket(sv0);
 
       if (req_method == "POST") {
         if (cgi_socket.Send(body_) == -1) {
