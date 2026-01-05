@@ -39,6 +39,7 @@ class StreamParser {
   virtual void OnExtraDataAfterDone() = 0;
 
   bool IsCRLF(const char* p) const;
+  bool IsLF(const char* p) const;
   std::string::size_type FindEndOfHeader(const std::string& payload);
 
   void BumpLenOrThrow(size_t& total, size_t inc, size_t max_size) const;

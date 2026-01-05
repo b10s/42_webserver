@@ -39,6 +39,10 @@ bool StreamParser::IsCRLF(const char* p) const {
   return p != NULL && p[0] == '\r' && p[1] == '\n';
 }
 
+bool StreamParser::IsLF(const char* p) const {
+  return p != NULL && p[0] == '\n';
+}
+
 std::string::size_type StreamParser::FindEndOfHeader(
     const std::string& payload) {
   size_t pos = payload.find("\r\n\r\n");
@@ -91,7 +95,7 @@ const char* StreamParser::ReadHeaderLine(const char* req, std::string& key,
   if (IsCRLF(req + vlen)) {
     BumpLenOrThrow(total_len, 2, max_size);  // skip CRLF
     return req + vlen + 2;
-  } else if (!IsStrictCrlf() && req[vlen] == '\n') {
+  } else if (!IsStrictCrlf() && IsLF(req + vlen)) {
     BumpLenOrThrow(total_len, 1, max_size);  // skip LF
     return req + vlen + 1;
   }

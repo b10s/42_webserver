@@ -31,20 +31,16 @@ bool CgiResponseParser::AdvanceHeader() {
   const char* req = buffer_.c_str();
   size_t total_len = 0;
   // CGI headers can start immediately
-  while (*req && !IsCRLF(req) && *req != '\n') {
+  while (*req) {
+    if (IsCRLF(req)) break;
+    if (!IsStrictCrlf() && IsLF(req)) break;
+
     std::string key, value;
     req = ReadHeaderLine(req, key, value, total_len, 8192);
     StoreHeader(key, value);
   }
 
-  // Skip the separator (\r\n\r\n or \n\n)
-  if (IsCRLF(req)) {
-    req += 2;
-  } else if (*req == '\n') {
-    req += 1;
-  }
-
-  buffer_.erase(0, req - buffer_.c_str());
+  buffer_.erase(0, end_of_header);
   state_ = kBody;
   return true;
 }
