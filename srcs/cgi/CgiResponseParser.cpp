@@ -36,7 +36,7 @@ bool CgiResponseParser::AdvanceHeader() {
     if (!IsStrictCrlf() && IsLF(req)) break;
 
     std::string key, value;
-    req = ReadHeaderLine(req, key, value, total_len, 8192);
+    req = ReadHeaderLine(req, key, value, total_len, kMaxHeaderSize);
     StoreHeader(key, value);
   }
 

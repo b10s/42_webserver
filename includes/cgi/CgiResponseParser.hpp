@@ -13,6 +13,8 @@ class CgiResponseParser : public lib::parser::StreamParser {
   CgiResponseParser();
   virtual ~CgiResponseParser();
 
+  static const size_t kMaxHeaderSize = 8192;
+
   const HttpResponse& GetResponse() const;
 
  protected:

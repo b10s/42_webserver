@@ -20,7 +20,6 @@ class StreamParser {
 
   StreamParser();
   virtual ~StreamParser();
-
   void Parse(const char* data, size_t len);
 
  protected:
@@ -54,4 +53,4 @@ class StreamParser {
 }  // namespace parser
 }  // namespace lib
 
-#endif  // LIB_PARSER_STREAM_PARSER_HPP_
+#endif  // LIB_PARSER_STREAMPARSER_HPP_
