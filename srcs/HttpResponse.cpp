@@ -45,6 +45,12 @@ void HttpResponse::SetStatus(lib::http::Status status) {
   reason_phrase_ = lib::http::StatusToString(status);
 }
 
+void HttpResponse::SetStatus(lib::http::Status status,
+                             const std::string& reason_phrase) {
+  status_code_ = status;
+  reason_phrase_ = reason_phrase;
+}
+
 lib::http::Status HttpResponse::GetStatus() {
   return static_cast<lib::http::Status>(status_code_);
 }

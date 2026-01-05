@@ -50,16 +50,23 @@ void CgiResponseParser::StoreHeader(const std::string& key,
   if (key == "Status") {
     size_t space_pos = value.find(' ');
     std::string status_str;
+    std::string reason_phrase;
     if (space_pos != std::string::npos) {
       status_str = value.substr(0, space_pos);
+      reason_phrase = value.substr(space_pos + 1);
     } else {
       status_str = value;
     }
     lib::type::Optional<long> status_code_opt =
         lib::utils::StrToLong(status_str);
     if (status_code_opt.HasValue()) {
-      response_.SetStatus(
-          static_cast<lib::http::Status>(status_code_opt.Value()));
+      lib::http::Status status =
+          static_cast<lib::http::Status>(status_code_opt.Value());
+      if (reason_phrase.empty()) {
+        response_.SetStatus(status);
+      } else {
+        response_.SetStatus(status, reason_phrase);
+      }
     } else {
       throw lib::exception::ResponseStatusException(
           lib::http::kInternalServerError);
