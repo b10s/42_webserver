@@ -56,6 +56,7 @@ class HttpRequest : public lib::parser::StreamParser {
   bool AppendChunkData(size_t& pos, size_t chunk_size);
   void OnInternalStateError();
   void OnExtraDataAfterDone();
+  virtual bool IsStrictCrlf() const;
 
  public:
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes

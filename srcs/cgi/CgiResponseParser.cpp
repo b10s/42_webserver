@@ -94,6 +94,10 @@ void CgiResponseParser::OnInternalStateError() {
 void CgiResponseParser::OnExtraDataAfterDone() {
 }
 
+bool CgiResponseParser::IsStrictCrlf() const {
+  return false;
+}
+
 HttpResponse ParseCgiResponse(const std::string& cgi_output) {
   CgiResponseParser parser;
   try {

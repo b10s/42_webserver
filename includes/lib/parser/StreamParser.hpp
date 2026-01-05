@@ -32,6 +32,7 @@ class StreamParser {
   // Derived classes implement these.
   virtual bool AdvanceHeader() = 0;
   virtual bool AdvanceBody() = 0;
+  virtual bool IsStrictCrlf() const = 0;
 
   // Error hooks: derived decides which exception/status to throw.
   virtual void OnInternalStateError() = 0;

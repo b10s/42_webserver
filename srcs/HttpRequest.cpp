@@ -119,3 +119,7 @@ void HttpRequest::OnInternalStateError() {
 void HttpRequest::OnExtraDataAfterDone() {
   throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
 }
+
+bool HttpRequest::IsStrictCrlf() const {
+  return true;
+}

@@ -43,8 +43,10 @@ std::string::size_type StreamParser::FindEndOfHeader(
     const std::string& payload) {
   size_t pos = payload.find("\r\n\r\n");
   if (pos != std::string::npos) return pos + 4;
-  pos = payload.find("\n\n");
-  if (pos != std::string::npos) return pos + 2;
+  if (!IsStrictCrlf()) {
+    pos = payload.find("\n\n");
+    if (pos != std::string::npos) return pos + 2;
+  }
   return std::string::npos;
 }
 
@@ -89,7 +91,7 @@ const char* StreamParser::ReadHeaderLine(const char* req, std::string& key,
   if (IsCRLF(req + vlen)) {
     BumpLenOrThrow(total_len, 2, max_size);  // skip CRLF
     return req + vlen + 2;
-  } else if (req[vlen] == '\n') {
+  } else if (!IsStrictCrlf() && req[vlen] == '\n') {
     BumpLenOrThrow(total_len, 1, max_size);  // skip LF
     return req + vlen + 1;
   }

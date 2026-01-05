@@ -20,6 +20,7 @@ class CgiResponseParser : public lib::parser::StreamParser {
   virtual bool AdvanceBody();
   virtual void OnInternalStateError();
   virtual void OnExtraDataAfterDone();
+  virtual bool IsStrictCrlf() const;
 
  private:
   HttpResponse response_;
