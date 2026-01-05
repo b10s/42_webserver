@@ -44,7 +44,7 @@ bool CgiResponseParser::AdvanceHeader() {
     req += 1;
   }
 
-  buffer_.erase(0, end_of_header);
+  buffer_.erase(0, req - buffer_.c_str());
   state_ = kBody;
   return true;
 }
