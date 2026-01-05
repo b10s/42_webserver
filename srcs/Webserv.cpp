@@ -3,14 +3,13 @@
 #include <sys/epoll.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <csignal>
 #include <cstring>
 #include <iostream>
-#include <stdexcept>
 
 #include "ConfigParser.hpp"
 #include "lib/type/Fd.hpp"
-#include "socket/ClientSocket.hpp"
 #include "socket/ServerSocket.hpp"
 
 Webserv::Webserv() : epoll_fd_(-1) {

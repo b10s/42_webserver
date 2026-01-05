@@ -1,5 +1,6 @@
 #include "CgiExecutor.hpp"
 
+#include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -7,16 +8,15 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
-#include <iostream>
-#include <sstream>
 #include <stdexcept>
 
 #include "HttpResponse.hpp"
 #include "cgi/CgiResponseParser.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Fd.hpp"
 #include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
+#include "socket/CgiSocket.hpp"
 
 namespace {
 std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
@@ -28,11 +28,6 @@ std::vector<char*> CreateEnvp(const std::vector<std::string>& envs) {
   return envp;
 }
 
-void ClosePipe(int fd[2]) {
-  close(fd[0]);
-  close(fd[1]);
-}
-
 lib::type::Optional<std::string> CreatePathInfo(
     const std::string& path, const std::vector<std::string>& extensions) {
   size_t min_pos = std::string::npos;
@@ -42,23 +37,12 @@ lib::type::Optional<std::string> CreatePathInfo(
     const std::string& ext = extensions[i];
     if (ext.empty()) continue;
 
-    // Search from the end of the path to find the most relevant occurrence
-    // of the extension and ensure it is properly delimited within a
-    // path component.
     size_t pos = path.rfind(ext);
     while (pos != std::string::npos) {
       size_t ext_end = pos + ext.length();
 
-      // The extension must be at the end of the path or immediately
-      // followed by a '/' to terminate the path component.
       if (ext_end == path.length() || path[ext_end] == '/') {
-        // Additionally, ensure the extension is not directly preceded
-        // by a '/' (which would make the extension a whole path
-        // component like "/.py/"), unless it is at the very start
-        // of the path.
         if (pos == 0 || path[pos - 1] != '/') {
-          // Among all valid matches, keep the one that appears
-          // earliest in the path to preserve existing semantics.
           if (pos < min_pos) {
             min_pos = pos;
             found_ext_len = ext.length();
@@ -201,62 +185,43 @@ HttpResponse CgiExecutor::Run() {
     return HttpResponse(lib::http::kForbidden);
 
   try {
-    int pipe_in[2], pipe_out[2];
-
-    if (pipe(pipe_in) < 0) throw std::runtime_error("pipe error");
-    if (pipe(pipe_out) < 0) {
-      ClosePipe(pipe_in);
-      throw std::runtime_error("pipe error");
+    int sv[2];
+    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
+      throw std::runtime_error("socketpair error");
     }
+    lib::type::Fd sv0(sv[0]);
+    lib::type::Fd sv1(sv[1]);
 
     std::vector<std::string> meta_vars = GetMetaVars();
     std::vector<char*> envp = CreateEnvp(meta_vars);
 
     int pid = fork();
     if (pid < 0) {
-      ClosePipe(pipe_in);
-      ClosePipe(pipe_out);
       throw std::runtime_error("fork error");
     }
 
     std::string req_method = GetMetaVar("REQUEST_METHOD");
 
     if (pid == 0) {  // Child process
-      close(pipe_in[kWriteEnd]);
-      close(pipe_out[kReadEnd]);
-      dup2(pipe_in[kReadEnd], STDIN_FILENO);
-      dup2(pipe_out[kWriteEnd], STDOUT_FILENO);
-      close(pipe_in[kReadEnd]);
-      close(pipe_out[kWriteEnd]);
+      sv0.Reset();
+      dup2(sv1.GetFd(), STDIN_FILENO);
+      dup2(sv1.GetFd(), STDOUT_FILENO);
+      sv1.Reset();
 
       char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
       execve(script_path_.c_str(), argv, envp.data());
       exit(1);
     } else {  // Parent process
-      close(pipe_in[kReadEnd]);
-      close(pipe_out[kWriteEnd]);
+      sv1.Reset();
+      CgiSocket cgi_socket(sv0);
 
       if (req_method == "POST") {
-        if (write(pipe_in[kWriteEnd], body_.c_str(), body_.length()) == -1) {
-          close(pipe_in[kWriteEnd]);
-          close(pipe_out[kReadEnd]);
+        if (cgi_socket.Send(body_) == -1) {
           throw std::runtime_error("write error");
         }
       }
-      close(pipe_in[kWriteEnd]);
 
-      std::string cgi_output;
-      // でかいデータもいい感じに取得する。epollで同じのやった気がする。
-      // CGI
-      // Scriptが無限ループした場合、ここでブロッキングが発生してしまうのか？
-      char buffer[4096];
-      ssize_t bytes_read;
-
-      while ((bytes_read = read(pipe_out[kReadEnd], buffer, sizeof(buffer))) >
-             0) {
-        cgi_output.append(buffer, bytes_read);
-      }
-      close(pipe_out[kReadEnd]);
+      std::string cgi_output = cgi_socket.Receive();
 
       int status;
       waitpid(pid, &status, 0);

@@ -1,3 +1,5 @@
+#include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
+
 #include "HttpRequest.hpp"
 
 /**

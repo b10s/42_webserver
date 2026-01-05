@@ -6,7 +6,6 @@
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "ServerConfig.hpp"
-#include "lib/exception/ConnectionClosed.hpp"
 #include "lib/type/Fd.hpp"
 #include "socket/ASocket.hpp"
 
@@ -23,7 +22,6 @@ class ClientSocket : public ASocket {
   const ServerConfig& config_;
   HttpRequest request_;
   HttpResponse response_;
-  std::string output_buffer_;
 
   void HandleEpollIn(int epoll_fd);
   void HandleEpollOut();

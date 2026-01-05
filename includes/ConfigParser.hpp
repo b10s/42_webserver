@@ -6,9 +6,6 @@
 #include <cctype>  // for std::isalnum, std::isprint
 #include <cstdlib>
 #include <cstring>
-#include <fstream>
-#include <map>
-#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>

@@ -2,7 +2,6 @@
 #define HOST_VALIDATION_HPP_
 
 #include <cctype>
-#include <sstream>
 #include <string>
 
 namespace host_validation {

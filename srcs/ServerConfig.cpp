@@ -1,4 +1,4 @@
-#include "ConfigParser.hpp"
+#include "ServerConfig.hpp"
 
 /*
 If the port is omitted, the default port is 80.

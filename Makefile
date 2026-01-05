@@ -49,6 +49,6 @@ tidy-fix:
 test:
 	cmake -S . -B ./build
 	cmake --build ./build
-	cd build && ctest
+	cd build && ctest --output-on-failure
 
 .PHONY: all clean fclean re format tidy tidy-fix test

@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
+#include <string>
+
 #include "lib/type/Fd.hpp"
 
 class ASocket;
@@ -26,9 +28,9 @@ class ASocket {
 
  protected:
   lib::type::Fd fd_;
-  ASocket();
-
- private:
+  std::string read_buffer_;
+  std::string write_buffer_;
+  void SetNonBlocking() const;
 };
 
 #endif

@@ -16,8 +16,8 @@ class Fd {
   void Reset(int new_fd = -1);
   int GetFd() const;
 
-  Fd(Fd& other);
-  Fd& operator=(Fd& other);
+  Fd(const Fd& other);
+  Fd& operator=(const Fd& other);
 };
 
 }  // namespace type
