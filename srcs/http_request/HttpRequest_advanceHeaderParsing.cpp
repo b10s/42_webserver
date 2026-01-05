@@ -1,17 +1,5 @@
 #include "HttpRequest.hpp"
 
-// "\r\n\r\n" indicates the end of the header section.
-// size_type is used because string::npos has that type.
-std::string::size_type HttpRequest::FindEndOfHeader(
-    const std::string& payload) {
-  static const std::string kDelimiter = "\r\n\r\n";
-  std::string::size_type pos = payload.find(kDelimiter);
-  if (pos != std::string::npos) {
-    return pos + kDelimiter.size();  // position after the kDelimiter
-  }
-  return std::string::npos;  // not found
-}
-
 /**
  * @brief Wait until the header terminator ("\r\n\r\n") appears, then parse
  * the request line (method, URI, version) and each header field in order.

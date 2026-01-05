@@ -5,91 +5,111 @@
 #include <string>
 
 #include "HttpResponse.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/type/Optional.hpp"
 #include "lib/utils/string_utils.hpp"
 
 namespace cgi {
 
-HttpResponse ParseCgiResponse(const std::string& cgi_output) {
-  HttpResponse response(lib::http::kOk);
+CgiResponseParser::CgiResponseParser() : response_(lib::http::kOk) {
+}
 
-  // Find separation between headers and body
-  size_t header_end = cgi_output.find("\r\n\r\n");
-  if (header_end == std::string::npos) {
-    header_end = cgi_output.find("\n\n");
+CgiResponseParser::~CgiResponseParser() {
+}
+
+const HttpResponse& CgiResponseParser::GetResponse() const {
+  return response_;
+}
+
+bool CgiResponseParser::AdvanceHeader() {
+  std::string::size_type end_of_header = FindEndOfHeader(buffer_);
+  if (end_of_header == std::string::npos) {
+    return false;
   }
 
-  if (header_end == std::string::npos) {
-    // RFC 3875 Violation: No header-body separator
-    response.SetStatus(lib::http::kInternalServerError);
-    response.EnsureDefaultErrorContent();
-    return response;
+  const char* req = buffer_.c_str();
+  size_t total_len = 0;
+  // CGI headers can start immediately
+  while (*req && !IsCRLF(req) && *req != '\n') {
+    std::string key, value;
+    req = ReadHeaderLine(req, key, value, total_len, 8192);
+    StoreHeader(key, value);
   }
 
-  std::string headers_part = cgi_output.substr(0, header_end);
-  response.SetBody(cgi_output.substr(
-      header_end + ((cgi_output[header_end] == '\r') ? 4 : 2)));
+  // Skip the separator (\r\n\r\n or \n\n)
+  if (IsCRLF(req)) {
+    req += 2;
+  } else if (*req == '\n') {
+    req += 1;
+  }
 
-  std::stringstream ss(headers_part);
-  std::string line;
-  while (std::getline(ss, line)) {
-    if (!line.empty() && line[line.length() - 1] == '\r')
-      line.erase(line.length() - 1);
-    if (line.empty()) continue;
+  buffer_.erase(0, end_of_header);
+  state_ = kBody;
+  return true;
+}
 
-    size_t colon = line.find(':');
-    if (colon != std::string::npos) {
-      std::string key = line.substr(0, colon);
-      std::string val = line.substr(colon + 1);
-
-      size_t val_start = 0;
-      while (val_start < val.length() && std::isspace(val[val_start]))
-        val_start++;
-      val = val.substr(val_start);
-
-      if (key == "Status") {
-        size_t space_pos = val.find(' ');
-        std::string status_str;
-        std::string reason_phrase;
-        if (space_pos != std::string::npos) {
-          status_str = val.substr(0, space_pos);
-          reason_phrase = val.substr(space_pos + 1);
-        } else {
-          status_str = val;
-          reason_phrase = "";
-        }
-        lib::type::Optional<long> status_code_opt =
-            lib::utils::StrToLong(status_str);
-        if (status_code_opt.HasValue()) {
-          response.SetStatus(
-              static_cast<lib::http::Status>(status_code_opt.Value()));
-        } else {
-          response.SetStatus(lib::http::kInternalServerError);
-          response.EnsureDefaultErrorContent();
-          return response;
-        }
-      } else if (key == "Location") {
-        if (response.GetStatus() == lib::http::kOk) {
-          response.SetStatus(lib::http::kFound);
-        }
-        response.AddHeader(key, val);
-      } else {
-        response.AddHeader(key, val);
-      }
+void CgiResponseParser::StoreHeader(const std::string& key,
+                                    const std::string& value) {
+  if (key == "Status") {
+    size_t space_pos = value.find(' ');
+    std::string status_str;
+    if (space_pos != std::string::npos) {
+      status_str = value.substr(0, space_pos);
     } else {
-      response.SetStatus(lib::http::kInternalServerError);
-      response.EnsureDefaultErrorContent();
-      return response;
+      status_str = value;
     }
+    lib::type::Optional<long> status_code_opt =
+        lib::utils::StrToLong(status_str);
+    if (status_code_opt.HasValue()) {
+      response_.SetStatus(
+          static_cast<lib::http::Status>(status_code_opt.Value()));
+    } else {
+      throw lib::exception::ResponseStatusException(
+          lib::http::kInternalServerError);
+    }
+  } else if (key == "Location") {
+    if (response_.GetStatus() == lib::http::kOk) {
+      response_.SetStatus(lib::http::kFound);
+    }
+    response_.AddHeader(key, value);
+  } else {
+    response_.AddHeader(key, value);
+  }
+}
+
+bool CgiResponseParser::AdvanceBody() {
+  response_.SetBody(buffer_);
+  buffer_.clear();
+  state_ = kDone;
+  return true;
+}
+
+void CgiResponseParser::OnInternalStateError() {
+  response_.SetStatus(lib::http::kInternalServerError);
+  response_.EnsureDefaultErrorContent();
+  state_ = kDone;
+}
+
+void CgiResponseParser::OnExtraDataAfterDone() {
+}
+
+HttpResponse ParseCgiResponse(const std::string& cgi_output) {
+  CgiResponseParser parser;
+  try {
+    parser.Parse(cgi_output.c_str(), cgi_output.length());
+  } catch (const std::exception&) {
+    HttpResponse error_res(lib::http::kInternalServerError);
+    error_res.EnsureDefaultErrorContent();
+    return error_res;
   }
 
-  if (!response.HasHeader("content-type")) {
-    response.SetStatus(lib::http::kInternalServerError);
-    response.EnsureDefaultErrorContent();
-    return response;
+  HttpResponse res = parser.GetResponse();
+  if (!res.HasHeader("content-type")) {
+    res.SetStatus(lib::http::kInternalServerError);
+    res.EnsureDefaultErrorContent();
   }
-  return response;
+  return res;
 }
 
 }  // namespace cgi
