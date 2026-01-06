@@ -75,7 +75,7 @@ const char* StreamParser::ReadHeaderLine(const char* data, std::string& key,
     ++i;
   }
   // must be ": ", not ":" or end of string
-  if (data[i] != ':' || data[i + 1] != ' ') {
+  if (data[i] != ':' || req[i + 1] == '\0' || data[i + 1] != ' ') {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   key.assign(data, i);
