@@ -79,7 +79,7 @@ const char* StreamParser::ReadHeaderLine(const char* data, std::string& key,
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   key.assign(data, i);
-  // skip": "
+  // skip ": "
   i += 2;
   BumpLenOrThrow(total_len, 2, max_size);
   data += i;
