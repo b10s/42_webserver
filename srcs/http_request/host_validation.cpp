@@ -1,5 +1,7 @@
 #include "host_validation.hpp"
 
+#include <sstream>
+
 /*
 The IsValidHost() function should ensure that only
 - valid IPv4 addresses (0.0.0.0, 127.0.0.1, etc.)

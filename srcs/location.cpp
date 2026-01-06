@@ -1,7 +1,5 @@
 #include "Location.hpp"
 
-#include "ConfigParser.hpp"
-
 Location::Location()
     : methods_(),
       name_("/"),

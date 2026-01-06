@@ -1,6 +1,5 @@
 #include "socket/ClientSocket.hpp"
 
-#include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -8,23 +7,14 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
-#include <stdexcept>
 
 #include "RequestHandler.hpp"
+#include "lib/exception/ConnectionClosed.hpp"
 #include "lib/type/Fd.hpp"
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
-  int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
-  if (flags == -1) {
-    throw std::runtime_error("fcntl(F_GETFL) failed. " +
-                             std::string(strerror(errno)));
-  }
-  if (fcntl(fd_.GetFd(), F_SETFL, flags | O_NONBLOCK) == -1) {
-    throw std::runtime_error("fcntl(F_SETFL) failed. " +
-                             std::string(strerror(errno)));
-  }
   request_.SetClientIp(client_ip);
 }
 
@@ -63,7 +53,7 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
   if (request_.IsDone()) {
     RequestHandler handler(config_, request_);
     response_ = handler.Run();
-    output_buffer_ = response_.ToHttpString();
+    write_buffer_ = response_.ToHttpString();
 
     epoll_event ev;
     ev.events = EPOLLOUT;
@@ -73,19 +63,19 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
 }
 
 void ClientSocket::HandleEpollOut() {
-  if (output_buffer_.empty()) return;
+  if (write_buffer_.empty()) return;
 
   ssize_t bytes_sent =
-      send(fd_.GetFd(), output_buffer_.c_str(), output_buffer_.length(), 0);
+      send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
 
   if (bytes_sent == -1) {
     throw lib::exception::ConnectionClosed();
   }
 
-  if (static_cast<size_t>(bytes_sent) < output_buffer_.length()) {
-    output_buffer_ = output_buffer_.substr(bytes_sent);
+  if (static_cast<size_t>(bytes_sent) < write_buffer_.length()) {
+    write_buffer_ = write_buffer_.substr(bytes_sent);
   } else {
-    output_buffer_.clear();
+    write_buffer_.clear();
     throw lib::exception::ConnectionClosed();
   }
 }
