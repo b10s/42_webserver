@@ -74,8 +74,8 @@ const char* StreamParser::ReadHeaderLine(const char* data, std::string& key,
     BumpLenOrThrow(total_len, 1, max_size);
     ++i;
   }
-  if (data[i] == '\0' || data[i] != ':' ||
-      data[i + 1] != ' ') {  // must be ": ", not ":" or end of string
+  // must be ": ", not ":" or end of string
+  if (data[i] != ':' || data[i + 1] != ' ') {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   key.assign(data, i);
