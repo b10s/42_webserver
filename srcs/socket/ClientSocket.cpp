@@ -8,9 +8,11 @@
 #include <cstring>
 #include <iostream>
 
+#include "CgiResponseParser.hpp"
 #include "RequestHandler.hpp"
 #include "lib/exception/ConnectionClosed.hpp"
 #include "lib/type/Fd.hpp"
+#include "socket/CgiSocket.hpp"
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
@@ -61,6 +63,9 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     ExecResult result = handler.Run();
 
     if (result.is_async) {
+      if (result.new_socket) {
+        result.new_socket->OnSetOwner(this);
+      }
       SocketResult socket_result;
       socket_result.new_socket = result.new_socket;
       return socket_result;
@@ -93,4 +98,15 @@ void ClientSocket::HandleEpollOut() {
     write_buffer_.clear();
     throw lib::exception::ConnectionClosed();
   }
+}
+
+void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
+                                          const std::string& cgi_output) {
+  res_ = cgi::ParseCgiResponse(cgi_output);
+  write_buffer_ = res_.ToHttpString();
+
+  epoll_event ev;
+  ev.events = EPOLLOUT;
+  ev.data.ptr = this;
+  epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
 }

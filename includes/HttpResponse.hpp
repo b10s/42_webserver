@@ -10,7 +10,7 @@
 class HttpResponse {
  public:
   HttpResponse();
-  HttpResponse(lib::http::Status);
+  explicit HttpResponse(lib::http::Status);
   ~HttpResponse();
   HttpResponse(const HttpResponse& other);
   HttpResponse& operator=(const HttpResponse& other);

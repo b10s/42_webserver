@@ -214,25 +214,16 @@ ExecResult CgiExecutor::Run() {
       exit(1);
     } else {  // Parent process
       sv1.Reset();
-      CgiSocket cgi_socket(sv0);
+      CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
 
       if (req_method == "POST") {
-        if (cgi_socket.Send(body_) == -1) {
+        if (cgi_socket->Send(body_) == -1) {
+          delete cgi_socket;
           throw std::runtime_error("write error");
         }
       }
 
-      std::string cgi_output = cgi_socket.Receive();
-
-      int status;
-      waitpid(pid, &status, 0);
-
-      if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-        return ExecResult(HttpResponse(lib::http::kInternalServerError));
-      }
-
-      HttpResponse res = cgi::ParseCgiResponse(cgi_output);
-      return ExecResult(res);
+      return ExecResult(cgi_socket);
     }
   } catch (std::exception& e) {
     return ExecResult(HttpResponse(lib::http::kInternalServerError));

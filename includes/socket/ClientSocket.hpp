@@ -16,6 +16,7 @@ class ClientSocket : public ASocket {
   virtual ~ClientSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
+  void OnCgiExecutionFinished(int epoll_fd, const std::string& cgi_output);
 
  private:
   ClientSocket();

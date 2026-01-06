@@ -1,22 +1,48 @@
 #include "socket/CgiSocket.hpp"
 
-#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-CgiSocket::CgiSocket(lib::type::Fd fd) : ASocket(fd) {
-  // まだ CGI
-  // はノンブロッキングに対応していないため、ブロッキングモードに設定する
-  int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
-  fcntl(fd_.GetFd(), F_SETFL, flags & ~O_NONBLOCK);
+#include <cerrno>
+#include <cstring>
+#include <iostream>
+
+#include "lib/type/Fd.hpp"
+#include "socket/ClientSocket.hpp"
+
+CgiSocket::CgiSocket(lib::type::Fd fd, int pid)
+    : ASocket(fd), pid_(pid), owner_(NULL) {
 }
 
 CgiSocket::~CgiSocket() {
+  if (pid_ > 0) {
+    kill(pid_, SIGKILL);
+    waitpid(pid_, NULL, 0);
+  }
 }
 
 SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
-  (void)epoll_fd;
-  (void)events;
-  return SocketResult();
+  SocketResult result;
+  if (events & EPOLLIN) {
+    char buf[kBufferSize];
+    ssize_t n = read(fd_.GetFd(), buf, sizeof(buf));
+    if (n > 0) {
+      read_buffer_.append(buf, n);
+    } else {
+      int status;
+      waitpid(pid_, &status, 0);
+      pid_ = -1;
+
+      result.remove_socket = true;
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+
+      if (owner_) {
+        owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+      }
+    }
+  }
+  return result;
 }
 
 ssize_t CgiSocket::Send(const std::string& data) {
@@ -32,4 +58,8 @@ std::string CgiSocket::Receive() {
     output.append(buffer, bytes_read);
   }
   return output;
+}
+
+void CgiSocket::OnSetOwner(ClientSocket* owner) {
+  owner_ = owner;
 }
