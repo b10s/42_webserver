@@ -24,6 +24,18 @@ TEST(CgiResponseParserTest, WithStatusHeader) {
   EXPECT_EQ(res.GetBody(), "Error Page");
 }
 
+TEST(CgiResponseParserTest, WithCustomStatusReason) {
+  std::string output =
+      "Status: 404 Custom Not Found Message\r\nContent-Type: "
+      "text/plain\r\n\r\nError";
+  HttpResponse res = cgi::ParseCgiResponse(output);
+
+  EXPECT_EQ(res.GetStatus(), lib::http::kNotFound);
+  std::string http_response = res.ToHttpString();
+  EXPECT_NE(http_response.find("404 Custom Not Found Message"),
+            std::string::npos);
+}
+
 TEST(CgiResponseParserTest, WithLocationHeader) {
   // If Location is present and status is OK, it should change to Found (302)
   std::string output =

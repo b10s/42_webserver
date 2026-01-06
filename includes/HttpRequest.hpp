@@ -28,9 +28,7 @@ class HttpRequest : public lib::parser::StreamParser {
   bool keep_alive_;
   std::string client_ip_;
 
-  static std::string::size_type FindEndOfHeader(const std::string& payload);
   const char* ParseHeader(const char* req);
-  bool IsCRLF(const char* p) const;
 
   bool ValidateAndSkipCRLF(size_t& pos) {
     if (pos + 1 >= buffer_.size()) return false;
@@ -41,9 +39,6 @@ class HttpRequest : public lib::parser::StreamParser {
     return true;
   }
 
-  void BumpLenOrThrow(size_t& total, size_t inc) const;
-  const char* ReadHeaderLine(const char* req, std::string& key,
-                             std::string& value, size_t& total_len);
   void StoreHeader(const std::string& raw_key, const std::string& value);
   void ValidateAndExtractHost();
   void ValidateBodyHeaders();
@@ -58,6 +53,7 @@ class HttpRequest : public lib::parser::StreamParser {
   bool AppendChunkData(size_t& pos, size_t chunk_size);
   void OnInternalStateError();
   void OnExtraDataAfterDone();
+  virtual bool IsStrictCrlf() const;
 
  public:
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes

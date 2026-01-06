@@ -1,11 +1,7 @@
 #ifndef LIB_PARSER_STREAMPARSER_HPP_
 #define LIB_PARSER_STREAMPARSER_HPP_
 
-#include <map>
-#include <sstream>
 #include <string>
-
-#include "lib/type/Optional.hpp"
 
 namespace lib {
 namespace parser {
@@ -22,31 +18,9 @@ class StreamParser {
  public:
   enum State { kHeader = 0, kBody = 1, kDone = 2 };
 
-  StreamParser() : buffer_read_pos_(0), state_(kHeader) {
-  }
-
-  virtual ~StreamParser() {
-  }
-
-  void Parse(const char* data, size_t len) {
-    buffer_.append(data, len);
-    for (;;) {
-      switch (state_) {
-        case kHeader:
-          if (!AdvanceHeader()) return;
-          if (state_ != kBody) OnInternalStateError();
-          continue;
-
-        case kBody:
-          if (!AdvanceBody()) return;
-          if (state_ != kDone) OnInternalStateError();
-          return;
-
-        case kDone:
-          OnExtraDataAfterDone();
-      }
-    }
-  }
+  StreamParser();
+  virtual ~StreamParser();
+  void Parse(const char* data, size_t len);
 
  protected:
   // Derived classes use these.
@@ -57,13 +31,26 @@ class StreamParser {
   // Derived classes implement these.
   virtual bool AdvanceHeader() = 0;
   virtual bool AdvanceBody() = 0;
+  virtual bool IsStrictCrlf() const = 0;
 
   // Error hooks: derived decides which exception/status to throw.
   virtual void OnInternalStateError() = 0;
   virtual void OnExtraDataAfterDone() = 0;
+
+  bool IsCRLF(const char* p) const;
+  bool IsLF(const char* p) const;
+  std::string::size_type FindEndOfHeader(const std::string& payload);
+
+  void BumpLenOrThrow(size_t& total, size_t inc, size_t max_size) const;
+
+  // we allow only single space after ":" and require CRLF at end
+  // OWS (optional whitespace) is not supported for simplicity
+  const char* ReadHeaderLine(const char* req, std::string& key,
+                             std::string& value, size_t& total_len,
+                             size_t max_size);
 };
 
 }  // namespace parser
 }  // namespace lib
 
-#endif  // LIB_PARSER_STREAM_PARSER_HPP_
+#endif  // LIB_PARSER_STREAMPARSER_HPP_

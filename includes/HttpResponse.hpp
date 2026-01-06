@@ -16,6 +16,7 @@ class HttpResponse {
   HttpResponse& operator=(const HttpResponse& other);
 
   void SetStatus(lib::http::Status status);
+  void SetStatus(lib::http::Status status, const std::string& reason_phrase);
   lib::http::Status GetStatus();
   void AddHeader(const std::string& key, const std::string& value);
   lib::type::Optional<std::string> GetHeader(const std::string& key);
