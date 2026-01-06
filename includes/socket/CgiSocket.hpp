@@ -14,7 +14,6 @@ class CgiSocket : public ASocket {
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
   ssize_t Send(const std::string& data);
-  std::string Receive();
   virtual void OnSetOwner(ClientSocket* owner);
 
  private:

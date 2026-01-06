@@ -25,9 +25,11 @@ class ASocket {
   virtual ~ASocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
+
   virtual void OnSetOwner(ClientSocket* owner) {
     (void)owner;
   }
+
   int GetFd() const;
 
  protected:

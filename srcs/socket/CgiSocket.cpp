@@ -4,10 +4,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <cerrno>
-#include <cstring>
-#include <iostream>
-
 #include "lib/type/Fd.hpp"
 #include "socket/ClientSocket.hpp"
 
@@ -47,17 +43,6 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
 
 ssize_t CgiSocket::Send(const std::string& data) {
   return write(fd_.GetFd(), data.c_str(), data.length());
-}
-
-std::string CgiSocket::Receive() {
-  std::string output;
-  char buffer[4096];
-  ssize_t bytes_read;
-
-  while ((bytes_read = read(fd_.GetFd(), buffer, sizeof(buffer))) > 0) {
-    output.append(buffer, bytes_read);
-  }
-  return output;
 }
 
 void CgiSocket::OnSetOwner(ClientSocket* owner) {
