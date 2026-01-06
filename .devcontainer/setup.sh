@@ -51,7 +51,22 @@ else:
     print("There is no data received.")
 EOF
 
+# endless.py の作成
+sudo tee /var/www/html/site_8081/scripts/endless.py > /dev/null <<EOF
+#!/usr/bin/env python3
+import sys
+import os
+
+print("Content-Type: text/plain; charset=utf-8\r\n\r\n", end='')
+
+content_length = os.environ.get('CONTENT_LENGTH')
+
+while True:
+    pass
+EOF
+
 # 権限の設定
 sudo chmod +x /var/www/html/site_8081/scripts/hello.py
 sudo chmod +x /var/www/html/site_8081/scripts/hello_post.py
+sudo chmod +x /var/www/html/site_8081/scripts/endless.py
 sudo chown -R vscode:vscode /var/www/html/site_8080 /var/www/html/site_8081
