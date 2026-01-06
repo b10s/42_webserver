@@ -63,41 +63,41 @@ void StreamParser::BumpLenOrThrow(size_t& total, size_t inc,
   total += inc;
 }
 
-const char* StreamParser::ReadHeaderLine(const char* req, std::string& key,
+const char* StreamParser::ReadHeaderLine(const char* data, std::string& key,
                                          std::string& value, size_t& total_len,
                                          size_t max_size) {
   size_t i = 0;
-  while (req[i] && req[i] != ':') {
-    if (!lib::http::IsValidHeaderChar(req[i])) {
+  while (data[i] && data[i] != ':') {
+    if (!lib::http::IsValidHeaderChar(data[i])) {
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     BumpLenOrThrow(total_len, 1, max_size);
     ++i;
   }
-  if (req[i] == '\0' || req[i] != ':' ||
-      req[i + 1] != ' ') {  // must be ": ", not ":" or end of string
+  if (data[i] == '\0' || data[i] != ':' ||
+      data[i + 1] != ' ') {  // must be ": ", not ":" or end of string
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
-  key.assign(req, i);
+  key.assign(data, i);
   // skip": "
   i += 2;
   BumpLenOrThrow(total_len, 2, max_size);
-  req += i;
+  data += i;
   size_t vlen = 0;
-  while (req[vlen] && req[vlen] != '\r' && req[vlen] != '\n') {
-    if (!lib::http::IsValidHeaderChar(req[vlen])) {
+  while (data[vlen] && data[vlen] != '\r' && data[vlen] != '\n') {
+    if (!lib::http::IsValidHeaderChar(data[vlen])) {
       throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
     }
     BumpLenOrThrow(total_len, 1, max_size);
     ++vlen;
   }
-  value.assign(req, vlen);  // value can be empty
-  if (IsCRLF(req + vlen)) {
+  value.assign(data, vlen);  // value can be empty
+  if (IsCRLF(data + vlen)) {
     BumpLenOrThrow(total_len, 2, max_size);  // skip CRLF
-    return req + vlen + 2;
-  } else if (!IsStrictCrlf() && IsLF(req + vlen)) {
+    return data + vlen + 2;
+  } else if (!IsStrictCrlf() && IsLF(data + vlen)) {
     BumpLenOrThrow(total_len, 1, max_size);  // skip LF
-    return req + vlen + 1;
+    return data + vlen + 1;
   }
   throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
 }
