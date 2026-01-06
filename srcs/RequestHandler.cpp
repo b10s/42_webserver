@@ -20,7 +20,7 @@ RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
 RequestHandler::~RequestHandler() {
 }
 
-HttpResponse RequestHandler::Run() {
+ExecResult RequestHandler::Run() {
   // PrepareRoutingContext();
   lib::http::Method method = req_.GetMethod();
   if (method == lib::http::kGet) {
@@ -30,9 +30,9 @@ HttpResponse RequestHandler::Run() {
   } else if (method == lib::http::kDelete) {
     HandleDelete();
   } else {
-    return HttpResponse(lib::http::kNotImplemented);
+    return ExecResult(HttpResponse(lib::http::kNotImplemented));
   }
-  return res_;
+  return result_;
 }
 
 void RequestHandler::PrepareRoutingContext() {
@@ -85,38 +85,44 @@ std::string RequestHandler::ResolveFilesystemPath() const {
 void RequestHandler::HandleGet() {
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
-    res_ = cgi.Run();
+    result_ = cgi.Run();
   } else {
     std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
-    res_.AddHeader("Content-Type",
-                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
-    res_.SetBody(body);
-    res_.SetStatus(lib::http::kOk);
+    HttpResponse res;
+    res.AddHeader("Content-Type",
+                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res.SetBody(body);
+    res.SetStatus(lib::http::kOk);
+    result_ = ExecResult(res);
   }
 }
 
 void RequestHandler::HandlePost() {
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
-    res_ = cgi.Run();
+    result_ = cgi.Run();
   } else {
     std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
-    res_.AddHeader("Content-Type",
-                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
-    res_.SetBody(body);
-    res_.SetStatus(lib::http::kOk);
+    HttpResponse res;
+    res.AddHeader("Content-Type",
+                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res.SetBody(body);
+    res.SetStatus(lib::http::kOk);
+    result_ = ExecResult(res);
   }
 }
 
 void RequestHandler::HandleDelete() {
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
-    res_ = cgi.Run();
+    result_ = cgi.Run();
   } else {
     std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
-    res_.AddHeader("Content-Type",
-                   lib::http::DetectMimeTypeFromPath(filesystem_path_));
-    res_.SetBody(body);
-    res_.SetStatus(lib::http::kOk);
+    HttpResponse res;
+    res.AddHeader("Content-Type",
+                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
+    res.SetBody(body);
+    res.SetStatus(lib::http::kOk);
+    result_ = ExecResult(res);
   }
 }

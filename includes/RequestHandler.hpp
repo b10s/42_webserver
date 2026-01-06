@@ -1,6 +1,7 @@
 #ifndef REQUESTHANDLER_HPP_
 #define REQUESTHANDLER_HPP_
 
+#include "ExecResult.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "LocationMatch.hpp"
@@ -11,7 +12,7 @@ class RequestHandler {
   RequestHandler(ServerConfig conf, HttpRequest req);
   ~RequestHandler();
 
-  HttpResponse Run();
+  ExecResult Run();
   void PrepareRoutingContext();
   std::string ResolveFilesystemPath() const;  // for testing purpose
 
@@ -19,7 +20,7 @@ class RequestHandler {
   RequestHandler();  // shouldn't use default constructor
   ServerConfig conf_;
   HttpRequest req_;
-  HttpResponse res_;
+  ExecResult result_;
 
   LocationMatch location_match_;
   std::string filesystem_path_;

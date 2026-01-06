@@ -1,5 +1,6 @@
 #include "CgiExecutor.hpp"
 
+#include <sys/epoll.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -10,8 +11,8 @@
 #include <cstring>
 #include <stdexcept>
 
+#include "CgiResponseParser.hpp"
 #include "HttpResponse.hpp"
-#include "cgi/CgiResponseParser.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/type/Fd.hpp"
 #include "lib/type/Optional.hpp"
@@ -180,9 +181,9 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 
 // GET and DELETE methods are handled same. POST method requires the body to be
 // passed to STDIN of the CGI script.
-HttpResponse CgiExecutor::Run() {
+ExecResult CgiExecutor::Run() {
   if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
-    return HttpResponse(lib::http::kForbidden);
+    return ExecResult(HttpResponse(lib::http::kForbidden));
 
   try {
     int sv[2];
@@ -227,13 +228,13 @@ HttpResponse CgiExecutor::Run() {
       waitpid(pid, &status, 0);
 
       if (WIFEXITED(status) && WEXITSTATUS(status) != 0) {
-        return HttpResponse(lib::http::kInternalServerError);
+        return ExecResult(HttpResponse(lib::http::kInternalServerError));
       }
 
       HttpResponse res = cgi::ParseCgiResponse(cgi_output);
-      return res;
+      return ExecResult(res);
     }
   } catch (std::exception& e) {
-    return HttpResponse(lib::http::kInternalServerError);
+    return ExecResult(HttpResponse(lib::http::kInternalServerError));
   }
 }

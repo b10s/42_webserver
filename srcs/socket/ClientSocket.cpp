@@ -15,7 +15,7 @@
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config) {
-  request_.SetClientIp(client_ip);
+  req_.SetClientIp(client_ip);
 }
 
 ClientSocket::~ClientSocket() {
@@ -25,7 +25,13 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;
   try {
     if (events & EPOLLIN) {
-      HandleEpollIn(epoll_fd);
+      SocketResult in_result = HandleEpollIn(epoll_fd);
+      if (in_result.new_socket) {
+        result.new_socket = in_result.new_socket;
+      }
+      if (in_result.remove_socket) {
+        result.remove_socket = true;
+      }
     }
     if (events & EPOLLOUT) {
       HandleEpollOut();
@@ -41,7 +47,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
   return result;
 }
 
-void ClientSocket::HandleEpollIn(int epoll_fd) {
+SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
   char buffer[kBufferSize];
   ssize_t bytes_received = recv(fd_.GetFd(), buffer, sizeof(buffer), 0);
 
@@ -49,17 +55,26 @@ void ClientSocket::HandleEpollIn(int epoll_fd) {
     throw lib::exception::ConnectionClosed();
   }
 
-  request_.Parse(buffer, bytes_received);
-  if (request_.IsDone()) {
-    RequestHandler handler(config_, request_);
-    response_ = handler.Run();
-    write_buffer_ = response_.ToHttpString();
+  req_.Parse(buffer, bytes_received);
+  if (req_.IsDone()) {
+    RequestHandler handler(config_, req_);
+    ExecResult result = handler.Run();
+
+    if (result.is_async) {
+      SocketResult socket_result;
+      socket_result.new_socket = result.new_socket;
+      return socket_result;
+    }
+
+    res_ = result.response;
+    write_buffer_ = res_.ToHttpString();
 
     epoll_event ev;
     ev.events = EPOLLOUT;
     ev.data.ptr = this;
     epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
   }
+  return SocketResult();
 }
 
 void ClientSocket::HandleEpollOut() {

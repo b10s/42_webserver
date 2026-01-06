@@ -20,10 +20,9 @@ class ClientSocket : public ASocket {
  private:
   ClientSocket();
   const ServerConfig& config_;
-  HttpRequest request_;
-  HttpResponse response_;
-
-  void HandleEpollIn(int epoll_fd);
+  HttpRequest req_;
+  HttpResponse res_;
+  SocketResult HandleEpollIn(int epoll_fd);
   void HandleEpollOut();
 
   static const size_t kBufferSize = 1024;
