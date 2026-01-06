@@ -46,8 +46,10 @@ If you want to fix lint errors automatically, use following command.
 ```bash
 make tidy-fix
 ```
-## Sample Configuration and Testing with curl
+
+## Testing with curl
 ```bash
+make
 ./webserv
 ```
 
