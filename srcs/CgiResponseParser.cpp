@@ -1,4 +1,4 @@
-#include "cgi/CgiResponseParser.hpp"
+#include "CgiResponseParser.hpp"
 
 #include <iostream>
 #include <sstream>
