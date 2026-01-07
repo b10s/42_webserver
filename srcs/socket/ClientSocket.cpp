@@ -81,7 +81,9 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     epoll_event ev;
     ev.events = EPOLLOUT;
     ev.data.ptr = this;
-    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
+      throw std::runtime_error("epoll_ctl error");
+    }
   }
   return SocketResult();
 }
@@ -112,7 +114,9 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
   epoll_event ev;
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
-  epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
+  if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
+    throw std::runtime_error("epoll_ctl error");
+  }
 }
 
 void ClientSocket::RemoveCgiSocket(ASocket* sock) {

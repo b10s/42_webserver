@@ -4,6 +4,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <iostream>
+
 #include "lib/type/Fd.hpp"
 #include "socket/ClientSocket.hpp"
 
@@ -23,23 +25,29 @@ CgiSocket::~CgiSocket() {
 
 SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;
-  if (events & EPOLLIN) {
-    char buf[kBufferSize];
-    ssize_t n = read(fd_.GetFd(), buf, sizeof(buf));
-    if (n > 0) {
-      read_buffer_.append(buf, n);
-    } else {
-      int status;
-      waitpid(pid_, &status, 0);
-      pid_ = -1;
+  try {
+    if (events & EPOLLIN) {
+      char buf[kBufferSize];
+      ssize_t n = read(fd_.GetFd(), buf, sizeof(buf));
+      if (n > 0) {
+        read_buffer_.append(buf, n);
+      } else {
+        int status;
+        waitpid(pid_, &status, 0);
+        pid_ = -1;
 
-      result.remove_socket = true;
-      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+        result.remove_socket = true;
+        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
 
-      if (owner_) {
-        owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+        if (owner_) {
+          owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+        }
       }
     }
+  } catch (const std::exception& e) {
+    std::cerr << "CgiSocket error: " << e.what() << std::endl;
+    result.remove_socket = true;
+    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
   }
   return result;
 }

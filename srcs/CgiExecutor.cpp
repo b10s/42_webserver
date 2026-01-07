@@ -217,10 +217,7 @@ ExecResult CgiExecutor::Run() {
       CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
 
       if (req_method == "POST") {
-        if (cgi_socket->Send(body_) == -1) {
-          delete cgi_socket;
-          throw std::runtime_error("write error");
-        }
+        cgi_socket->Send(body_);
       }
 
       return ExecResult(cgi_socket);
