@@ -12,6 +12,9 @@ CgiSocket::CgiSocket(lib::type::Fd fd, int pid)
 }
 
 CgiSocket::~CgiSocket() {
+  if (owner_) {
+    owner_->RemoveCgiSocket(this);
+  }
   if (pid_ > 0) {
     kill(pid_, SIGTERM);
     waitpid(pid_, NULL, 0);

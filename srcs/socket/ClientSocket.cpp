@@ -16,11 +16,14 @@
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
-    : ASocket(fd), config_(config) {
+    : ASocket(fd), config_(config), cgi_socket_(NULL) {
   req_.SetClientIp(client_ip);
 }
 
 ClientSocket::~ClientSocket() {
+  if (cgi_socket_) {
+    cgi_socket_->OnSetOwner(NULL);
+  }
 }
 
 SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
@@ -65,6 +68,7 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     if (result.is_async) {
       if (result.new_socket) {
         result.new_socket->OnSetOwner(this);
+        cgi_socket_ = result.new_socket;
       }
       SocketResult socket_result;
       socket_result.new_socket = result.new_socket;
@@ -109,4 +113,10 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
+}
+
+void ClientSocket::RemoveCgiSocket(ASocket* sock) {
+  if (cgi_socket_ == sock) {
+    cgi_socket_ = NULL;
+  }
 }

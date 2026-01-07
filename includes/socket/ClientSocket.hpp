@@ -17,12 +17,14 @@ class ClientSocket : public ASocket {
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
   void OnCgiExecutionFinished(int epoll_fd, const std::string& cgi_output);
+  void RemoveCgiSocket(ASocket* sock);
 
  private:
   ClientSocket();
   const ServerConfig& config_;
   HttpRequest req_;
   HttpResponse res_;
+  ASocket* cgi_socket_;
   SocketResult HandleEpollIn(int epoll_fd);
   void HandleEpollOut();
 
