@@ -119,6 +119,18 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
   }
 }
 
+void ClientSocket::OnCgiExecutionError(int epoll_fd) {
+  res_ = HttpResponse(lib::http::kInternalServerError);
+  write_buffer_ = res_.ToHttpString();
+
+  epoll_event ev;
+  ev.events = EPOLLOUT;
+  ev.data.ptr = this;
+  if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
+    throw std::runtime_error("epoll_ctl error");
+  }
+}
+
 void ClientSocket::RemoveCgiSocket(ASocket* sock) {
   if (cgi_socket_ == sock) {
     cgi_socket_ = NULL;

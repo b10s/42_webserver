@@ -42,7 +42,11 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
         }
 
         if (owner_) {
-          owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+          if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+          } else {
+            owner_->OnCgiExecutionError(epoll_fd);
+          }
         }
       }
     }
