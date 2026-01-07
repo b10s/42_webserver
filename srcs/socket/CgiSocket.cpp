@@ -37,7 +37,9 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
         pid_ = -1;
 
         result.remove_socket = true;
-        epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
+          throw std::runtime_error("epoll_ctl error");
+        }
 
         if (owner_) {
           owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
@@ -47,7 +49,9 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
   } catch (const std::exception& e) {
     std::cerr << "CgiSocket error: " << e.what() << std::endl;
     result.remove_socket = true;
-    epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
+      std::cerr << "epoll_ctl error" << std::endl;
+    }
   }
   return result;
 }
