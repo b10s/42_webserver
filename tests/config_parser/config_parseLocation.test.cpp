@@ -107,12 +107,12 @@ TEST(ConfigParser, Location_MissingClosingBrace_Throws) {
 
 // ==================== duplicate directive error cases ====================
 
-TEST(ConfigParser, Location_DuplicateAllowMethods_Throws) {
+TEST(ConfigParser, Location_DuplicateAllowedMethods_Throws) {
   ServerConfig sc;
   const std::string s =
       "/x/ {\n"
-      "  allow_methods GET POST;\n"
-      "  allow_methods GET;\n"
+      "  allowed_methods GET POST;\n"
+      "  allowed_methods GET;\n"
       "}\n";
   EXPECT_THROW(callParseLocation(s, &sc), std::runtime_error);
 }

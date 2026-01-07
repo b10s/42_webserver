@@ -23,7 +23,7 @@ RequestHandler::~RequestHandler() {
 HttpResponse RequestHandler::Run() {
   // PrepareRoutingContext();
   lib::http::Method method = req_.GetMethod();
-  if (location_match_.loc->HasAllowMethods()) {
+  if (location_match_.loc->HasAllowedMethods()) {
     if (!location_match_.loc->IsMethodAllowed(method)) {
       return HttpResponse(lib::http::kMethodNotAllowed);
     }

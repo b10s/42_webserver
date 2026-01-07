@@ -20,7 +20,7 @@ class Location {
   std::string redirect_;
   bool cgi_enabled_;
   std::vector<std::string> cgi_allowed_extensions_;
-  bool has_allow_methods_;  // method directive should appear only once
+  bool has_allowed_methods_;  // method directive should appear only once
   bool has_root_;
   bool has_autoindex_;
   bool has_index_directive_;  // index directive should appear only once
@@ -48,7 +48,7 @@ class Location {
     return has_cgi_allowed_extensions_;
   }
 
-  void AddMethod(lib::http::Method method) {
+  void AddAllowedMethod(lib::http::Method method) {
     methods_.insert(method);
   }
 
@@ -60,12 +60,12 @@ class Location {
     return methods_;
   }
 
-  bool HasAllowMethods() const {
-    return has_allow_methods_;
+  bool HasAllowedMethods() const {
+    return has_allowed_methods_;
   }
 
-  void SetHasAllowMethods(bool has) {
-    has_allow_methods_ = has;
+  void SetHasAllowedMethods(bool has) {
+    has_allowed_methods_ = has;
   }
 
   void SetName(const std::string& name) {

@@ -22,8 +22,8 @@ protected:
         Location api_loc;
         api_loc.SetName("/api");
         api_loc.SetRoot("/var/www/api");
-        api_loc.SetHasAllowMethods(true);
-        api_loc.AddMethod(lib::http::kGet);
+        api_loc.SetHasAllowedMethods(true);
+        api_loc.AddAllowedMethod(lib::http::kGet);
         api_loc.SetIndexFile("index.html"); // Minimal config
         config.AddLocation(api_loc);
     }
