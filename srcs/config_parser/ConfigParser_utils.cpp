@@ -15,7 +15,8 @@ std::map<std::string, TokenType> CreateTokenTable() {
   m.insert(std::make_pair(config_tokens::kMaxBody, kTokenMaxBody));
   m.insert(std::make_pair(config_tokens::kErrorPage, kTokenErrorPage));
   m.insert(std::make_pair(config_tokens::kLocation, kTokenLocation));
-  m.insert(std::make_pair(config_tokens::kAllowedMethods, kTokenAllowedMethods));
+  m.insert(
+      std::make_pair(config_tokens::kAllowedMethods, kTokenAllowedMethods));
   m.insert(std::make_pair(config_tokens::kRoot, kTokenRoot));
   m.insert(std::make_pair(config_tokens::kAutoIndex, kTokenAutoindex));
   m.insert(std::make_pair(config_tokens::kIndex, kTokenIndex));

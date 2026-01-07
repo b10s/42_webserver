@@ -22,7 +22,8 @@ void ConfigParser::ParseMethods(Location* location) {
     is_method_empty = false;
   }
   if (is_method_empty) {
-    throw std::runtime_error("No methods specified in allowed_methods directive");
+    throw std::runtime_error(
+        "No methods specified in allowed_methods directive");
   }
   location->SetHasAllowedMethods(true);
 }
