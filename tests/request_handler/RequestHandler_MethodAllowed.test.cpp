@@ -35,9 +35,9 @@ TEST_F(RequestHandlerMethodTest, MethodNotAllowed_ExplicitBlocked) {
     request.SetMethod(lib::http::kPost); // Only GET is allowed in /api
 
     RequestHandler handler(config, request);
-    HttpResponse res = handler.Run();
+    ExecResult res = handler.Run();
 
-    EXPECT_EQ(res.GetStatus(), lib::http::kMethodNotAllowed);
+    EXPECT_EQ(res.response.GetStatus(), lib::http::kMethodNotAllowed);
 }
 
 TEST_F(RequestHandlerMethodTest, MethodNotAllowed_AnotherBlocked) {
@@ -46,7 +46,7 @@ TEST_F(RequestHandlerMethodTest, MethodNotAllowed_AnotherBlocked) {
     request.SetMethod(lib::http::kDelete); // Only GET is allowed in /api
 
     RequestHandler handler(config, request);
-    HttpResponse res = handler.Run();
+    ExecResult res = handler.Run();
 
-    EXPECT_EQ(res.GetStatus(), lib::http::kMethodNotAllowed);
+    EXPECT_EQ(res.response.GetStatus(), lib::http::kMethodNotAllowed);
 }
