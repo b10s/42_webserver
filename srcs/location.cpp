@@ -10,7 +10,7 @@ Location::Location()
       redirect_(),
       cgi_enabled_(false),
       cgi_allowed_extensions_(),
-      has_allow_methods_(false),
+      has_allowed_methods_(false),
       has_root_(false),
       has_autoindex_(false),
       has_index_directive_(false),

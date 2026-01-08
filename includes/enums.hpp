@@ -9,7 +9,7 @@ enum TokenType {
   kTokenErrorPage,
   kTokenLocation,
   // Location directives
-  kTokenAllowMethods,
+  kTokenAllowedMethods,
   kTokenRoot,
   kTokenAutoindex,
   kTokenIndex,

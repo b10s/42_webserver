@@ -23,6 +23,12 @@ RequestHandler::~RequestHandler() {
 ExecResult RequestHandler::Run() {
   // PrepareRoutingContext();
   lib::http::Method method = req_.GetMethod();
+  if (location_match_.loc->HasAllowedMethods()) {
+    if (!location_match_.loc->IsMethodAllowed(method)) {
+      return HttpResponse(lib::http::kMethodNotAllowed);
+    }
+  }
+
   if (method == lib::http::kGet) {
     HandleGet();
   } else if (method == lib::http::kPost) {

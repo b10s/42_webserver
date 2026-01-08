@@ -35,7 +35,7 @@ void ConfigParser::ParseLocation(ServerConfig* server) {
     token = Tokenize(content);
     if (token == "}") break;
     switch (ToTokenType(token)) {
-      case kTokenAllowMethods:
+      case kTokenAllowedMethods:
         ParseMethods(&location);
         break;
       case kTokenRoot:
