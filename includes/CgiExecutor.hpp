@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 
+#include "ExecResult.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
 #include "Location.hpp"
@@ -32,7 +33,7 @@ class CgiExecutor {
   CgiExecutor(const HttpRequest&, const Location&, const std::string&);
   ~CgiExecutor();
 
-  HttpResponse Run();
+  ExecResult Run();
 };
 
 #endif

@@ -74,6 +74,16 @@ void Webserv::Run() {
 
       if (result.new_socket) {
         sockets_[result.new_socket->GetFd()] = result.new_socket;
+        epoll_event ev;
+        ev.events = EPOLLIN;
+        ev.data.ptr = result.new_socket;
+        if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_ADD,
+                      result.new_socket->GetFd(), &ev) == -1) {
+          std::cerr << "epoll_ctl() failed for new socket. " << strerror(errno)
+                    << std::endl;
+          sockets_.erase(result.new_socket->GetFd());
+          delete result.new_socket;
+        }
       }
 
       if (result.remove_socket) {

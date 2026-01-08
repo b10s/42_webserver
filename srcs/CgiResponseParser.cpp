@@ -1,4 +1,4 @@
-#include "cgi/CgiResponseParser.hpp"
+#include "CgiResponseParser.hpp"
 
 #include <iostream>
 #include <sstream>
@@ -12,14 +12,14 @@
 
 namespace cgi {
 
-CgiResponseParser::CgiResponseParser() : response_(lib::http::kOk) {
+CgiResponseParser::CgiResponseParser() : res_(lib::http::kOk) {
 }
 
 CgiResponseParser::~CgiResponseParser() {
 }
 
 const HttpResponse& CgiResponseParser::GetResponse() const {
-  return response_;
+  return res_;
 }
 
 bool CgiResponseParser::AdvanceHeader() {
@@ -63,34 +63,34 @@ void CgiResponseParser::StoreHeader(const std::string& key,
       lib::http::Status status =
           static_cast<lib::http::Status>(status_code_opt.Value());
       if (reason_phrase.empty()) {
-        response_.SetStatus(status);
+        res_.SetStatus(status);
       } else {
-        response_.SetStatus(status, reason_phrase);
+        res_.SetStatus(status, reason_phrase);
       }
     } else {
       throw lib::exception::ResponseStatusException(
           lib::http::kInternalServerError);
     }
   } else if (key == "Location") {
-    if (response_.GetStatus() == lib::http::kOk) {
-      response_.SetStatus(lib::http::kFound);
+    if (res_.GetStatus() == lib::http::kOk) {
+      res_.SetStatus(lib::http::kFound);
     }
-    response_.AddHeader(key, value);
+    res_.AddHeader(key, value);
   } else {
-    response_.AddHeader(key, value);
+    res_.AddHeader(key, value);
   }
 }
 
 bool CgiResponseParser::AdvanceBody() {
-  response_.SetBody(buffer_);
+  res_.SetBody(buffer_);
   buffer_.clear();
   state_ = kDone;
   return true;
 }
 
 void CgiResponseParser::OnInternalStateError() {
-  response_.SetStatus(lib::http::kInternalServerError);
-  response_.EnsureDefaultErrorContent();
+  res_.SetStatus(lib::http::kInternalServerError);
+  res_.EnsureDefaultErrorContent();
   state_ = kDone;
 }
 

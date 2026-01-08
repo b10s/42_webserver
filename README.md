@@ -46,3 +46,20 @@ If you want to fix lint errors automatically, use following command.
 ```bash
 make tidy-fix
 ```
+
+## Testing with curl
+```bash
+make
+./webserv
+```
+
+Open different terminal and run following curl commands to test the server in a dev container:
+
+```bash
+curl localhost:8080
+curl localhost:8080/welcome.html
+curl localhost:8081
+curl localhost:8081/cgi/hello.py
+curl localhost:8081/cgi/hello_post.py -d "test data"
+curl localhost:8081/cgi/endless.py -d "test data"
+```

@@ -16,14 +16,17 @@ class ClientSocket : public ASocket {
   virtual ~ClientSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
+  void OnCgiExecutionFinished(int epoll_fd, const std::string& cgi_output);
+  void OnCgiExecutionError(int epoll_fd);
+  void RemoveCgiSocket(ASocket* sock);
 
  private:
   ClientSocket();
   const ServerConfig& config_;
-  HttpRequest request_;
-  HttpResponse response_;
-
-  void HandleEpollIn(int epoll_fd);
+  HttpRequest req_;
+  HttpResponse res_;
+  ASocket* cgi_socket_;
+  SocketResult HandleEpollIn(int epoll_fd);
   void HandleEpollOut();
 
   static const size_t kBufferSize = 1024;

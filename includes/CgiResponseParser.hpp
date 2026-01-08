@@ -25,7 +25,7 @@ class CgiResponseParser : public lib::parser::StreamParser {
   virtual bool IsStrictCrlf() const;
 
  private:
-  HttpResponse response_;
+  HttpResponse res_;
   void StoreHeader(const std::string& key, const std::string& value);
 };
 

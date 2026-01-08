@@ -1,35 +1,69 @@
 #include "socket/CgiSocket.hpp"
 
-#include <fcntl.h>
+#include <sys/epoll.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
-CgiSocket::CgiSocket(lib::type::Fd fd) : ASocket(fd) {
-  // まだ CGI
-  // はノンブロッキングに対応していないため、ブロッキングモードに設定する
-  int flags = fcntl(fd_.GetFd(), F_GETFL, 0);
-  fcntl(fd_.GetFd(), F_SETFL, flags & ~O_NONBLOCK);
+#include <iostream>
+
+#include "lib/type/Fd.hpp"
+#include "socket/ClientSocket.hpp"
+
+CgiSocket::CgiSocket(lib::type::Fd fd, int pid)
+    : ASocket(fd), pid_(pid), owner_(NULL) {
 }
 
 CgiSocket::~CgiSocket() {
+  if (owner_) {
+    owner_->RemoveCgiSocket(this);
+  }
+  if (pid_ > 0) {
+    kill(pid_, SIGTERM);
+    waitpid(pid_, NULL, 0);
+  }
 }
 
 SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
-  (void)epoll_fd;
-  (void)events;
-  return SocketResult();
+  SocketResult result;
+  try {
+    if (events & EPOLLIN) {
+      char buf[kBufferSize];
+      ssize_t n = read(fd_.GetFd(), buf, sizeof(buf));
+      if (n > 0) {
+        read_buffer_.append(buf, n);
+      } else {
+        int status;
+        waitpid(pid_, &status, 0);
+        pid_ = -1;
+
+        result.remove_socket = true;
+        if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
+          throw std::runtime_error("epoll_ctl error");
+        }
+
+        if (owner_) {
+          if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
+            owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
+          } else {
+            owner_->OnCgiExecutionError(epoll_fd);
+          }
+        }
+      }
+    }
+  } catch (const std::exception& e) {
+    std::cerr << "CgiSocket error: " << e.what() << std::endl;
+    result.remove_socket = true;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
+      std::cerr << "epoll_ctl error" << std::endl;
+    }
+  }
+  return result;
 }
 
 ssize_t CgiSocket::Send(const std::string& data) {
   return write(fd_.GetFd(), data.c_str(), data.length());
 }
 
-std::string CgiSocket::Receive() {
-  std::string output;
-  char buffer[4096];
-  ssize_t bytes_read;
-
-  while ((bytes_read = read(fd_.GetFd(), buffer, sizeof(buffer))) > 0) {
-    output.append(buffer, bytes_read);
-  }
-  return output;
+void CgiSocket::OnSetOwner(ClientSocket* owner) {
+  owner_ = owner;
 }
