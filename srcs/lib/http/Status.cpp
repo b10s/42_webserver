@@ -15,6 +15,8 @@ std::string StatusToString(Status status) {
       return "No Content";
     case kResetContent:
       return "Reset Content";
+    case kFound:
+      return "Found";
     case kTemporaryRedirect:
       return "Temporary Redirect";
     case lib::http::kBadRequest:

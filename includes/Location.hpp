@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "lib/http/Method.hpp"
+#include "lib/http/Status.hpp"
 
 class Location {
  private:
@@ -18,6 +19,7 @@ class Location {
   std::string index_file_;
   std::string upload_path_;
   std::string redirect_;
+  lib::http::Status redirect_status_;
   bool cgi_enabled_;
   std::vector<std::string> cgi_allowed_extensions_;
   bool has_allowed_methods_;  // method directive should appear only once
@@ -129,11 +131,20 @@ class Location {
       throw std::runtime_error("Duplicate redirect directive");
     }
     redirect_ = redirect;
+    redirect_status_ = lib::http::kFound;
     has_redirect_ = true;
   }
 
   const std::string& GetRedirect() const {
     return redirect_;
+  }
+
+  lib::http::Status GetRedirectStatus() const {
+    return redirect_status_;
+  }
+
+  bool HasRedirect() const {
+    return has_redirect_;
   }
 
   void SetCgiEnabled(const std::string& value) {

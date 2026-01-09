@@ -76,6 +76,21 @@ TEST(ConfigParser, Location_WithSeveralKnownDirectives) {
   EXPECT_EQ(locs[0].GetName(), "/app/");
 }
 
+TEST(ConfigParser, Location_WithRedirect) {
+  ServerConfig sc;
+  const std::string s =
+      "/old/ {\n"
+      "  redirect /new/page.html;\n"
+      "}\n";
+  EXPECT_NO_THROW(callParseLocation(s, &sc));
+
+  const std::vector<Location>& locs = sc.GetLocations();
+  ASSERT_EQ(locs.size(), 1u);
+  EXPECT_TRUE(locs[0].HasRedirect());
+  EXPECT_EQ(locs[0].GetRedirect(), "/new/page.html");
+  EXPECT_EQ(locs[0].GetRedirectStatus(), lib::http::kFound);
+}
+
 // ==================== error cases ====================
 
 TEST(ConfigParser, Location_InvalidName_NoLeadingSlash_Throws) {

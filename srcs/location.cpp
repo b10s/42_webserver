@@ -8,6 +8,7 @@ Location::Location()
       index_file_(),
       upload_path_(),
       redirect_(),
+      redirect_status_(lib::http::kFound),
       cgi_enabled_(false),
       cgi_allowed_extensions_(),
       has_allowed_methods_(false),

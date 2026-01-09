@@ -13,7 +13,6 @@
 
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
-  // location_match_.loc = NULL;
   PrepareRoutingContext();
 }
 
@@ -21,7 +20,13 @@ RequestHandler::~RequestHandler() {
 }
 
 ExecResult RequestHandler::Run() {
-  // PrepareRoutingContext();
+  if (location_match_.loc->HasRedirect()) {
+    HttpResponse res;
+    res.SetStatus(location_match_.loc->GetRedirectStatus());
+    res.AddHeader("Location", location_match_.loc->GetRedirect());
+    return ExecResult(res);
+  }
+
   lib::http::Method method = req_.GetMethod();
   if (location_match_.loc->HasAllowedMethods()) {
     if (!location_match_.loc->IsMethodAllowed(method)) {
@@ -58,6 +63,9 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc == NULL) {
     throw std::runtime_error("No matching location found for URI: " +
                              req_.GetUri());  // TODO: return HTTP 404?
+  }
+  if (location_match_.loc->HasRedirect()) {
+    return "";
   }
   const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
