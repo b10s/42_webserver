@@ -26,7 +26,7 @@ const std::string kAutoIndex = "autoindex";
 const std::string kIndex = "index";
 const std::string kUploadPath = "upload_path";
 const std::string kServer = "server";
-const std::string kRedirect = "return";
+const std::string kRedirect = "redirect";
 const std::string kCgi = "cgi";
 const std::string kCgiAllowedExtensions = "cgi_allowed_extensions";
 }  // namespace config_tokens
