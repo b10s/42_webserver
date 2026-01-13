@@ -18,10 +18,8 @@ configより緩い部分
 class FileValidator {
  public:
   // made public for testing
-  static bool ContainsDotDotSegments(const std::string& path);
-  static std::string NormalizeSlashes(const std::string& path);
+  static std::string NormalizePathBySegments(const std::string& path);
   static std::vector<std::string> SplitPathSegments(const std::string& path);
-  static std::string RemoveSingleDotSegments(const std::string& path);
   static bool IsPathUnderDocumentRoot(const std::string& path,
                                       const std::string& document_root);
 
