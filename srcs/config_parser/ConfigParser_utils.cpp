@@ -87,7 +87,6 @@ void ConfigParser::ConsumeExpectedSemicolon(const std::string& directive_name) {
   }
 }
 
-
 // Index, Root, UploadPath, Redirect path safety check
 // bool ConfigParser::IsSafeIndexFilename(const std::string& filename) const {
 //   if (filename.empty()) return false;
