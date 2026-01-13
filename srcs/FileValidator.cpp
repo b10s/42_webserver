@@ -43,7 +43,9 @@ std::vector<std::string> FileValidator::SplitPathSegments(
 // - absolute path: "/../x" tries to escape root -> reject
 // - relative path: "../x" cannot be normalized safely without a base -> reject
 std::string FileValidator::NormalizePathBySegments(const std::string& path) {
-  const bool has_leading_slash = !path.empty() && path[0] == '/';
+  if (path.empty() || path[0] != '/') {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   const bool has_trailing_slash = !path.empty() && path[path.size() - 1] == '/';
 
   std::vector<std::string> segments = SplitPathSegments(path);
@@ -63,17 +65,14 @@ std::string FileValidator::NormalizePathBySegments(const std::string& path) {
     stack.push_back(segment);
   }
 
-  std::string rebuilt_path;
-  if (has_leading_slash) rebuilt_path += '/';
+  std::string rebuilt_path = "/";
   for (size_t i = 0; i < stack.size(); ++i) {
     if (i > 0) rebuilt_path += '/';
     rebuilt_path += stack[i];
   }
-  if (has_trailing_slash && !rebuilt_path.empty() &&
-      rebuilt_path[rebuilt_path.size() - 1] != '/') {
+  if (has_trailing_slash && rebuilt_path[rebuilt_path.size() - 1] != '/') {
     rebuilt_path += '/';
   }
-  if (has_leading_slash && rebuilt_path.empty()) return "/";
   return rebuilt_path;
 }
 
