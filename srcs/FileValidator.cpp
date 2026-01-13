@@ -64,8 +64,7 @@ std::string FileValidator::NormalizePathBySegments(const std::string& path) {
       continue;
     } else if (segment == "..") {
       if (stack.empty()) {
-        throw lib::exception::ResponseStatusException(
-            lib::http::kBadRequest);
+        throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
       }
       stack.pop_back();
       continue;
@@ -80,7 +79,8 @@ std::string FileValidator::NormalizePathBySegments(const std::string& path) {
     if (i > 0) normalized_path += '/';
     normalized_path += stack[i];
   }
-  if (has_trailing_slash && normalized_path[normalized_path.size() - 1] != '/') {
+  if (has_trailing_slash &&
+      normalized_path[normalized_path.size() - 1] != '/') {
     normalized_path += '/';
   }
   if (has_leading_slash && normalized_path.empty()) return "/";
