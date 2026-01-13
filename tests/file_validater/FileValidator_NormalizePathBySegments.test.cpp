@@ -37,10 +37,14 @@ TEST(FileValidatorTest, NormalizePathBySegments_EdgeCases) {
             "");
   EXPECT_EQ(FileValidator::NormalizePathBySegments("."),
             "");
+  EXPECT_EQ(FileValidator::NormalizePathBySegments("./"),
+            "");
   EXPECT_EQ(FileValidator::NormalizePathBySegments("./a/b"),
             "a/b");
   EXPECT_EQ(FileValidator::NormalizePathBySegments("a/b/."),
             "a/b");
+  EXPECT_EQ(FileValidator::NormalizePathBySegments("././"),
+            "");
 }
 
 // expect throw for paths that try to escape root

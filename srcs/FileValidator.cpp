@@ -72,19 +72,18 @@ std::string FileValidator::NormalizePathBySegments(const std::string& path) {
     stack.push_back(segment);
   }
 
-  // Reconstruct normalized path
-  std::string normalized_path;
-  if (has_leading_slash) normalized_path += '/';
+  std::string rebuilt_path;
+  if (has_leading_slash) rebuilt_path += '/';
   for (size_t i = 0; i < stack.size(); ++i) {
-    if (i > 0) normalized_path += '/';
-    normalized_path += stack[i];
+    if (i > 0) rebuilt_path += '/';
+    rebuilt_path += stack[i];
   }
-  if (has_trailing_slash &&
-      normalized_path[normalized_path.size() - 1] != '/') {
-    normalized_path += '/';
+  if (has_trailing_slash && !rebuilt_path.empty() &&
+      rebuilt_path[rebuilt_path.size() - 1] != '/') {
+    rebuilt_path += '/';
   }
-  if (has_leading_slash && normalized_path.empty()) return "/";
-  return normalized_path;
+  if (has_leading_slash && rebuilt_path.empty()) return "/";
+  return rebuilt_path;
 }
 
 bool FileValidator::IsPathUnderDocumentRoot(const std::string& path,
