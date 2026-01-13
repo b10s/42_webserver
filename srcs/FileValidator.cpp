@@ -4,20 +4,11 @@
 #include "lib/http/CharValidation.hpp"
 
 /*
-仕様
-percent-decode しない
-NUL/制御文字拒否 : lib/http/CharValidation.hpp の IsValidHeaderChar() を流用
-
-ContainsDotDotSegment(path):
-- 1回でも出たら即 reject（400/404）
-- (移動するならstackやdequeで管理したほうがよいかも？いったん保留)
-- reject:`/../a`  `/a/../b` `/a/..` / `..`
-- rejectしない例（ファイル名）:  `/a..b` / `/a/..b` / `/a/b..`
-
-I don't think we need to resolve symlinks in this project
+percent-decode and resolving symlinks are not handled in this class
 */
 
 // Check for control characters (allow spaces)
+// IsValidHeaderChar() is used to reject control characters and '\0'
 bool FileValidator::ContainsUnsafeChars(const std::string& path) {
   for (size_t i = 0; i < path.size(); ++i) {
     char c = path[i];

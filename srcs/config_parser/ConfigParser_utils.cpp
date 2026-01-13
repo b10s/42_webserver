@@ -86,3 +86,19 @@ void ConfigParser::ConsumeExpectedSemicolon(const std::string& directive_name) {
                              " directive");
   }
 }
+
+
+// Index, Root, UploadPath, Redirect path safety check
+// bool ConfigParser::IsSafeIndexFilename(const std::string& filename) const {
+//   if (filename.empty()) return false;
+//   if (filename.find("../") != std::string::npos) return false;
+//   if (filename.find('/') != std::string::npos)
+//     return false;  // absolute path or subdir
+//   for (size_t i = 0; i < filename.size(); ++i) {
+//     unsigned char c = static_cast<unsigned char>(filename[i]);
+//     if (!lib::http::IsVisibleAscii(c)) return false;  // non-visible ASCII
+//     // reject unsafe chars such as spaces, quotes, angle brackets, etc.
+//     if (!(std::isalnum(c) || c == '.' || c == '-' || c == '_')) return false;
+//   }
+//   return true;
+// }
