@@ -90,21 +90,18 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   // TODO: create AppendIndexIfDirectory(path, req_uri, index)
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
-  bool is_directory =
-      (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
-  /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
   bool is_directory = false;
   if (req_uri_ends_with_slash) {
     is_directory = true;
   } else {
-    struct stat st = lib::utils::StatOrThrow(path);
+    struct stat st = lib::utils::StatOrThrow(
+        path);  // if stat fails, ENOENT/ENOTDIR/EACCES mapped to HTTP status
     is_directory = S_ISDIR(st.st_mode);
   }
-  */
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
-      throw std::runtime_error(
-          "No index files configured for location");  // TODO: status 500?
+      // nginx returns 403 if autoindex is off and no index file is set
+      throw lib::exception::ResponseStatusException(lib::http::kForbidden);
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();
