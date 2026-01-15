@@ -101,7 +101,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
         path);  // if stat fails, ENOENT/ENOTDIR/EACCES mapped to HTTP status
     is_directory = S_ISDIR(st.st_mode);
   }
-  
+
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
       // nginx returns 403 if autoindex is off and no index file is set
