@@ -130,10 +130,12 @@ TEST(ConfigParser, Server_FindLocation_NoMatchingLocation) {
   ASSERT_EQ(servers.size(), 1u);
   const ServerConfig& server = servers[0];
   // "/videos/movie.mp4" -> no match -> throw not found
-  {
-    EXPECT_THROW(
-      server.FindLocationForUri("/videos/movie.mp4"),
-      lib::exception::ResponseStatusException
-    );
+  try {
+    server.FindLocationForUri("/videos/movie.mp4");
+    FAIL() << "Expected ResponseStatusException to be thrown";
+  } catch (const lib::exception::ResponseStatusException& e) {
+    EXPECT_EQ(e.GetStatus(), lib::http::kNotFound);
+  } catch (...) {
+    FAIL() << "Expected ResponseStatusException, but caught a different exception";
   }
 }

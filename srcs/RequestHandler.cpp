@@ -62,7 +62,7 @@ void RequestHandler::PrepareRoutingContext() {
     HttpResponse res(e.GetStatus());
     res.SetBody(lib::http::StatusToString(e.GetStatus()));
     result_ = ExecResult(res);
-    location_match_ = LocationMatch{NULL, ""};
+    location_match_.loc = NULL;
   }
 }
 
@@ -75,8 +75,8 @@ Precondition:
 - remainder starts with '/'
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
-  if (location_match_.loc ==
-      NULL) {  // should not happen (not found case handled in PrepareRoutingContext())
+  if (location_match_.loc == NULL) {  // should not happen (not found case
+                                      // handled in PrepareRoutingContext())
     throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   if (location_match_.loc->HasRedirect()) {
