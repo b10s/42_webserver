@@ -22,16 +22,15 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_RootDirectory) {
     request.SetUri("/");
     RequestHandler handler(config, request);
 
-    std::string out;
-    ASSERT_NO_THROW(out = handler.ResolveFilesystemPath());
-    EXPECT_EQ(out, "/var/www/html/index.html");
+    handler.PrepareRoutingContext(); 
+    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/index.html");
 }
 
 TEST_F(RequestHandlerTest, ResolveFilesystemPath_SubDirectory) {
     HttpRequest request;
     request.SetUri("/images/");
     RequestHandler handler(config, request);
-    
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/images/index.html");
 }
 
@@ -39,7 +38,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_FileRequest) {
     HttpRequest request;
     request.SetUri("/about.html");
     RequestHandler handler(config, request);
-    
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/about.html");
 }
 
@@ -47,7 +46,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_SingleDot) {
     HttpRequest request;
     request.SetUri("/file.");
     RequestHandler handler(config, request);
-    
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/file.");
 }
 
@@ -55,7 +54,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_MultipleDotsAtEnd) {
     HttpRequest request;
     request.SetUri("/strange...");
     RequestHandler handler(config, request);
-    
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/strange...");
 }
 
@@ -63,7 +62,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_DotsInDirectoryName) {
     HttpRequest request;
     request.SetUri("/v2.1.0/about");
     RequestHandler handler(config, request);
-
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/v2.1.0/about");
 }
 
@@ -72,7 +71,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_DirectoryWithDotsTrailingSlash)
     HttpRequest request;
     request.SetUri("/modules/package.v1.2.3/");
     RequestHandler handler(config, request);
-    
+    handler.PrepareRoutingContext(); 
     EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/modules/package.v1.2.3/index.html");
 }
 
@@ -93,7 +92,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_LocationSpecificRoot) {
         HttpRequest request;
         request.SetUri("/kapouet/pouic/toto");
         RequestHandler handler(config, request);
-        
+        handler.PrepareRoutingContext(); 
         EXPECT_EQ(handler.ResolveFilesystemPath(), "/tmp/www/pouic/toto");
     }
 
@@ -102,7 +101,7 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_LocationSpecificRoot) {
         HttpRequest request;
         request.SetUri("/kapouet/");
         RequestHandler handler(config, request);
-        
+        handler.PrepareRoutingContext(); 
         EXPECT_EQ(handler.ResolveFilesystemPath(), "/tmp/www/index.html");
     }
 }

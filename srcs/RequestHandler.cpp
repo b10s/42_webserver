@@ -13,57 +13,54 @@
 
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
-  PrepareRoutingContext();
 }
 
 RequestHandler::~RequestHandler() {
 }
 
 ExecResult RequestHandler::Run() {
-  // PrepareRoutingContext is called in the constructor already,
-  // so if location_match_.loc is NULL, routing preparation did not complete
-  // successfully (e.g., no matching location or an error during preparation).
-  if (location_match_.loc == NULL) {
-    return result_;
-  }
+  try {
+    PrepareRoutingContext();
 
-  if (location_match_.loc->HasRedirect()) {
-    HttpResponse res;
-    res.SetStatus(location_match_.loc->GetRedirectStatus());
-    res.AddHeader("Location", location_match_.loc->GetRedirect());
+    if (location_match_.loc->HasRedirect()) {
+      HttpResponse res;
+      res.SetStatus(location_match_.loc->GetRedirectStatus());
+      res.AddHeader("Location", location_match_.loc->GetRedirect());
+      return ExecResult(res);
+    }
+
+    lib::http::Method method = req_.GetMethod();
+    if (location_match_.loc->HasAllowedMethods()) {
+      if (!location_match_.loc->IsMethodAllowed(method)) {
+        return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
+      }
+    }
+
+    if (method == lib::http::kGet) {
+      HandleGet();
+    } else if (method == lib::http::kPost) {
+      HandlePost();
+    } else if (method == lib::http::kDelete) {
+      HandleDelete();
+    } else {
+      return ExecResult(HttpResponse(lib::http::kNotImplemented));
+    }
+    return result_;
+  } catch (const lib::exception::ResponseStatusException& e) {
+    HttpResponse res(e.GetStatus());
+    res.SetBody(lib::http::StatusToString(e.GetStatus()));
+    return ExecResult(res);
+  } catch (const std::exception& e) {
+    HttpResponse res(lib::http::kInternalServerError);
+    res.SetBody("Internal Server Error");
     return ExecResult(res);
   }
-
-  lib::http::Method method = req_.GetMethod();
-  if (location_match_.loc->HasAllowedMethods()) {
-    if (!location_match_.loc->IsMethodAllowed(method)) {
-      return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
-    }
-  }
-
-  if (method == lib::http::kGet) {
-    HandleGet();
-  } else if (method == lib::http::kPost) {
-    HandlePost();
-  } else if (method == lib::http::kDelete) {
-    HandleDelete();
-  } else {
-    return ExecResult(HttpResponse(lib::http::kNotImplemented));
-  }
-  return result_;
 }
 
 void RequestHandler::PrepareRoutingContext() {
   const std::string req_uri = req_.GetUri();
-  try {
-    location_match_ = conf_.FindLocationForUri(req_uri);
-    filesystem_path_ = ResolveFilesystemPath();
-  } catch (const lib::exception::ResponseStatusException& e) {
-    HttpResponse res(e.GetStatus());
-    res.SetBody(lib::http::StatusToString(e.GetStatus()));
-    result_ = ExecResult(res);
-    location_match_.loc = NULL;
-  }
+  location_match_ = conf_.FindLocationForUri(req_uri);
+  filesystem_path_ = ResolveFilesystemPath();
 }
 
 /*
