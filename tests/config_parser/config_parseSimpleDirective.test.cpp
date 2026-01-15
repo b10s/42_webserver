@@ -65,7 +65,7 @@ TEST(ConfigParser, SimpleDir_ParseRoot_RelativePath_Throws) {
 
 TEST(ConfigParser, SimpleDir_ParseRoot_InvalidChar_Throws) {
   Location loc;
-  EXPECT_THROW(callParseRoot("./var/www\r/html;", &loc), std::runtime_error);
+  EXPECT_THROW(callParseRoot("/var/www\r/html;", &loc), std::runtime_error);
 }
 
 /* ===================== ParseUploadPath ===================== */
