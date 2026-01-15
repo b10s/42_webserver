@@ -30,7 +30,7 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
 }
 
 void ConfigParser::RequireAbsoluteSafePathOrThrow(const std::string& path,
-                                   const std::string& label) {
+                                                  const std::string& label) {
   if (path.empty() || path[0] != '/') {
     throw std::runtime_error(label + " must be an absolute path: " + path);
   }

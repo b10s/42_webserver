@@ -49,7 +49,7 @@ class ConfigParser {
   void ConsumeExpectedSemicolon(const std::string& directive_name);
   bool IsSafeIndexFilename(const std::string& filename) const;
   void RequireAbsoluteSafePathOrThrow(const std::string& path,
-                                   const std::string& label);
+                                      const std::string& label);
 
  public:
   std::string content;  // Made public for easier access in parsing functions
