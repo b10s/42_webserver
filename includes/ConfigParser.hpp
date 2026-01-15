@@ -79,6 +79,7 @@ class ConfigParser {
   }
 
   bool IsSafeIndexFilename(const std::string& filename) const;
+  void IsSafeRootPathOrThrow(const std::string& path);
 };
 
 template <typename T, typename Setter>

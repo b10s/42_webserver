@@ -56,8 +56,9 @@ void RequestHandler::PrepareRoutingContext() {
 Resolves the request URI into an absolute filesystem path
 suitable for open(), stat(), and read().
 
-TODO: check file existence and permissions, detect dangerous paths
-return 308 if uri is a directory but missing trailing '/' (normalize)?
+Precondition:
+- location root is an absolute path
+- remainder starts with '/'
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc == NULL) {

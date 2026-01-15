@@ -18,7 +18,7 @@ TEST(ConfigParser, Server_FindLocation_BasicMatches) {
   parser.content =
       "{ "
       "listen 8080; "
-      "location / { root ./www; } "
+      "location / { root /www; } "
       "location /kapouet { root /tmp/www; } "
       "location /images { root /var/img; } "
       "}";
@@ -92,7 +92,7 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
   parser.content =
       "{ "
       "listen 8080; "
-      "location / { root ./www; } "
+      "location / { root /www; } "
       "location /kapouet { root /tmp/www; } "
       "}";
   EXPECT_NO_THROW(parser.ParseServer());

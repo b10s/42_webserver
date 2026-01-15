@@ -1,13 +1,6 @@
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
 
-// TODO: normalize path
-// root = NormalizeSlashes(root);
-// root = TrimTrailingSlashExceptRoot(root);
-void ConfigParser::ParseRoot(Location* location) {
-  ParseSimpleDirective(location, &Location::SetRoot, "root directory path");
-}
-
 void ConfigParser::ParseUploadPath(Location* location) {
   ParseSimpleDirective(location, &Location::SetUploadPath, "upload_path value");
 }
