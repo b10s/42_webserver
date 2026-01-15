@@ -13,6 +13,7 @@
 
 #include "Location.hpp"
 #include "LocationMatch.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
 
 class ServerConfig {

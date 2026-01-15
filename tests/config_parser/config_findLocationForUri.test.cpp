@@ -116,3 +116,24 @@ TEST(ConfigParser, Server_FindLocation_TrailingSlashes) {
     EXPECT_EQ(m3.remainder, "/");
   }
 }
+
+// throw not found if no matching location
+TEST(ConfigParser, Server_FindLocation_NoMatchingLocation) {
+  ConfigParser parser;
+  parser.content =
+      "{ "
+      "listen 8080; "
+      "location /images { root /var/img; } "
+      "}";
+  EXPECT_NO_THROW(parser.ParseServer());
+  const std::vector<ServerConfig>& servers = parser.GetServerConfigs();
+  ASSERT_EQ(servers.size(), 1u);
+  const ServerConfig& server = servers[0];
+  // "/videos/movie.mp4" -> no match -> throw not found
+  {
+    EXPECT_THROW(
+      server.FindLocationForUri("/videos/movie.mp4"),
+      lib::exception::ResponseStatusException
+    );
+  }
+}

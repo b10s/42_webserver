@@ -48,8 +48,7 @@ LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
     }
   }
   if (!best.loc) {
-    throw std::runtime_error("No matching location found for URI: " +
-                             uri_key);  // TODO: return HTTP 404?
+    throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   const std::string best_key = TrimTrailingSlashExceptRoot(best.loc->GetName());
   // build remainder (make sure remainder always starts with '/')

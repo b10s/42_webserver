@@ -20,6 +20,12 @@ RequestHandler::~RequestHandler() {
 }
 
 ExecResult RequestHandler::Run() {
+  // PrepareRoutingContext is called in the constructor already
+  // so if location_match_.loc is NULL, it means no matching location found
+  if (location_match_.loc == NULL) {
+    return result_;
+  }
+
   if (location_match_.loc->HasRedirect()) {
     HttpResponse res;
     res.SetStatus(location_match_.loc->GetRedirectStatus());
@@ -48,8 +54,15 @@ ExecResult RequestHandler::Run() {
 
 void RequestHandler::PrepareRoutingContext() {
   const std::string req_uri = req_.GetUri();
-  location_match_ = conf_.FindLocationForUri(req_uri);
-  filesystem_path_ = ResolveFilesystemPath();
+  try {
+    location_match_ = conf_.FindLocationForUri(req_uri);
+    filesystem_path_ = ResolveFilesystemPath();
+  } catch (const lib::exception::ResponseStatusException& e) {
+    HttpResponse res(e.GetStatus());
+    res.SetBody(lib::http::StatusToString(e.GetStatus()));
+    result_ = ExecResult(res);
+    location_match_.loc = NULL;
+  }
 }
 
 /*
@@ -61,9 +74,9 @@ Precondition:
 - remainder starts with '/'
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
-  if (location_match_.loc == NULL) {
-    throw std::runtime_error("No matching location found for URI: " +
-                             req_.GetUri());  // TODO: return HTTP 404?
+  if (location_match_.loc ==
+      NULL) {  // should not happen (not found case handled in Run())
+    throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   if (location_match_.loc->HasRedirect()) {
     return "";
@@ -89,7 +102,8 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   */
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
-      throw std::runtime_error("No index files configured for location");
+      throw std::runtime_error(
+          "No index files configured for location");  // TODO: status 500?
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();
