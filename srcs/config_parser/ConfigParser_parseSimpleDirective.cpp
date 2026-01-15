@@ -1,10 +1,6 @@
 #include "ConfigParser.hpp"
 #include "ServerConfig.hpp"
 
-void ConfigParser::ParseUploadPath(Location* location) {
-  ParseSimpleDirective(location, &Location::SetUploadPath, "upload_path value");
-}
-
 void ConfigParser::ParseRedirect(Location* location) {
   ParseSimpleDirective(location, &Location::SetRedirect, "redirect value");
 }

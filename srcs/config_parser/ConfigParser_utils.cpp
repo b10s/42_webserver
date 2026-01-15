@@ -5,9 +5,7 @@
 namespace {
 const std::string kWhitespace = " \t\r\n";
 const std::string kSpecialLetter = "{};";
-}  // namespace
 
-namespace {
 std::map<std::string, TokenType> CreateTokenTable() {
   std::map<std::string, TokenType> m;
   m.insert(std::make_pair(config_tokens::kListen, kTokenListen));
@@ -70,7 +68,7 @@ bool ConfigParser::IsValidPortNumber(const std::string& port) const {
 
 bool ConfigParser::IsAllDigits(const std::string& str) const {
   for (size_t i = 0; i < str.length(); ++i) {
-    if (!isdigit(str[i])) return false;
+    if (!isdigit(static_cast<unsigned char>(str[i]))) return false;
   }
   return true;
 }

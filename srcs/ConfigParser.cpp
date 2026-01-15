@@ -28,3 +28,15 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
                         std::istreambuf_iterator<char>());
   file.close();
 }
+
+void ConfigParser::RequireAbsoluteSafePathOrThrow(const std::string& path,
+                                                  const std::string& label) {
+  if (path.empty() || path[0] != '/') {
+    throw std::runtime_error(label + " must be an absolute path: " + path);
+  }
+  for (size_t i = 0; i < path.size(); ++i) {
+    if (!lib::http::IsValidHeaderChar(path[i])) {
+      throw std::runtime_error(label + " contains invalid character: " + path);
+    }
+  }
+}

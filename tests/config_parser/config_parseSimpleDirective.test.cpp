@@ -80,6 +80,16 @@ TEST(ConfigParser, SimpleDir_ParseUploadPath_MissingSemicolon_Throws) {
   EXPECT_THROW(callParseUploadPath("/uploads", &loc), std::runtime_error);
 }
 
+TEST(ConfigParser, SimpleDir_ParseUploadPath_RelativePath_Throws) {
+  Location loc;
+  EXPECT_THROW(callParseUploadPath("./uploads;", &loc), std::runtime_error);
+}
+
+TEST(ConfigParser, SimpleDir_ParseUploadPath_UnsafeChars_Throws) {
+  Location loc;
+  EXPECT_THROW(callParseUploadPath("/upload\ts;", &loc), std::runtime_error);
+}
+
 TEST(ConfigParser, SimpleDir_ParseUploadPath_EmptyValue_Throws) {
   Location loc;
   EXPECT_THROW(callParseUploadPath(";", &loc), std::runtime_error);

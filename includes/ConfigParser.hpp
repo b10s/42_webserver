@@ -13,6 +13,7 @@
 #include "Location.hpp"
 #include "ServerConfig.hpp"
 #include "enums.hpp"
+#include "lib/http/CharValidation.hpp"
 
 namespace config_tokens {
 const std::string kListen = "listen";
@@ -46,6 +47,9 @@ class ConfigParser {
   TokenType ToTokenType(const std::string& token) const;
   std::string Tokenize(const std::string& content);
   void ConsumeExpectedSemicolon(const std::string& directive_name);
+  bool IsSafeIndexFilename(const std::string& filename) const;
+  void RequireAbsoluteSafePathOrThrow(const std::string& path,
+                                      const std::string& label);
 
  public:
   std::string content;  // Made public for easier access in parsing functions
@@ -77,9 +81,6 @@ class ConfigParser {
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
   }
-
-  bool IsSafeIndexFilename(const std::string& filename) const;
-  void IsSafeRootPathOrThrow(const std::string& path);
 };
 
 template <typename T, typename Setter>
