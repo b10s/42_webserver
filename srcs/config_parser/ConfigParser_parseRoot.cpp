@@ -10,9 +10,6 @@ void ConfigParser::IsSafeRootPathOrThrow(const std::string& path) {
       throw std::runtime_error("Root path contains invalid character: " + path);
     }
   }
-  if (path.find("..") != std::string::npos) {
-    throw std::runtime_error("Root path must not contain '..': " + path);
-  }
 }
 
 void ConfigParser::ParseRoot(Location* location) {
