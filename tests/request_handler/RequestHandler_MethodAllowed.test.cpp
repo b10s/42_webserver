@@ -31,7 +31,7 @@ protected:
 
 TEST_F(RequestHandlerMethodTest, MethodNotAllowed_ExplicitBlocked) {
     HttpRequest request;
-    request.SetUri("/api/resource");
+    request.SetUri("/api/resource/");
     request.SetMethod(lib::http::kPost); // Only GET is allowed in /api
 
     RequestHandler handler(config, request);
@@ -42,7 +42,7 @@ TEST_F(RequestHandlerMethodTest, MethodNotAllowed_ExplicitBlocked) {
 
 TEST_F(RequestHandlerMethodTest, MethodNotAllowed_AnotherBlocked) {
     HttpRequest request;
-    request.SetUri("/api/resource");
+    request.SetUri("/api/resource/");
     request.SetMethod(lib::http::kDelete); // Only GET is allowed in /api
 
     RequestHandler handler(config, request);

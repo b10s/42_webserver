@@ -90,6 +90,9 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   // TODO: create AppendIndexIfDirectory(path, req_uri, index)
   bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
+
+  // bool is_directory =
+  //     (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
   bool is_directory = false;
   if (req_uri_ends_with_slash) {
     is_directory = true;
@@ -98,6 +101,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
         path);  // if stat fails, ENOENT/ENOTDIR/EACCES mapped to HTTP status
     is_directory = S_ISDIR(st.st_mode);
   }
+  
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
       // nginx returns 403 if autoindex is off and no index file is set
