@@ -75,7 +75,7 @@ Precondition:
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc ==
-      NULL) {  // should not happen (not found case handled in Run())
+      NULL) {  // should not happen (not found case handled in PrepareRoutingContext())
     throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   if (location_match_.loc->HasRedirect()) {
