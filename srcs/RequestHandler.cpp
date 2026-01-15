@@ -62,7 +62,7 @@ void RequestHandler::PrepareRoutingContext() {
     HttpResponse res(e.GetStatus());
     res.SetBody(lib::http::StatusToString(e.GetStatus()));
     result_ = ExecResult(res);
-    location_match_.loc = NULL;
+    location_match_ = LocationMatch{NULL, ""};
   }
 }
 
