@@ -72,8 +72,10 @@ Precondition:
 - remainder starts with '/'
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
-  if (location_match_.loc == NULL) {  // should not happen (not found case
-                                      // handled in PrepareRoutingContext())
+  if (location_match_.loc == NULL) {  // Defensive check for direct calls to
+                                      // ResolveFilesystemPath() without a prior
+                                      // PrepareRoutingContext(); in normal flows
+                                      // FindLocationForUri() throws on not found.
     throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   if (location_match_.loc->HasRedirect()) {
