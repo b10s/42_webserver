@@ -9,5 +9,5 @@ void ConfigParser::ParseUploadPath(Location* location) {
   }
   RequireAbsoluteSafePathOrThrow(token, "Upload path");
   location->SetUploadPath(token);
-  ConsumeExpectedSemicolon("root path");
+  ConsumeExpectedSemicolon("upload path");
 }
