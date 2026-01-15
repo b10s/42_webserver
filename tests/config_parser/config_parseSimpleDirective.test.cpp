@@ -37,6 +37,12 @@ TEST(ConfigParser, SimpleDir_ParseRoot_OK) {
   EXPECT_EQ(loc.GetRoot(), "/var/www/html");
 }
 
+TEST(ConfigParser, SimpleDir_ParseRoot_DotdotInFileName_OK) {
+  Location loc;
+  EXPECT_NO_THROW(callParseRoot("/var/ww..w/html;", &loc));
+  EXPECT_EQ(loc.GetRoot(), "/var/ww..w/html");
+}
+
 TEST(ConfigParser, SimpleDir_ParseRoot_MissingSemicolon_Throws) {
   Location loc;
   EXPECT_THROW(callParseRoot("/var/www/html", &loc), std::runtime_error);
