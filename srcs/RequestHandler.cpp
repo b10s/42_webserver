@@ -13,37 +13,48 @@
 
 RequestHandler::RequestHandler(ServerConfig conf, HttpRequest req)
     : conf_(conf), req_(req) {
-  PrepareRoutingContext();
 }
 
 RequestHandler::~RequestHandler() {
 }
 
 ExecResult RequestHandler::Run() {
-  if (location_match_.loc->HasRedirect()) {
-    HttpResponse res;
-    res.SetStatus(location_match_.loc->GetRedirectStatus());
-    res.AddHeader("Location", location_match_.loc->GetRedirect());
+  try {
+    PrepareRoutingContext();
+
+    if (location_match_.loc->HasRedirect()) {
+      HttpResponse res;
+      res.SetStatus(location_match_.loc->GetRedirectStatus());
+      res.AddHeader("Location", location_match_.loc->GetRedirect());
+      return ExecResult(res);
+    }
+
+    lib::http::Method method = req_.GetMethod();
+    if (location_match_.loc->HasAllowedMethods()) {
+      if (!location_match_.loc->IsMethodAllowed(method)) {
+        return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
+      }
+    }
+
+    if (method == lib::http::kGet) {
+      HandleGet();
+    } else if (method == lib::http::kPost) {
+      HandlePost();
+    } else if (method == lib::http::kDelete) {
+      HandleDelete();
+    } else {
+      return ExecResult(HttpResponse(lib::http::kNotImplemented));
+    }
+    return result_;
+  } catch (const lib::exception::ResponseStatusException& e) {
+    HttpResponse res(e.GetStatus());
+    res.SetBody(lib::http::StatusToString(e.GetStatus()));
+    return ExecResult(res);
+  } catch (const std::exception& e) {
+    HttpResponse res(lib::http::kInternalServerError);
+    res.SetBody("Internal Server Error");
     return ExecResult(res);
   }
-
-  lib::http::Method method = req_.GetMethod();
-  if (location_match_.loc->HasAllowedMethods()) {
-    if (!location_match_.loc->IsMethodAllowed(method)) {
-      return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
-    }
-  }
-
-  if (method == lib::http::kGet) {
-    HandleGet();
-  } else if (method == lib::http::kPost) {
-    HandlePost();
-  } else if (method == lib::http::kDelete) {
-    HandleDelete();
-  } else {
-    return ExecResult(HttpResponse(lib::http::kNotImplemented));
-  }
-  return result_;
 }
 
 void RequestHandler::PrepareRoutingContext() {
@@ -61,9 +72,12 @@ Precondition:
 - remainder starts with '/'
 */
 std::string RequestHandler::ResolveFilesystemPath() const {
-  if (location_match_.loc == NULL) {
-    throw std::runtime_error("No matching location found for URI: " +
-                             req_.GetUri());  // TODO: return HTTP 404?
+  if (location_match_.loc ==
+      NULL) {  // Defensive check for direct calls to
+               // ResolveFilesystemPath() without a prior
+               // PrepareRoutingContext(); in normal flows
+               // FindLocationForUri() throws on not found.
+    throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
   if (location_match_.loc->HasRedirect()) {
     return "";
@@ -89,7 +103,8 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   */
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
-      throw std::runtime_error("No index files configured for location");
+      throw std::runtime_error(
+          "No index files configured for location");  // TODO: status 500?
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();

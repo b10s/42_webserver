@@ -64,8 +64,7 @@ TEST(ConfigParser, Server_FindLocation_BasicMatches) {
 }
 
 // throws if no root location is defined
-// TODO: change behavior to return 404 location instead
-TEST(ConfigParser, Server_FindLocation_NoRootLocation) {
+TEST(ConfigParser, Server_FindLocation_NoMatchingLocation) {
   ConfigParser parser;
   parser.content =
       "{ "
@@ -77,12 +76,14 @@ TEST(ConfigParser, Server_FindLocation_NoRootLocation) {
   ASSERT_EQ(servers.size(), 1u);
   const ServerConfig& server = servers[0];
 
-  // /kapouet2/test -> no match -> throws (current behavior)
-  {
-    EXPECT_THROW(
-      server.FindLocationForUri("/kapouet2/test"),
-      std::runtime_error
-    );
+  // /kapouet2/test -> no match -> throws 404
+  try {
+    server.FindLocationForUri("/kapouet2/test");
+    FAIL() << "Expected ResponseStatusException to be thrown";
+  } catch (const lib::exception::ResponseStatusException& e) {
+    EXPECT_EQ(e.GetStatus(), lib::http::kNotFound);
+  } catch (...) {
+    FAIL() << "Expected ResponseStatusException, but caught a different exception";
   }
 }
 
