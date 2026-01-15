@@ -20,8 +20,9 @@ RequestHandler::~RequestHandler() {
 }
 
 ExecResult RequestHandler::Run() {
-  // PrepareRoutingContext is called in the constructor already
-  // so if location_match_.loc is NULL, it means no matching location found
+  // PrepareRoutingContext is called in the constructor already,
+  // so if location_match_.loc is NULL, routing preparation did not complete
+  // successfully (e.g., no matching location or an error during preparation).
   if (location_match_.loc == NULL) {
     return result_;
   }
