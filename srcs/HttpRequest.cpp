@@ -21,7 +21,8 @@ HttpRequest::HttpRequest()
       content_length_(-1),  // default: unknown length, chunked possible
       next_chunk_size_(-1),
       keep_alive_(false),
-      client_ip_() {
+      client_ip_(),
+      max_body_size_(std::numeric_limits<size_t>::max()) {
 }
 
 HttpRequest::HttpRequest(const HttpRequest& src)

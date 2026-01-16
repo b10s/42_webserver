@@ -60,6 +60,7 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     throw lib::exception::ConnectionClosed();
   }
 
+  // ここでtry catchして、例えばParseでボディサイズを超えたら413などを返すようにする？
   req_.Parse(buffer, bytes_received);
   if (req_.IsDone()) {
     RequestHandler handler(config_, req_);
