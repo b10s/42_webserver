@@ -57,7 +57,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
                 << std::strerror(errno) << std::endl;
       result.remove_socket = true;
       epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
-    } 
+    }
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;
     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
