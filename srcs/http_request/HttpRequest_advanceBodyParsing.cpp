@@ -54,7 +54,7 @@ bool HttpRequest::AdvanceBody() {
 // content length mode
 bool HttpRequest::AdvanceContentLengthBody() {
   const size_t need = static_cast<size_t>(content_length_);
-  if (need > server_max_body_size_) {
+  if (need > max_body_size_limit_) {
     throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
   }
   if (need == 0) {
@@ -154,7 +154,7 @@ bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
 
 // append "<data>\r\n" and advance pos, but do not erase yet
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
-  // overflow check: body_ size + chunk_size > server_max_body_size_
+  // overflow check: body_ size + chunk_size > max_body_size_limit_
   if (chunk_size > max_body_size_limit_ ||
       body_.size() > max_body_size_limit_ - chunk_size) {
     throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);

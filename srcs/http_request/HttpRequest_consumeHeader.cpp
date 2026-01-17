@@ -49,7 +49,7 @@ void HttpRequest::ValidateBodyHeaders() {
     ParseContentLength(s);
     // Once content_length_ is determined, throw if it exceeds max_body_size_.
     if (content_length_ >= 0 &&
-        static_cast<size_t>(content_length_) > server_max_body_size_) {
+        static_cast<size_t>(content_length_) > max_body_size_limit_) {
       throw lib::exception::ResponseStatusException(
           lib::http::kPayloadTooLarge);
     }
