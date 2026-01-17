@@ -71,6 +71,9 @@ Precondition:
 - location root is an absolute path
 - remainder starts with '/'
 */
+
+
+// TODO:  POSTとDELETEで分ける
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc ==
       NULL) {  // Defensive check for direct calls to
