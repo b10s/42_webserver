@@ -18,6 +18,7 @@ ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config), cgi_socket_(NULL) {
   req_.SetClientIp(client_ip);
+  req_.SetServerMaxBodySize(config_.GetMaxBodySize());
 }
 
 ClientSocket::~ClientSocket() {
@@ -41,6 +42,16 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     if (events & EPOLLOUT) {
       HandleEpollOut();
     }
+  } catch (const lib::exception::ResponseStatusException& e) { //413/400/500
+    res_ = HttpResponse(e.GetStatus());
+    res_.AddHeader("Connection", "close");
+    res_.AddHeader("Content-Type", "text/html");
+    res_.EnsureDefaultErrorContent();
+    write_buffer_ = res_.ToHttpString();
+    epoll_event ev;
+    ev.events = EPOLLOUT;
+    ev.data.ptr = this;
+    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev); // HandleEpollOut will close
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;
     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
@@ -60,9 +71,6 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     throw lib::exception::ConnectionClosed();
   }
 
-  // ここでtry
-  // catchして、例えばParseでボディサイズを超えたら413などを返すようにする？
-  req_.SetServerMaxBodySize(config_.GetMaxBodySize());
   req_.Parse(buffer, bytes_received);
   if (req_.IsDone()) {
     RequestHandler handler(config_, req_);

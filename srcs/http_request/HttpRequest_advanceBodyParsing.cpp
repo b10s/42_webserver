@@ -156,7 +156,7 @@ bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   // overflow check: body_ size + chunk_size > server_max_body_size_
   if (chunk_size > server_max_body_size_ ||
-      body_.size() + chunk_size > server_max_body_size_) {
+      body_.size() > server_max_body_size_ - chunk_size) {
     throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
   }
 
