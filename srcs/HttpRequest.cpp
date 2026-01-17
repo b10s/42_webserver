@@ -22,7 +22,7 @@ HttpRequest::HttpRequest()
       next_chunk_size_(-1),
       keep_alive_(false),
       client_ip_(),
-      max_body_size_(std::numeric_limits<size_t>::max()) {
+      server_max_body_size_(kMaxPayloadSize) {
 }
 
 HttpRequest::HttpRequest(const HttpRequest& src)
@@ -56,6 +56,7 @@ HttpRequest& HttpRequest::operator=(const HttpRequest& src) {
     next_chunk_size_ = src.next_chunk_size_;
     keep_alive_ = src.keep_alive_;
     client_ip_ = src.client_ip_;
+    server_max_body_size_ = src.server_max_body_size_;
   }
   return *this;
 }
