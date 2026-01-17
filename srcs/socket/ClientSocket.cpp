@@ -18,7 +18,7 @@ ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config), cgi_socket_(NULL) {
   req_.SetClientIp(client_ip);
-  req_.SetServerMaxBodySize(config_.GetMaxBodySize());
+  req_.SetMaxBodySizeLimit(config_.GetMaxBodySize());
 }
 
 ClientSocket::~ClientSocket() {

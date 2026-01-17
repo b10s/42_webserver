@@ -136,8 +136,8 @@ class HttpRequest : public lib::parser::StreamParser {
     state_ = p;
   }
 
-  void SetServerMaxBodySize(size_t bytes) {
-    server_max_body_size_ = bytes;
+  void SetMaxBodySizeLimit(size_t bytes) {
+    max_body_size_limit_ = bytes;
   }
 
   size_t GetServerMaxBodySize() const {

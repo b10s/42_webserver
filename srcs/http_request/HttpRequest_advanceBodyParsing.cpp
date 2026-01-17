@@ -155,8 +155,8 @@ bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
 // append "<data>\r\n" and advance pos, but do not erase yet
 bool HttpRequest::AppendChunkData(size_t& pos, size_t chunk_size) {
   // overflow check: body_ size + chunk_size > server_max_body_size_
-  if (chunk_size > server_max_body_size_ ||
-      body_.size() > server_max_body_size_ - chunk_size) {
+  if (chunk_size > max_body_size_limit_ ||
+      body_.size() > max_body_size_limit_ - chunk_size) {
     throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
   }
 
