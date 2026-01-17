@@ -47,7 +47,7 @@ void HttpRequest::ValidateBodyHeaders() {
   if (has_cl) {
     const std::string& s = headers_["content-length"];
     ParseContentLength(s);
-    // content_length_ が確定した時点で、max_body_size_ を超えていたらthrow
+    // Once content_length_ is determined, throw if it exceeds max_body_size_.
     if (content_length_ >= 0 &&
         static_cast<size_t>(content_length_) > server_max_body_size_) {
       throw lib::exception::ResponseStatusException(
