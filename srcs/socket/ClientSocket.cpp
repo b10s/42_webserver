@@ -42,7 +42,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     if (events & EPOLLOUT) {
       HandleEpollOut();
     }
-  } catch (const lib::exception::ResponseStatusException& e) { //413/400/500
+  } catch (const lib::exception::ResponseStatusException& e) {  // 413/400/500
     res_ = HttpResponse(e.GetStatus());
     res_.AddHeader("Connection", "close");
     res_.AddHeader("Content-Type", "text/html");
@@ -51,7 +51,8 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     epoll_event ev;
     ev.events = EPOLLOUT;
     ev.data.ptr = this;
-    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev); // HandleEpollOut will close
+    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(),
+              &ev);  // HandleEpollOut will close
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;
     epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
