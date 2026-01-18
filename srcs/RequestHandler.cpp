@@ -134,20 +134,19 @@ void RequestHandler::HandlePost() {
   } else {
     std::ofstream ofs(filesystem_path_.c_str(), std::ios::binary);
     if (!ofs) {
-      throw lib::exception::ResponseStatusException(
-          lib::http::kForbidden);
-      // response_->setStatus(kForbidden); // shoud we check errno and return 403/404/500 accordingly?
-      // return;
+      throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+      // response_->setStatus(kForbidden); // shoud we check errno and return
+      // 403/404/500 accordingly? return;
     }
     const std::string& req_body = req_.GetBody();
     ofs.write(req_body.data(), static_cast<std::streamsize>(req_body.size()));
     if (!ofs) {
-       throw lib::exception::ResponseStatusException(
+      throw lib::exception::ResponseStatusException(
           lib::http::kInternalServerError);
       // response_->setStatus(kInternalServerError);
       // return;
     }
-    HttpResponse res(lib::http::kCreated); // 201 Created
+    HttpResponse res(lib::http::kCreated);  // 201 Created
     res.AddHeader("Content-Length", "0");
     result_ = ExecResult(res);
   }
