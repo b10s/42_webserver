@@ -28,9 +28,7 @@ bool HttpRequest::AdvanceHeader() {
     cur = this->ConsumeMethod(cur);
     cur = this->ConsumeUri(cur);
     cur = this->ConsumeVersion(cur);
-    cur =
-        this->ConsumeHeader(cur);  // throw 413 if content_length_ exceeds limit
-    (void)cur;                     // suppress unused variable warning
+    this->ConsumeHeader(cur);  // throw 413 if content_length_ exceeds limit
   } catch (lib::exception::ResponseStatusException&) {
     throw;
   } catch (std::exception&) {
