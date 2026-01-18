@@ -27,6 +27,7 @@ class HttpRequest : public lib::parser::StreamParser {
   std::ptrdiff_t next_chunk_size_;  // -1: waiting for chunk size line
   bool keep_alive_;
   std::string client_ip_;
+  size_t max_body_size_limit_;  // default: kMaxPayloadSize
 
   const char* ParseHeader(const char* req);
 
@@ -133,6 +134,14 @@ class HttpRequest : public lib::parser::StreamParser {
 
   void SetStateForTest(State p) {
     state_ = p;
+  }
+
+  void SetMaxBodySizeLimit(size_t bytes) {
+    max_body_size_limit_ = bytes;
+  }
+
+  size_t GetServerMaxBodySize() const {
+    return max_body_size_limit_;
   }
 };
 

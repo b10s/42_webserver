@@ -19,7 +19,7 @@ std::string StatusToString(Status status) {
       return "Found";
     case kTemporaryRedirect:
       return "Temporary Redirect";
-    case lib::http::kBadRequest:
+    case kBadRequest:
       return "Bad Request";
     case kUnauthorized:
       return "Unauthorized";
@@ -29,18 +29,20 @@ std::string StatusToString(Status status) {
       return "Not Found";
     case kMethodNotAllowed:
       return "Method Not Allowed";
+    case kLengthRequired:
+      return "Length Required";
+    case kPayloadTooLarge:
+      return "Payload Too Large";
     case kUriTooLong:
       return "URI Too Long";
-    case lib::http::kInternalServerError:
+    case kRequestHeaderFieldsTooLarge:
+      return "Request Header Fields Too Large";
+    case kInternalServerError:
       return "Internal Server Error";
     case kNotImplemented:
       return "Not Implemented";
     case kBadGateway:
       return "Bad Gateway";
-    case kRequestHeaderFieldsTooLarge:
-      return "Request Header Fields Too Large";
-    case kLengthRequired:
-      return "Length Required";
     default:
       return "I'm a teapot";
   }
