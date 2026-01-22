@@ -122,14 +122,16 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
 }
 
 void RequestHandler::HandleGet() {
+  std::string path_with_index =
+      AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
   if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
     result_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
     HttpResponse res;
     res.AddHeader("Content-Type",
-                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
+                  lib::http::DetectMimeTypeFromPath(path_with_index));
     res.SetBody(body);
     res.SetStatus(lib::http::kOk);
     result_ = ExecResult(res);
@@ -137,11 +139,19 @@ void RequestHandler::HandleGet() {
 }
 
 void RequestHandler::HandlePost() {
+  const std::string req_uri = req_.GetUri();
+  if (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/') {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
+  const std::string path = filesystem_path_;
+  if (lib::utils::IsDirectory(path)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    CgiExecutor cgi(req_, *location_match_.loc, path);
     result_ = cgi.Run();
   } else {
-    std::ofstream ofs(filesystem_path_.c_str(), std::ios::binary);
+    std::ofstream ofs(path.c_str(), std::ios::binary);
     if (!ofs) {
       throw lib::exception::ResponseStatusException(lib::http::kForbidden);
       // response_->setStatus(kForbidden); // shoud we check errno and return
