@@ -107,14 +107,15 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
     is_directory = S_ISDIR(st.st_mode);
   }
   */
+  const std::string index = location_match_.loc->GetIndexFile();
+  if (index.empty()) {
+    throw std::runtime_error(
+        "No index files configured for location");  // TODO: status 500?
+  }
   std::string path = base_path;
   if (is_directory) {
-    if (location_match_.loc->GetIndexFile().empty()) {
-      throw std::runtime_error(
-          "No index files configured for location");  // TODO: status 500?
-    }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
-    path += location_match_.loc->GetIndexFile();
+    path += index;
   }
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
@@ -138,6 +139,7 @@ void RequestHandler::HandleGet() {
   }
 }
 
+// reject directories for POST requests
 void RequestHandler::HandlePost() {
   const std::string req_uri = req_.GetUri();
   if (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/') {
@@ -166,12 +168,15 @@ void RequestHandler::HandlePost() {
       // return;
     }
     HttpResponse res(lib::http::kCreated);  // 201 Created
-    res.AddHeader("Content-Length", "0");
+    res.AddHeader("Location", req_uri);  // TODO: should this be absolute URI?
     result_ = ExecResult(res);
   }
 }
 
 void RequestHandler::HandleDelete() {
+  if (lib::utils::IsDirectory(filesystem_path_)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     result_ = cgi.Run();
