@@ -72,7 +72,6 @@ Precondition:
 - remainder starts with '/'
 */
 
-
 // TODO:  POSTとDELETEで分ける
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc ==
@@ -85,16 +84,20 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc->HasRedirect()) {
     return "";
   }
-  const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
-  // Validate the path for security
+  // Validate/normalize (security)
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
-  // TODO: create AppendIndexIfDirectory(path, req_uri, index)
-  bool req_uri_ends_with_slash =
+  return path;
+}
+
+std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
+    const std::string& base_path) const {
+  const std::string req_uri = req_.GetUri();
+  const bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
   bool is_directory =
-      (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
+      (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
   /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
   bool is_directory = false;
   if (req_uri_ends_with_slash) {
@@ -104,6 +107,7 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     is_directory = S_ISDIR(st.st_mode);
   }
   */
+  std::string path = base_path;
   if (is_directory) {
     if (location_match_.loc->GetIndexFile().empty()) {
       throw std::runtime_error(
@@ -112,6 +116,8 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += location_match_.loc->GetIndexFile();
   }
+  path = FileValidator::ValidateAndNormalizePath(
+      path, location_match_.loc->GetRoot());
   return path;
 }
 

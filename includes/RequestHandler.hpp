@@ -15,6 +15,8 @@ class RequestHandler {
   ExecResult Run();
   void PrepareRoutingContext();
   std::string ResolveFilesystemPath() const;  // for testing purpose
+  std::string AppendIndexFileIfDirectoryOrThrow(
+      const std::string& base_path) const;
 
  private:
   RequestHandler();  // shouldn't use default constructor
