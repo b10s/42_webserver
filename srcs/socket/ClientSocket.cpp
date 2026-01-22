@@ -18,6 +18,7 @@ ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
     : ASocket(fd), config_(config), cgi_socket_(NULL) {
   req_.SetClientIp(client_ip);
+  req_.SetMaxBodySizeLimit(config_.GetMaxBodySize());
 }
 
 ClientSocket::~ClientSocket() {
@@ -40,6 +41,22 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     }
     if (events & EPOLLOUT) {
       HandleEpollOut();
+    }
+  } catch (const lib::exception::ResponseStatusException& e) {  // 413/400/500
+    res_ = HttpResponse(e.GetStatus());
+    res_.AddHeader("Connection", "close");
+    res_.AddHeader("Content-Type", "text/html");
+    res_.EnsureDefaultErrorContent();
+    write_buffer_ = res_.ToHttpString();
+    epoll_event ev;
+    ev.events = EPOLLOUT;
+    ev.data.ptr = this;
+    if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
+      std::cerr << "epoll_ctl EPOLL_CTL_MOD failed in ResponseStatusException "
+                   "handler: "
+                << std::strerror(errno) << std::endl;
+      result.remove_socket = true;
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
     }
   } catch (const lib::exception::ConnectionClosed& e) {
     result.remove_socket = true;

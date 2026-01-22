@@ -16,6 +16,7 @@
  *  - consumed data is removed from buffer_
  *  - progress is updated to BODY when header parsing completes
  */
+
 bool HttpRequest::AdvanceHeader() {
   std::string::size_type end_of_header = FindEndOfHeader(buffer_);
   if (end_of_header == std::string::npos) {
@@ -27,8 +28,9 @@ bool HttpRequest::AdvanceHeader() {
     cur = this->ConsumeMethod(cur);
     cur = this->ConsumeUri(cur);
     cur = this->ConsumeVersion(cur);
-    cur = this->ConsumeHeader(cur);
-    (void)cur;  // suppress unused variable warning
+    this->ConsumeHeader(cur);  // throw 413 if content_length_ exceeds limit
+  } catch (lib::exception::ResponseStatusException&) {
+    throw;
   } catch (std::exception&) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
