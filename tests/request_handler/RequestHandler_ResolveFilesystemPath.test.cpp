@@ -17,21 +17,24 @@ protected:
     }
 };
 
+// "/" is a special case that maps to the root directory
+// See TrimTrailingSlashExceptRoot()
 TEST_F(RequestHandlerTest, ResolveFilesystemPath_RootDirectory) {
     HttpRequest request;
     request.SetUri("/");
     RequestHandler handler(config, request);
 
     handler.PrepareRoutingContext(); 
-    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/index.html");
+    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/");
 }
 
+// filesystem path does not end with '/' except for root
 TEST_F(RequestHandlerTest, ResolveFilesystemPath_SubDirectory) {
     HttpRequest request;
     request.SetUri("/images/");
     RequestHandler handler(config, request);
     handler.PrepareRoutingContext(); 
-    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/images/index.html");
+    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/images");
 }
 
 TEST_F(RequestHandlerTest, ResolveFilesystemPath_FileRequest) {
@@ -72,13 +75,12 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_DirectoryWithDotsTrailingSlash)
     request.SetUri("/modules/package.v1.2.3/");
     RequestHandler handler(config, request);
     handler.PrepareRoutingContext(); 
-    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/modules/package.v1.2.3/index.html");
+    EXPECT_EQ(handler.ResolveFilesystemPath(), "/var/www/html/modules/package.v1.2.3");
 }
 
 // ResolveFilesystemPath() correctly maps:
 // /kapouet/pouic/toto → /tmp/www/pouic/toto
 // /kapouet/ → /tmp/www/<index file>
-
 TEST_F(RequestHandlerTest, ResolveFilesystemPath_LocationSpecificRoot) {
     // Add a new location with a different root
     Location kapouetLocation;
@@ -102,6 +104,6 @@ TEST_F(RequestHandlerTest, ResolveFilesystemPath_LocationSpecificRoot) {
         request.SetUri("/kapouet/");
         RequestHandler handler(config, request);
         handler.PrepareRoutingContext(); 
-        EXPECT_EQ(handler.ResolveFilesystemPath(), "/tmp/www/index.html");
+        EXPECT_EQ(handler.ResolveFilesystemPath(), "/tmp/www/");
     }
 }

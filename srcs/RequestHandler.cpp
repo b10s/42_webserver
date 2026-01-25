@@ -71,6 +71,8 @@ Precondition:
 - location root is an absolute path
 - remainder starts with '/'
 */
+
+// TODO:  POSTとDELETEで分ける
 std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc ==
       NULL) {  // Defensive check for direct calls to
@@ -82,16 +84,20 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   if (location_match_.loc->HasRedirect()) {
     return "";
   }
-  const std::string req_uri = req_.GetUri();
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
-  // Validate the path for security
+  // Validate/normalize (security)
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
-  // TODO: create AppendIndexIfDirectory(path, req_uri, index)
-  bool req_uri_ends_with_slash =
+  return path;
+}
+
+std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
+    const std::string& base_path) const {
+  const std::string req_uri = req_.GetUri();
+  const bool req_uri_ends_with_slash =
       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
   bool is_directory =
-      (req_uri_ends_with_slash || lib::utils::IsDirectory(path));
+      (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
   /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
   bool is_directory = false;
   if (req_uri_ends_with_slash) {
@@ -101,38 +107,53 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     is_directory = S_ISDIR(st.st_mode);
   }
   */
+  std::string path = base_path;
   if (is_directory) {
-    if (location_match_.loc->GetIndexFile().empty()) {
+    const std::string index = location_match_.loc->GetIndexFile();
+    if (index.empty()) {
       throw std::runtime_error(
           "No index files configured for location");  // TODO: status 500?
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
-    path += location_match_.loc->GetIndexFile();
+    path += index;
   }
+  path = FileValidator::ValidateAndNormalizePath(
+      path, location_match_.loc->GetRoot());
   return path;
 }
 
 void RequestHandler::HandleGet() {
+  std::string path_with_index =
+      AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
   if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
     result_ = cgi.Run();
   } else {
-    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
+    std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
     HttpResponse res;
     res.AddHeader("Content-Type",
-                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
+                  lib::http::DetectMimeTypeFromPath(path_with_index));
     res.SetBody(body);
     res.SetStatus(lib::http::kOk);
     result_ = ExecResult(res);
   }
 }
 
+// reject directories for POST requests
 void RequestHandler::HandlePost() {
+  const std::string req_uri = req_.GetUri();
+  if (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/') {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
+  const std::string path = filesystem_path_;
+  if (lib::utils::IsDirectory(path)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
+    CgiExecutor cgi(req_, *location_match_.loc, path);
     result_ = cgi.Run();
   } else {
-    std::ofstream ofs(filesystem_path_.c_str(), std::ios::binary);
+    std::ofstream ofs(path.c_str(), std::ios::binary);
     if (!ofs) {
       throw lib::exception::ResponseStatusException(lib::http::kForbidden);
       // response_->setStatus(kForbidden); // shoud we check errno and return
@@ -147,12 +168,15 @@ void RequestHandler::HandlePost() {
       // return;
     }
     HttpResponse res(lib::http::kCreated);  // 201 Created
-    res.AddHeader("Content-Length", "0");
+    res.AddHeader("Location", req_uri);  // TODO: should this be absolute URI?
     result_ = ExecResult(res);
   }
 }
 
 void RequestHandler::HandleDelete() {
+  if (lib::utils::IsDirectory(filesystem_path_)) {
+    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
     result_ = cgi.Run();
