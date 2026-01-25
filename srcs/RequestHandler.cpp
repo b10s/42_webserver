@@ -107,13 +107,13 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
     is_directory = S_ISDIR(st.st_mode);
   }
   */
-  const std::string index = location_match_.loc->GetIndexFile();
-  if (index.empty()) {
-    throw std::runtime_error(
-        "No index files configured for location");  // TODO: status 500?
-  }
   std::string path = base_path;
   if (is_directory) {
+    const std::string index = location_match_.loc->GetIndexFile();
+    if (index.empty()) {
+      throw std::runtime_error(
+          "No index files configured for location");  // TODO: status 500?
+    }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += index;
   }
