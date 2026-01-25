@@ -43,13 +43,11 @@ class RequestHandlerPostTest : public ::testing::Test {
     tmp_ = MakeTempDir();
     ASSERT_FALSE(tmp_.empty());
 
-    // ConfigParser に食わせる設定（あなたの文法に合わせて調整してね）
-    // 例: { listen 8081; location / { root <tmp_>; index index.html; methods POST; } }
     ConfigParser parser;
     parser.content =
         "{ "
         "listen 0.0.0.0:8081; "
-        "location / { "
+        "location /upload { "
         "  root " + tmp_ + "; "
         "  index index.html; "
         "  allowed_methods POST; "
@@ -65,13 +63,18 @@ class RequestHandlerPostTest : public ::testing::Test {
   }
 
   void TearDown() override {
+    unlink((tmp_ + "/text.txt").c_str());
+    unlink((tmp_ + "/exist.txt").c_str());
+    unlink((tmp_ + "/cant.txt").c_str());
+    rmdir((tmp_ + "/dir").c_str());
+    rmdir(tmp_.c_str());
   }
 };
 
 TEST_F(RequestHandlerPostTest, StaticPost_CreatesFile_AndReturns201) {
   HttpRequest req;
   req.SetMethod(lib::http::kPost);
-  req.SetUri("/text.txt");
+  req.SetUri("/upload/text.txt");
   req.SetBufferForTest("hello post world");
   req.SetContentLengthForTest(16);          // 16 bytes
   ASSERT_TRUE(req.AdvanceBody());           // set body_
@@ -83,7 +86,7 @@ TEST_F(RequestHandlerPostTest, StaticPost_CreatesFile_AndReturns201) {
   lib::type::Optional<std::string> loc_header =
       r.response.GetHeader("location");
   ASSERT_TRUE(loc_header.HasValue());
-  EXPECT_EQ(loc_header.Value(), "/text.txt");
+  EXPECT_EQ(loc_header.Value(), "/upload/text.txt");
 
   // response body should be empty
   lib::type::Optional<std::string> body = r.response.GetBody();
@@ -97,7 +100,7 @@ TEST_F(RequestHandlerPostTest, StaticPost_CreatesFile_AndReturns201) {
 TEST_F(RequestHandlerPostTest, StaticPost_UriEndsWithSlash_Returns400) {
   HttpRequest req;
   req.SetMethod(lib::http::kPost);
-  req.SetUri("/dir/");          // ← trailing slash
+  req.SetUri("/upload/dir/");          // ← trailing slash
   req.SetBufferForTest("x");
 
   RequestHandler handler(config_, req);
@@ -111,7 +114,7 @@ TEST_F(RequestHandlerPostTest, StaticPost_TargetIsDirectory_Returns400) {
 
   HttpRequest req;
   req.SetMethod(lib::http::kPost);
-  req.SetUri("/dir");
+  req.SetUri("/upload/dir");
   req.SetBufferForTest("x");
 
   RequestHandler handler(config_, req);
@@ -121,11 +124,11 @@ TEST_F(RequestHandlerPostTest, StaticPost_TargetIsDirectory_Returns400) {
 }
 
 TEST_F(RequestHandlerPostTest, StaticPost_NoWritePermission_Returns403) {
-  chmod(tmp_.c_str(), 0555);  // 読み取り/実行のみ
+  chmod(tmp_.c_str(), 0555);  // read & execute only
 
   HttpRequest req;
   req.SetMethod(lib::http::kPost);
-  req.SetUri("/cant.txt");
+  req.SetUri("/upload/cant.txt");
   req.SetBufferForTest("x");
 
   RequestHandler handler(config_, req);
@@ -133,6 +136,30 @@ TEST_F(RequestHandlerPostTest, StaticPost_NoWritePermission_Returns403) {
 
   EXPECT_EQ(r.response.GetStatus(), lib::http::kForbidden);
 
-  // 後始末（他テストに影響しないように戻す）
   chmod(tmp_.c_str(), 0755);
 }
+
+// POST to existing file returns chosen behavior (409 or overwrite behavior) ?
+// for now, we implement overwrite behavior
+TEST_F(RequestHandlerPostTest, StaticPost_OverwriteExistingFile_Succeeds) {
+  const std::string filepath = tmp_ + "/exist.txt";
+  {
+    std::ofstream ofs(filepath.c_str(), std::ios::binary);
+    ofs << "original content";
+  }
+
+  HttpRequest req;
+  req.SetMethod(lib::http::kPost);
+  req.SetUri("/upload/exist.txt");
+  req.SetBufferForTest("new content");
+  req.SetContentLengthForTest(11);          // 11 bytes
+  ASSERT_TRUE(req.AdvanceBody());           // set body_
+
+  RequestHandler handler(config_, req);
+  ExecResult r = handler.Run();
+
+  EXPECT_EQ(r.response.GetStatus(), lib::http::kCreated);
+
+  const std::string saved = tmp_ + "/exist.txt";
+  EXPECT_EQ(ReadAll(saved), "new content");
+} 

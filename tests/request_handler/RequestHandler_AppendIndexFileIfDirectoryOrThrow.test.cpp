@@ -72,17 +72,11 @@ TEST_F(RequestHandlerTest, AppendIndexFileIfDirectoryOrThrow_NoIndexFileConfigur
     HttpRequest request;
     request.SetUri("/noindex/");
     RequestHandler handler(config, request);
-    handler.PrepareRoutingContext(); 
-    try {
-        std::string base = handler.ResolveFilesystemPath();
-        handler.AppendIndexFileIfDirectoryOrThrow(base);
-    } catch (std::runtime_error& e) {
-        EXPECT_STREQ(e.what(), "No index files configured for location");
-        return;
-    }
-    // } catch (lib::exception::ResponseStatusException& e) {
-    //     EXPECT_EQ(e.GetStatus(), lib::http::kInternalServerError);
-    //     return;
-    // }
+    handler.PrepareRoutingContext();
+    std::string base = handler.ResolveFilesystemPath();
+    EXPECT_THROW(
+        handler.AppendIndexFileIfDirectoryOrThrow(base),
+        std::runtime_error // TODO: shoudl be lib::http::kInternalServerError ??
+    );
 }
 
