@@ -183,8 +183,7 @@ action has been enacted and the response message includes a representation
 describing the status.
 */
 void RequestHandler::HandleDelete() {
-  struct stat st =
-      lib::utils::StatOrThrow(filesystem_path_);  // 404 if not found
+  lib::utils::StatOrThrow(filesystem_path_);  // 404 if not found
   if (lib::utils::IsDirectory(filesystem_path_)) {
     throw lib::exception::ResponseStatusException(
         lib::http::kForbidden);  // Or BadRequest?
