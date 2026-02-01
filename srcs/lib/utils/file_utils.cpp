@@ -17,9 +17,18 @@ map errno -> HTTP status
 - others          -> internal server error (500)
 */
 lib::http::Status MapErrnoToHttpStatus(int e) {
-  if (e == ENOENT || e == ENOTDIR) return lib::http::kNotFound;  // 404
-  if (e == EACCES) return lib::http::kForbidden;                 // 403
-  return lib::http::kInternalServerError;
+  switch (e) {
+    case ENOENT:
+    case ENOTDIR:
+      return lib::http::kNotFound;  // 404
+    case EACCES:
+    case EPERM:
+      return lib::http::kForbidden;  // 403
+    case EISDIR:
+      return lib::http::kBadRequest;  // 400
+    default:
+      return lib::http::kInternalServerError;  // 500
+  }
 }
 
 struct stat StatOrThrow(const std::string& path) {

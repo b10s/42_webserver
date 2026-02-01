@@ -183,15 +183,11 @@ action has been enacted and the response message includes a representation
 describing the status.
 */
 void RequestHandler::HandleDelete() {
-  lib::utils::StatOrThrow(filesystem_path_);  // 404 if not found
-  if (lib::utils::IsDirectory(filesystem_path_)) {
-    throw lib::exception::ResponseStatusException(
-        lib::http::kForbidden);  // Or BadRequest?
-  }
   lib::utils::CheckDeletableRegularFileOrThrow(filesystem_path_);  // 403 if no
                                                                    // permission
   if (std::remove(filesystem_path_.c_str()) != 0) {
-    throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+    throw lib::exception::ResponseStatusException(
+        lib::utils::MapErrnoToHttpStatus(errno));
   }
   HttpResponse res(lib::http::kOk);  // 200 OK
   res.SetBody("File deleted successfully");

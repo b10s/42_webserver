@@ -101,13 +101,11 @@ TEST_F(RequestHandlerDeleteTest, StaticDelete_DeletesFile_AndReturns200or204) {
 
   ExecResult r = RunDelete("/upload/victim.txt");
 
-  // Implementation may choose 200 OK or 204 No Content
+  // In this project, return 200 OK (not 204 No Content)
   const lib::http::Status st = r.response.GetStatus();
-  EXPECT_TRUE(st == lib::http::kOk || st == lib::http::kNoContent);
+  EXPECT_TRUE(st == lib::http::kOk);
 
   EXPECT_FALSE(PathExists(victim));
-
-  // If 204, body should be empty (or absent). If 200, your impl may or may not set body.
   lib::type::Optional<std::string> body = r.response.GetBody();
   ASSERT_TRUE(body.HasValue());
   EXPECT_EQ(body.Value(), "File deleted successfully");

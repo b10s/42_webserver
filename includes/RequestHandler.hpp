@@ -1,6 +1,10 @@
 #ifndef REQUESTHANDLER_HPP_
 #define REQUESTHANDLER_HPP_
 
+#include <cstdio>     // for std::remove()
+#include <fstream>    // for std::ofstream
+#include <stdexcept>  // std::runtime_error
+
 #include "ExecResult.hpp"
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
