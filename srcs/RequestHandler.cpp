@@ -188,7 +188,7 @@ void RequestHandler::HandleDelete() {
     throw lib::exception::ResponseStatusException(
         lib::http::kForbidden);  // Or BadRequest?
   }
-  lib::utils::CheckDeletableRegularFileOrThrow(filesystem_path_); // 403 if no
+  lib::utils::CheckDeletableRegularFileOrThrow(filesystem_path_);  // 403 if no
                                                                    // permission
   if (std::remove(filesystem_path_.c_str()) != 0) {
     throw lib::exception::ResponseStatusException(lib::http::kForbidden);
