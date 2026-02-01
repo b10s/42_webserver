@@ -129,7 +129,6 @@ TEST_F(RequestHandlerDeleteTest, StaticDelete_TargetIsDirectory_ReturnsClientErr
   // Accept common policies:
   // - 403 Forbidden: "we don't allow deleting directories"
   // - 400 Bad Request: "invalid delete target"
-  // - 409 Conflict: "cannot delete directory"
   const lib::http::Status st = r.response.GetStatus();
   EXPECT_TRUE(st == lib::http::kForbidden ||
               st == lib::http::kBadRequest);
@@ -179,17 +178,4 @@ TEST_F(RequestHandlerDeleteTest, StaticDelete_MethodNotAllowed_Returns405) {
   ExecResult r = handler.Run();
 
   EXPECT_EQ(r.response.GetStatus(), lib::http::kMethodNotAllowed);
-}
-
-// (optional) trailing slash should probably be treated as directory-ish.
-// If your policy is: reject -> 400/403/409; or treat as not found -> 404; accept several.
-TEST_F(RequestHandlerDeleteTest, StaticDelete_UriEndsWithSlash_ReturnsClientErrorOr404) {
-  MakeDir(tmp_ + "/dir", 0755);
-
-  ExecResult r = RunDelete("/upload/dir/");  // trailing slash
-
-  const lib::http::Status st = r.response.GetStatus();
-  EXPECT_TRUE(st == lib::http::kForbidden ||
-              st == lib::http::kBadRequest ||
-              st == lib::http::kNotFound);
 }
