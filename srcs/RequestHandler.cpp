@@ -173,20 +173,24 @@ void RequestHandler::HandlePost() {
   }
 }
 
+/*
+RFC9110 Section 9.3.5 DELETE
+If a DELETE method is successfully applied, the origin server SHOULD send
+a 202 (Accepted) status code if the action will likely succeed but has not yet
+been enacted, a 204 (No Content) status code if the action has been enacted and
+no further information is to be supplied, or a 200 (OK) status code if the
+action has been enacted and the response message includes a representation
+describing the status.
+*/
 void RequestHandler::HandleDelete() {
-  if (lib::utils::IsDirectory(filesystem_path_)) {
-    throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  lib::utils::CheckDeletableRegularFileOrThrow(filesystem_path_);  // 403 if no
+                                                                   // permission
+  if (std::remove(filesystem_path_.c_str()) != 0) {
+    throw lib::exception::ResponseStatusException(
+        lib::utils::MapErrnoToHttpStatus(errno));
   }
-  if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, filesystem_path_);
-    result_ = cgi.Run();
-  } else {
-    std::string body = lib::utils::ReadFileToStringOrThrow(filesystem_path_);
-    HttpResponse res;
-    res.AddHeader("Content-Type",
-                  lib::http::DetectMimeTypeFromPath(filesystem_path_));
-    res.SetBody(body);
-    res.SetStatus(lib::http::kOk);
-    result_ = ExecResult(res);
-  }
+  HttpResponse res(lib::http::kOk);  // 200 OK
+  res.SetBody("File deleted successfully");
+  res.AddHeader("Content-Type", "text/plain");
+  result_ = ExecResult(res);
 }
