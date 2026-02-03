@@ -37,6 +37,9 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
   }
   std::string real_path = RealPathOrThrow(filename);
   config_dir_ = DirnameOf(real_path);
+  #ifdef WEBSERV_DEBUG
+  std::cerr << "Config file directory: " << config_dir_ << std::endl;
+  #endif
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
     throw std::runtime_error("Failed to open file: " + filename);

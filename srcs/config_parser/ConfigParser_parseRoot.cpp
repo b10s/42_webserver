@@ -24,6 +24,9 @@ void ConfigParser::ParseRoot(Location* location) {
         "Syntax error: expected root path but got empty token");
   }
   std::string resolved_path = ResolvePathRelativeToConfig(token);
+  #ifndef WESERV_DEBUG
+  std::cerr << "Resolved root path: " << resolved_path << std::endl;
+  #endif
   RequireAbsoluteSafePathOrThrow(resolved_path, "Root path");
   location->SetRoot(resolved_path);
   ConsumeExpectedSemicolon("root path");

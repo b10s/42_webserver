@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <iostream> // for debug output
 
 #include "Location.hpp"
 #include "ServerConfig.hpp"
