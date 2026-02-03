@@ -1,13 +1,30 @@
 #include "ConfigParser.hpp"
 #include "lib/http/CharValidation.hpp"
 
+static bool IsAbsolutePath(const std::string& path) {
+  return !path.empty() && path[0] == '/';
+}
+
+static std::string JoinPath(const std::string& base, const std::string& rel) {
+  if (base.empty() || base == ".") return rel;
+  if (!base.empty() && base[base.size() - 1] == '/') return base + rel;
+  return base + "/" + rel;
+}
+
+std::string ConfigParser::ResolvePathRelativeToConfig(
+    const std::string& token) const {
+  if (IsAbsolutePath(token)) return token;
+  return JoinPath(config_dir_, token);
+}
+
 void ConfigParser::ParseRoot(Location* location) {
   std::string token = Tokenize(content);
   if (token.empty()) {
     throw std::runtime_error(
         "Syntax error: expected root path but got empty token");
   }
-  RequireAbsoluteSafePathOrThrow(token, "Root path");
-  location->SetRoot(token);
+  std::string resolved_path = ResolvePathRelativeToConfig(token);
+  RequireAbsoluteSafePathOrThrow(resolved_path, "Root path");
+  location->SetRoot(resolved_path);
   ConsumeExpectedSemicolon("root path");
 }

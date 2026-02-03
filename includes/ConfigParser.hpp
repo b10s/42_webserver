@@ -15,6 +15,8 @@
 #include "enums.hpp"
 #include "lib/http/CharValidation.hpp"
 
+#define PATH_MAX 4096
+
 namespace config_tokens {
 const std::string kListen = "listen";
 const std::string kServerName = "server_name";
@@ -53,6 +55,7 @@ class ConfigParser {
 
  public:
   std::string content;  // Made public for easier access in parsing functions
+  std::string config_dir_;  // Directory of the config file
   ConfigParser();       // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
@@ -77,6 +80,8 @@ class ConfigParser {
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);
+  std::string ResolvePathRelativeToConfig(
+      const std::string& token) const;
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;

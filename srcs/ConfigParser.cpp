@@ -12,6 +12,21 @@ ConfigParser::ConfigParser(const std::string& text)
 ConfigParser::~ConfigParser() {
 }
 
+static std::string RealPathOrThrow(const std::string& path) {
+  char real_path_buf[PATH_MAX];
+  if (realpath(path.c_str(), real_path_buf) == NULL) {
+    throw std::runtime_error("Failed to resolve real path: " + path);
+  }
+  return std::string(real_path_buf);
+}
+
+static std::string DirnameOf(const std::string& path) {
+  std::string::size_type pos = path.find_last_of('/');
+  if (pos == std::string::npos) return "."; // current directory
+  if (pos == 0) return "/"; // root directory
+  return path.substr(0, pos); // for example, /a/b/c.txt -> /a/b
+}
+
 void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
   struct stat s;
   if (stat(filename.c_str(), &s) != 0) {
@@ -20,6 +35,8 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
   if (S_ISDIR(s.st_mode)) {
     throw std::runtime_error(filename + " is a directory");
   }
+  std::string real_path = RealPathOrThrow(filename);
+  config_dir_ = DirnameOf(real_path);
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
     throw std::runtime_error("Failed to open file: " + filename);
