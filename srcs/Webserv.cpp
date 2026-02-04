@@ -63,7 +63,8 @@ void Webserv::Run() {
   epoll_event events[kMaxEvents];
   while (true) {
     CheckTimeout();
-    int nfds = epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, 500);
+    int nfds =
+        epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, kEpollWaitTimeout);
     if (nfds == -1) {
       std::cerr << "epoll_wait() failed. " << strerror(errno) << std::endl;
       continue;
