@@ -10,6 +10,7 @@ class ServerSocket : public ASocket {
   virtual ~ServerSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
+  virtual bool IsTimeout(time_t threshold_time) const;
 
  private:
   ServerSocket();

@@ -6,7 +6,8 @@
 #include <cstring>
 #include <stdexcept>
 
-ASocket::ASocket(lib::type::Fd fd) : fd_(fd) {
+ASocket::ASocket(lib::type::Fd fd)
+    : fd_(fd), last_activity_time_(std::time(NULL)) {
   if (fd_.GetFd() == -1) {
     throw std::runtime_error("ASocket: Invalid file descriptor");
   }

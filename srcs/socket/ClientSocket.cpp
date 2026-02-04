@@ -28,6 +28,7 @@ ClientSocket::~ClientSocket() {
 }
 
 SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
+  UpdateLastActivity();
   SocketResult result;
   try {
     if (events & EPOLLIN) {
@@ -125,6 +126,7 @@ void ClientSocket::HandleEpollOut() {
 
 void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
                                           const std::string& cgi_output) {
+  UpdateLastActivity();
   res_ = cgi::ParseCgiResponse(cgi_output);
   write_buffer_ = res_.ToHttpString();
 
@@ -137,6 +139,7 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
 }
 
 void ClientSocket::OnCgiExecutionError(int epoll_fd) {
+  UpdateLastActivity();
   res_ = HttpResponse(lib::http::kInternalServerError);
   write_buffer_ = res_.ToHttpString();
 

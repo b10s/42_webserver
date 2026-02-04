@@ -81,3 +81,8 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
   }
   return result;
 }
+
+bool ServerSocket::IsTimeout(time_t threshold_time) const {
+  (void)threshold_time;
+  return false;
+}
