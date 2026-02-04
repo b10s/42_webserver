@@ -2,12 +2,11 @@
 
 #include <sys/epoll.h>
 #include <unistd.h>
-#include <ctime>
-
 
 #include <cerrno>
 #include <csignal>
 #include <cstring>
+#include <ctime>
 #include <iostream>
 
 #include "ConfigParser.hpp"

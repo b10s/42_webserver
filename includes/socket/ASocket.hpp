@@ -3,9 +3,8 @@
 
 #include <stdint.h>
 #include <unistd.h>
+
 #include <ctime>
-
-
 #include <string>
 
 #include "lib/type/Fd.hpp"
