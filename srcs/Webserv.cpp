@@ -2,6 +2,8 @@
 
 #include <sys/epoll.h>
 #include <unistd.h>
+#include <ctime>
+
 
 #include <cerrno>
 #include <csignal>
@@ -61,7 +63,8 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   epoll_event events[kMaxEvents];
   while (true) {
-    int nfds = epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, -1);
+    CheckTimeout();
+    int nfds = epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, 500);
     if (nfds == -1) {
       std::cerr << "epoll_wait() failed. " << strerror(errno) << std::endl;
       continue;
@@ -120,6 +123,25 @@ const ServerConfig* Webserv::FindServerConfigByPort(
     return &it->second;
   }
   return NULL;
+}
+
+void Webserv::CheckTimeout() {
+  time_t now = std::time(NULL);
+  time_t threshold = now - kRequestTimeout;
+
+  for (std::map<int, ASocket*>::iterator it = sockets_.begin();
+       it != sockets_.end();) {
+    if (it->second->IsTimeout(threshold)) {
+      ASocket* socket = it->second;
+      int fd = socket->GetFd();
+      epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, fd, NULL);
+      delete socket;
+      sockets_.erase(it++);
+      std::cerr << "Connection timed out. fd: " << fd << std::endl;
+    } else {
+      ++it;
+    }
+  }
 }
 
 void Webserv::ClearResources() {

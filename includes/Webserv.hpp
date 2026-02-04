@@ -17,6 +17,9 @@ class Webserv {
   void ClearResources();
 
   static const int kMaxEvents = 10;
+  static const int kRequestTimeout = 1;
+  void CheckTimeout();
+
 
  public:
   Webserv();  // should be private but made public for testing
