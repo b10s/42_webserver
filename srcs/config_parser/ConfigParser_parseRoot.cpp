@@ -14,7 +14,10 @@ static std::string JoinPath(const std::string& base, const std::string& rel) {
 std::string ConfigParser::ResolvePathRelativeToConfig(
     const std::string& token) const {
   if (IsAbsolutePath(token)) return token;
-  return JoinPath(config_dir_, token);
+  char* cwd = getcwd(NULL, 0);
+  std::string current_dir(cwd);
+  free(cwd);
+  return JoinPath(current_dir_, token);
 }
 
 void ConfigParser::ParseRoot(Location* location) {
