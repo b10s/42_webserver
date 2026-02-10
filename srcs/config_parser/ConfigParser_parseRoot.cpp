@@ -1,3 +1,5 @@
+#include <unistd.h>  // getcwd
+
 #include "ConfigParser.hpp"
 #include "lib/http/CharValidation.hpp"
 
@@ -17,7 +19,7 @@ std::string ConfigParser::ResolvePathRelativeToConfig(
   char* cwd = getcwd(NULL, 0);
   std::string current_dir(cwd);
   free(cwd);
-  return JoinPath(current_dir_, token);
+  return JoinPath(current_dir, token);
 }
 
 void ConfigParser::ParseRoot(Location* location) {
@@ -27,9 +29,9 @@ void ConfigParser::ParseRoot(Location* location) {
         "Syntax error: expected root path but got empty token");
   }
   std::string resolved_path = ResolvePathRelativeToConfig(token);
-  #ifndef WESERV_DEBUG
+#ifndef WESERV_DEBUG
   std::cerr << "Resolved root path: " << resolved_path << std::endl;
-  #endif
+#endif
   RequireAbsoluteSafePathOrThrow(resolved_path, "Root path");
   location->SetRoot(resolved_path);
   ConsumeExpectedSemicolon("root path");

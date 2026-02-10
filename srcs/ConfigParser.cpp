@@ -22,9 +22,9 @@ static std::string RealPathOrThrow(const std::string& path) {
 
 static std::string DirnameOf(const std::string& path) {
   std::string::size_type pos = path.find_last_of('/');
-  if (pos == std::string::npos) return "."; // current directory
-  if (pos == 0) return "/"; // root directory
-  return path.substr(0, pos); // for example, /a/b/c.txt -> /a/b
+  if (pos == std::string::npos) return ".";  // current directory
+  if (pos == 0) return "/";                  // root directory
+  return path.substr(0, pos);                // for example, /a/b/c.txt -> /a/b
 }
 
 void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
@@ -37,9 +37,9 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
   }
   std::string real_path = RealPathOrThrow(filename);
   config_dir_ = DirnameOf(real_path);
-  #ifdef WEBSERV_DEBUG
+#ifdef WEBSERV_DEBUG
   std::cerr << "Config file directory: " << config_dir_ << std::endl;
-  #endif
+#endif
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
     throw std::runtime_error("Failed to open file: " + filename);

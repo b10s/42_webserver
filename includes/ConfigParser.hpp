@@ -6,10 +6,10 @@
 #include <cctype>  // for std::isalnum, std::isprint
 #include <cstdlib>
 #include <cstring>
+#include <iostream>  // for debug output
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream> // for debug output
 
 #include "Location.hpp"
 #include "ServerConfig.hpp"
@@ -57,7 +57,7 @@ class ConfigParser {
  public:
   std::string content;  // Made public for easier access in parsing functions
   std::string config_dir_;  // Directory of the config file
-  ConfigParser();       // Default constructor for tests
+  ConfigParser();           // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
   void LoadFileOrThrowRuntime(const std::string& filename);
@@ -81,8 +81,7 @@ class ConfigParser {
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);
-  std::string ResolvePathRelativeToConfig(
-      const std::string& token) const;
+  std::string ResolvePathRelativeToConfig(const std::string& token) const;
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
