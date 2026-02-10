@@ -36,9 +36,9 @@ void ConfigParser::LoadFileOrThrowRuntime(const std::string& filename) {
     throw std::runtime_error(filename + " is a directory");
   }
   std::string real_path = RealPathOrThrow(filename);
-  config_dir_ = DirnameOf(real_path);
+  config_dir = DirnameOf(real_path);
 #ifdef WEBSERV_DEBUG
-  std::cerr << "Config file directory: " << config_dir_ << std::endl;
+  std::cerr << "Config file directory: " << config_dir << std::endl;
 #endif
   std::ifstream file(filename.c_str());
   if (!file.is_open()) {
