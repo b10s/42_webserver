@@ -1,4 +1,5 @@
 #include <unistd.h>  // getcwd
+#include <limits.h> // PATH_MAX
 
 #include "ConfigParser.hpp"
 #include "lib/http/CharValidation.hpp"
@@ -16,9 +17,11 @@ static std::string JoinPath(const std::string& base, const std::string& rel) {
 std::string ConfigParser::ResolvePathRelativeToConfig(
     const std::string& token) const {
   if (IsAbsolutePath(token)) return token;
-  char* cwd = getcwd(NULL, 0);
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, PATH_MAX) == NULL) {
+    throw std::runtime_error("Failed to get current working directory");
+  }
   std::string current_dir(cwd);
-  free(cwd);
   return JoinPath(current_dir, token);
 }
 

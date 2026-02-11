@@ -10,7 +10,6 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <climits>  // for PATH_MAX
 
 #include "Location.hpp"
 #include "ServerConfig.hpp"
@@ -54,9 +53,8 @@ class ConfigParser {
                                       const std::string& label);
 
  public:
-  std::string content;     // Made public for easier access in parsing functions
-  std::string config_dir;  // Directory of the config file
-  ConfigParser();          // Default constructor for tests
+  std::string content;  // Made public for easier access in parsing functions
+  ConfigParser();       // Default constructor for tests
   explicit ConfigParser(const std::string& text);
   ~ConfigParser();
   void LoadFileOrThrowRuntime(const std::string& filename);
