@@ -6,7 +6,6 @@
 #include "lib/http/CharValidation.hpp"
 
 namespace {
-// Anonymous namespace for internal helper functions
 
 bool IsAbsolutePath(const std::string& path) {
   return !path.empty() && path[0] == '/';
@@ -16,6 +15,10 @@ std::string JoinAndNormalizePath(const std::string& base,
                                  const std::string& relative) {
   if (base.empty() || base == ".") {
     return relative;
+  }
+  if (relative.find("..") != std::string::npos) {
+    throw std::runtime_error(
+        "Relative path contains '..', which is not allowed");
   }
   std::string joined = base + "/" + relative;
   return FileValidator::NormalizePathBySegments(joined);
@@ -33,8 +36,8 @@ std::string GetCwdOrThrow() {
 std::string ConfigParser::ResolveRootPath(const std::string& token) const {
   if (IsAbsolutePath(token)) return token;
   std::string current_dir = GetCwdOrThrow();
-  std::string base_dir = JoinAndNormalizePath(current_dir, token);
-  return base_dir;
+  std::string root_path = JoinAndNormalizePath(current_dir, token);
+  return root_path;
 }
 
 void ConfigParser::ParseRoot(Location* location) {

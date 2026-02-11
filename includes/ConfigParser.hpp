@@ -50,6 +50,7 @@ class ConfigParser {
   bool IsSafeIndexFilename(const std::string& filename) const;
   void RequireAbsoluteSafePathOrThrow(const std::string& path,
                                       const std::string& label);
+  std::string ResolveRootPath(const std::string& token) const;
 
  public:
   std::string content;  // Made public for easier access in parsing functions
@@ -77,7 +78,6 @@ class ConfigParser {
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);
-  std::string ResolveRootPath(const std::string& token) const;
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;
