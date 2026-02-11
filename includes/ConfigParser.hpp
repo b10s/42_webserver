@@ -78,7 +78,7 @@ class ConfigParser {
   template <typename T, typename Setter>
   void ParseSimpleDirective(T* obj, Setter setter,
                             const std::string& error_msg);
-  std::string ResolvePathRelativeToConfig(const std::string& token) const;
+  std::string ResolveRootPath(const std::string& token) const;
 
   const std::vector<ServerConfig>& GetServerConfigs() const {
     return server_configs_;

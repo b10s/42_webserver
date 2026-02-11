@@ -2,27 +2,39 @@
 #include <unistd.h>  // getcwd
 
 #include "ConfigParser.hpp"
+#include "FileValidator.hpp"
 #include "lib/http/CharValidation.hpp"
 
-static bool IsAbsolutePath(const std::string& path) {
+namespace {
+// Anonymous namespace for internal helper functions
+
+bool IsAbsolutePath(const std::string& path) {
   return !path.empty() && path[0] == '/';
 }
 
-static std::string JoinPath(const std::string& base, const std::string& rel) {
-  if (base.empty() || base == ".") return rel;
-  if (!base.empty() && base[base.size() - 1] == '/') return base + rel;
-  return base + "/" + rel;
+std::string JoinAndNormalizePath(const std::string& base,
+                                 const std::string& relative) {
+  if (base.empty() || base == ".") {
+    return relative;
+  }
+  std::string joined = base + "/" + relative;
+  return FileValidator::NormalizePathBySegments(joined);
 }
 
-std::string ConfigParser::ResolvePathRelativeToConfig(
-    const std::string& token) const {
-  if (IsAbsolutePath(token)) return token;
+std::string GetCwdOrThrow() {
   char cwd[PATH_MAX];
   if (getcwd(cwd, PATH_MAX) == NULL) {
     throw std::runtime_error("Failed to get current working directory");
   }
-  std::string current_dir(cwd);
-  return JoinPath(current_dir, token);
+  return std::string(cwd);
+}
+}  // namespace
+
+std::string ConfigParser::ResolveRootPath(const std::string& token) const {
+  if (IsAbsolutePath(token)) return token;
+  std::string current_dir = GetCwdOrThrow();
+  std::string base_dir = JoinAndNormalizePath(current_dir, token);
+  return base_dir;
 }
 
 void ConfigParser::ParseRoot(Location* location) {
@@ -31,11 +43,8 @@ void ConfigParser::ParseRoot(Location* location) {
     throw std::runtime_error(
         "Syntax error: expected root path but got empty token");
   }
-  std::string resolved_path = ResolvePathRelativeToConfig(token);
-#ifndef WEBSERV_DEBUG
-  std::cerr << "Resolved root path: " << resolved_path << std::endl;
-#endif
-  RequireAbsoluteSafePathOrThrow(resolved_path, "Root path");
-  location->SetRoot(resolved_path);
+  std::string resolved = ResolveRootPath(token);
+  RequireAbsoluteSafePathOrThrow(resolved, "Root path");
+  location->SetRoot(resolved);
   ConsumeExpectedSemicolon("root path");
 }
