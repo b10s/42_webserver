@@ -1,5 +1,5 @@
+#include <limits.h>  // PATH_MAX
 #include <unistd.h>  // getcwd
-#include <limits.h> // PATH_MAX
 
 #include "ConfigParser.hpp"
 #include "lib/http/CharValidation.hpp"
