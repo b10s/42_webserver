@@ -1,0 +1,9 @@
+Hello from static files!
+
+This is a test file served from the /static location.
+
+Server: 42 Webserver
+Path: /static/a.txt
+Content-Type: text/plain
+
+Test successful!
