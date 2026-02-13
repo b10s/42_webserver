@@ -1,5 +1,44 @@
+#include <limits.h>  // PATH_MAX
+#include <unistd.h>  // getcwd
+
 #include "ConfigParser.hpp"
+#include "FileValidator.hpp"
 #include "lib/http/CharValidation.hpp"
+
+namespace {
+
+bool IsAbsolutePath(const std::string& path) {
+  return !path.empty() && path[0] == '/';
+}
+
+std::string JoinAndNormalizePath(const std::string& base,
+                                 const std::string& relative) {
+  if (base.empty() || base == ".") {
+    return relative;
+  }
+  if (relative.find("..") != std::string::npos) {
+    throw std::runtime_error(
+        "Relative path contains '..', which is not allowed");
+  }
+  std::string joined = base + "/" + relative;
+  return FileValidator::NormalizePathBySegments(joined);
+}
+
+std::string GetCwdOrThrow() {
+  char cwd[PATH_MAX];
+  if (getcwd(cwd, PATH_MAX) == NULL) {
+    throw std::runtime_error("Failed to get current working directory");
+  }
+  return std::string(cwd);
+}
+}  // namespace
+
+std::string ConfigParser::ResolveRootPath(const std::string& token) const {
+  if (IsAbsolutePath(token)) return token;
+  std::string current_dir = GetCwdOrThrow();
+  std::string root_path = JoinAndNormalizePath(current_dir, token);
+  return root_path;
+}
 
 void ConfigParser::ParseRoot(Location* location) {
   std::string token = Tokenize(content);
@@ -7,7 +46,8 @@ void ConfigParser::ParseRoot(Location* location) {
     throw std::runtime_error(
         "Syntax error: expected root path but got empty token");
   }
-  RequireAbsoluteSafePathOrThrow(token, "Root path");
-  location->SetRoot(token);
+  std::string resolved = ResolveRootPath(token);
+  RequireAbsoluteSafePathOrThrow(resolved, "Root path");
+  location->SetRoot(resolved);
   ConsumeExpectedSemicolon("root path");
 }

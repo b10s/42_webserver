@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>webserv eval</title></head>
+<body>
+  <h1>webserv evaluation dashboard</h1>
+  <ul>
+    <li><a href="/static/a.txt">GET static file</a></li>
+    <li><a href="/dirlist/">Autoindex directory listing</a></li>
+    <li><a href="/redirect">Redirect test (/redirect)</a></li>
+    <li><a href="/cgi/ok.py">CGI GET (ok.py)</a></li>
+  </ul>
+
+  <h2>POST upload</h2>
+  <form method="POST" action="/upload/posted.txt">
+    <textarea name="data" rows="4" cols="50">hello</textarea><br>
+    <button type="submit">POST</button>
+  </form>
+
+  <p>DELETE test (use curl): <code>curl -X DELETE http://127.0.0.1:8080/upload/posted.txt</code></p>
+</body>
+</html>

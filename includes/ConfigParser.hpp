@@ -50,6 +50,7 @@ class ConfigParser {
   bool IsSafeIndexFilename(const std::string& filename) const;
   void RequireAbsoluteSafePathOrThrow(const std::string& path,
                                       const std::string& label);
+  std::string ResolveRootPath(const std::string& token) const;
 
  public:
   std::string content;  // Made public for easier access in parsing functions
