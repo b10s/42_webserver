@@ -68,8 +68,7 @@ void CgiResponseParser::StoreHeader(const std::string& key,
         res_.SetStatus(status, reason_phrase);
       }
     } else {
-      throw lib::exception::ResponseStatusException(
-          lib::http::kInternalServerError);
+      throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
     }
   } else if (key == "Location") {
     if (res_.GetStatus() == lib::http::kOk) {
@@ -89,9 +88,8 @@ bool CgiResponseParser::AdvanceBody() {
 }
 
 void CgiResponseParser::OnInternalStateError() {
-  res_.SetStatus(lib::http::kInternalServerError);
-  res_.EnsureDefaultErrorContent();
   state_ = kDone;
+  throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
 }
 
 void CgiResponseParser::OnExtraDataAfterDone() {
@@ -103,18 +101,11 @@ bool CgiResponseParser::IsStrictCrlf() const {
 
 HttpResponse ParseCgiResponse(const std::string& cgi_output) {
   CgiResponseParser parser;
-  try {
-    parser.Parse(cgi_output.c_str(), cgi_output.length());
-  } catch (const std::exception&) {
-    HttpResponse error_res(lib::http::kInternalServerError);
-    error_res.EnsureDefaultErrorContent();
-    return error_res;
-  }
+  parser.Parse(cgi_output.c_str(), cgi_output.length());
 
   HttpResponse res = parser.GetResponse();
   if (!res.HasHeader("content-type")) {
-    res.SetStatus(lib::http::kInternalServerError);
-    res.EnsureDefaultErrorContent();
+    throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
   }
   return res;
 }

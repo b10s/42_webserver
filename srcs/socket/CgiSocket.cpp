@@ -4,9 +4,12 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#include <cerrno>
 #include <iostream>
 
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/type/Fd.hpp"
+#include "lib/utils/file_utils.hpp"
 #include "socket/ClientSocket.hpp"
 
 CgiSocket::CgiSocket(lib::type::Fd fd, int pid)
@@ -38,7 +41,9 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
 
         result.remove_socket = true;
         if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
-          throw std::runtime_error("epoll_ctl error");
+          int saved_errno = errno;
+          throw lib::exception::ResponseStatusException(
+              lib::utils::MapErrnoToHttpStatus(saved_errno));
         }
 
         if (owner_) {

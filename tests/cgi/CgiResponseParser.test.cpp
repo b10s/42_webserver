@@ -3,6 +3,7 @@
 #include <gtest/gtest.h>
 
 #include "HttpResponse.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
 
 TEST(CgiResponseParserTest, BasicSuccess) {
@@ -57,22 +58,19 @@ TEST(CgiResponseParserTest, WithExtraHeaders) {
 
 TEST(CgiResponseParserTest, MissingSeparator) {
   std::string output = "Content-Type: text/html\r\nBodyWithoutSeparator";
-  HttpResponse res = cgi::ParseCgiResponse(output);
-
-  EXPECT_EQ(res.GetStatus(), lib::http::kInternalServerError);
+  EXPECT_THROW(cgi::ParseCgiResponse(output),
+               lib::exception::ResponseStatusException);
 }
 
 TEST(CgiResponseParserTest, MissingContentType) {
   std::string output = "X-Custom: OnlyThis\r\n\r\nBody";
-  HttpResponse res = cgi::ParseCgiResponse(output);
-
-  EXPECT_EQ(res.GetStatus(), lib::http::kInternalServerError);
+  EXPECT_THROW(cgi::ParseCgiResponse(output),
+               lib::exception::ResponseStatusException);
 }
 
 TEST(CgiResponseParserTest, MalformedHeader) {
   // Line without colon
   std::string output = "Content-Type text/html\r\n\r\nBody";
-  HttpResponse res = cgi::ParseCgiResponse(output);
-
-  EXPECT_EQ(res.GetStatus(), lib::http::kInternalServerError);
+  EXPECT_THROW(cgi::ParseCgiResponse(output),
+               lib::exception::ResponseStatusException);
 }

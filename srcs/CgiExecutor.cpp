@@ -13,6 +13,7 @@
 
 #include "CgiResponseParser.hpp"
 #include "HttpResponse.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/type/Fd.hpp"
 #include "lib/type/Optional.hpp"
@@ -185,44 +186,42 @@ ExecResult CgiExecutor::Run() {
   if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
     return ExecResult(HttpResponse(lib::http::kForbidden));
 
-  try {
-    int sv[2];
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
-      throw std::runtime_error("socketpair error");
+  int sv[2];
+  if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);
+  }
+  lib::type::Fd sv0(sv[0]);
+  lib::type::Fd sv1(sv[1]);
+
+  std::vector<std::string> meta_vars = GetMetaVars();
+  std::vector<char*> envp = CreateEnvp(meta_vars);
+
+  int pid = fork();
+  if (pid < 0) {
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);
+  }
+
+  std::string req_method = GetMetaVar("REQUEST_METHOD");
+
+  if (pid == 0) {  // Child process
+    sv0.Reset();
+    dup2(sv1.GetFd(), STDIN_FILENO);
+    dup2(sv1.GetFd(), STDOUT_FILENO);
+    sv1.Reset();
+
+    char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
+    execve(script_path_.c_str(), argv, envp.data());
+    exit(1);
+  } else {  // Parent process
+    sv1.Reset();
+    CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
+
+    if (req_method == "POST") {
+      cgi_socket->Send(body_);
     }
-    lib::type::Fd sv0(sv[0]);
-    lib::type::Fd sv1(sv[1]);
 
-    std::vector<std::string> meta_vars = GetMetaVars();
-    std::vector<char*> envp = CreateEnvp(meta_vars);
-
-    int pid = fork();
-    if (pid < 0) {
-      throw std::runtime_error("fork error");
-    }
-
-    std::string req_method = GetMetaVar("REQUEST_METHOD");
-
-    if (pid == 0) {  // Child process
-      sv0.Reset();
-      dup2(sv1.GetFd(), STDIN_FILENO);
-      dup2(sv1.GetFd(), STDOUT_FILENO);
-      sv1.Reset();
-
-      char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
-      execve(script_path_.c_str(), argv, envp.data());
-      exit(1);
-    } else {  // Parent process
-      sv1.Reset();
-      CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
-
-      if (req_method == "POST") {
-        cgi_socket->Send(body_);
-      }
-
-      return ExecResult(cgi_socket);
-    }
-  } catch (std::exception& e) {
-    return ExecResult(HttpResponse(lib::http::kInternalServerError));
+    return ExecResult(cgi_socket);
   }
 }

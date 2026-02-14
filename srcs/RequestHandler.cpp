@@ -6,6 +6,7 @@
 #include "FileValidator.hpp"
 #include "HttpRequest.hpp"
 #include "ServerConfig.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Method.hpp"
 #include "lib/http/MimeType.hpp"
 #include "lib/http/Status.hpp"
@@ -32,7 +33,8 @@ ExecResult RequestHandler::Run() {
     lib::http::Method method = req_.GetMethod();
     if (location_match_.loc->HasAllowedMethods()) {
       if (!location_match_.loc->IsMethodAllowed(method)) {
-        return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
+        throw lib::exception::ResponseStatusException(
+            lib::http::kMethodNotAllowed);
       }
     }
 
@@ -111,8 +113,8 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
   if (is_directory) {
     const std::string index = location_match_.loc->GetIndexFile();
     if (index.empty()) {
-      throw std::runtime_error(
-          "No index files configured for location");  // TODO: status 500?
+      throw lib::exception::ResponseStatusException(
+          lib::http::kInternalServerError);
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += index;
