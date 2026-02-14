@@ -11,7 +11,9 @@
 #include "CgiResponseParser.hpp"
 #include "RequestHandler.hpp"
 #include "lib/exception/ConnectionClosed.hpp"
+#include "lib/exception/ResponseStatusException.hpp"
 #include "lib/type/Fd.hpp"
+#include "lib/utils/file_utils.hpp"
 #include "socket/CgiSocket.hpp"
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
@@ -100,7 +102,9 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     ev.events = EPOLLOUT;
     ev.data.ptr = this;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-      throw std::runtime_error("epoll_ctl error");
+      int saved_errno = errno;
+      throw lib::exception::ResponseStatusException(
+          lib::utils::MapErrnoToHttpStatus(saved_errno));
     }
   }
   return SocketResult();
@@ -134,7 +138,9 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    throw std::runtime_error("epoll_ctl error");
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        lib::utils::MapErrnoToHttpStatus(saved_errno));
   }
 }
 
@@ -147,7 +153,9 @@ void ClientSocket::OnCgiExecutionError(int epoll_fd) {
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    throw std::runtime_error("epoll_ctl error");
+    int saved_errno = errno;
+    throw lib::exception::ResponseStatusException(
+        lib::utils::MapErrnoToHttpStatus(saved_errno));
   }
 }
 
