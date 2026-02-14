@@ -138,9 +138,8 @@ void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    int saved_errno = errno;
     throw lib::exception::ResponseStatusException(
-        lib::utils::MapErrnoToHttpStatus(saved_errno));
+        lib::http::kInternalServerError);
   }
 }
 
@@ -153,9 +152,8 @@ void ClientSocket::OnCgiExecutionError(int epoll_fd) {
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    int saved_errno = errno;
     throw lib::exception::ResponseStatusException(
-        lib::utils::MapErrnoToHttpStatus(saved_errno));
+        lib::http::kInternalServerError);
   }
 }
 
