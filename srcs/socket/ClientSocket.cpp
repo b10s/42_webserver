@@ -131,15 +131,22 @@ void ClientSocket::HandleEpollOut() {
 void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
                                           const std::string& cgi_output) {
   UpdateLastActivity();
-  res_ = cgi::ParseCgiResponse(cgi_output);
+  try {
+    res_ = cgi::ParseCgiResponse(cgi_output);
+  } catch (const lib::exception::ResponseStatusException& e) {
+    res_ = HttpResponse(lib::http::kInternalServerError);
+    res_.AddHeader("Connection", "close");
+    res_.AddHeader("Content-Type", "text/html");
+    res_.EnsureDefaultErrorContent();
+  }
   write_buffer_ = res_.ToHttpString();
 
   epoll_event ev;
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    throw lib::exception::ResponseStatusException(
-        lib::http::kInternalServerError);
+    std::cerr << "epoll_ctl EPOLL_CTL_MOD failed in OnCgiExecutionFinished: "
+              << std::strerror(errno) << std::endl;
   }
 }
 
@@ -152,8 +159,8 @@ void ClientSocket::OnCgiExecutionError(int epoll_fd) {
   ev.events = EPOLLOUT;
   ev.data.ptr = this;
   if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
-    throw lib::exception::ResponseStatusException(
-        lib::http::kInternalServerError);
+    std::cerr << "epoll_ctl EPOLL_CTL_MOD failed in OnCgiExecutionError: "
+              << std::strerror(errno) << std::endl;
   }
 }
 
