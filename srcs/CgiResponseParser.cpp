@@ -88,9 +88,8 @@ bool CgiResponseParser::AdvanceBody() {
 }
 
 void CgiResponseParser::OnInternalStateError() {
-  res_.SetStatus(lib::http::kInternalServerError);
-  res_.EnsureDefaultErrorContent();
   state_ = kDone;
+  throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
 }
 
 void CgiResponseParser::OnExtraDataAfterDone() {
