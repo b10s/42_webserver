@@ -33,7 +33,8 @@ ExecResult RequestHandler::Run() {
     lib::http::Method method = req_.GetMethod();
     if (location_match_.loc->HasAllowedMethods()) {
       if (!location_match_.loc->IsMethodAllowed(method)) {
-        return ExecResult(HttpResponse(lib::http::kMethodNotAllowed));
+        throw lib::exception::ResponseStatusException(
+            lib::http::kMethodNotAllowed);
       }
     }
 
