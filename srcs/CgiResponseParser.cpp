@@ -68,8 +68,7 @@ void CgiResponseParser::StoreHeader(const std::string& key,
         res_.SetStatus(status, reason_phrase);
       }
     } else {
-      throw lib::exception::ResponseStatusException(
-          lib::http::kInternalServerError);
+      throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
     }
   } else if (key == "Location") {
     if (res_.GetStatus() == lib::http::kOk) {
@@ -107,8 +106,7 @@ HttpResponse ParseCgiResponse(const std::string& cgi_output) {
 
   HttpResponse res = parser.GetResponse();
   if (!res.HasHeader("content-type")) {
-    throw lib::exception::ResponseStatusException(
-        lib::http::kInternalServerError);
+    throw lib::exception::ResponseStatusException(lib::http::kBadGateway);
   }
   return res;
 }
