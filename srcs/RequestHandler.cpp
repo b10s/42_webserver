@@ -114,7 +114,7 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
     const std::string index = location_match_.loc->GetIndexFile();
     if (index.empty()) {
       throw lib::exception::ResponseStatusException(
-          lib::http::kInternalServerError);
+          lib::http::kForbidden);  // or kNotFound?
     }
     if (path.empty() || path[path.size() - 1] != '/') path += '/';
     path += index;
