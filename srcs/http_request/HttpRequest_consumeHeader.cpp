@@ -4,6 +4,7 @@
 #include "lib/http/Method.hpp"
 #include "lib/http/Status.hpp"
 #include "lib/utils/string_utils.hpp"
+#include <iostream> // debug
 
 // Store header key in lowercase.
 // We are not keeping original case for simplicity.
@@ -39,6 +40,10 @@ void HttpRequest::ValidateAndExtractHost() {
 
 // header keys are normalized to lowercase
 void HttpRequest::ValidateBodyHeaders() {
+  std::cerr << "has_cl=" << headers_.count("content-length")
+          << " has_te=" << headers_.count("transfer-encoding")
+          << " TE='" << (headers_.count("transfer-encoding") ? headers_.at("transfer-encoding") : "<none>")
+          << "'\n";
   bool has_cl = headers_.count("content-length");
   bool has_te = headers_.count("transfer-encoding");
   if (has_cl && has_te) {
@@ -47,6 +52,7 @@ void HttpRequest::ValidateBodyHeaders() {
   if (has_cl) {
     const std::string& s = headers_["content-length"];
     ParseContentLength(s);
+    std::cerr << "parsed content_length_=" << content_length_ << "\n";
     // Once content_length_ is determined, throw if it exceeds max_body_size_.
     if (content_length_ >= 0 &&
         static_cast<size_t>(content_length_) > max_body_size_limit_) {

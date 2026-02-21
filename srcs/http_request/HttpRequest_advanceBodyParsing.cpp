@@ -1,6 +1,7 @@
 #include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
 
 #include "HttpRequest.hpp"
+#include <iostream> // debug
 
 /**
  * @brief handle body parsing advancement, either by content-length or chunked
@@ -65,6 +66,7 @@ bool HttpRequest::AdvanceContentLengthBody() {
     return false;
   }
   body_.assign(buffer_.data(), need);
+  std::cerr << "BODY PREVIEW: '" << body_.substr(0, 30) << "'\n";
   buffer_.erase(0, need);  // erase consumed data
   state_ = kDone;
   return true;
