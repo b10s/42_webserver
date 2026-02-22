@@ -147,7 +147,9 @@ void Webserv::CheckTimeout() {
 void Webserv::ClearResources() {
   for (std::map<int, ASocket*>::iterator it = sockets_.begin();
        it != sockets_.end(); ++it) {
+    std::cerr << "Cleaning up socket fd: " << it->second->GetFd() << std::endl;
     delete it->second;
   }
+  std::cerr << "All sockets cleaned up." << std::endl;
   sockets_.clear();
 }

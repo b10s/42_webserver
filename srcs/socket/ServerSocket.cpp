@@ -61,7 +61,6 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
     socklen_t client_addr_len = sizeof(client_addr);
     lib::type::Fd client_fd(
         accept(fd_.GetFd(), (sockaddr*)&client_addr, &client_addr_len));
-
     if (client_fd.GetFd() == -1) {
       std::cerr << "Failed to accept fd:" << client_fd.GetFd() << std::endl;
       return result;

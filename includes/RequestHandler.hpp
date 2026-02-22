@@ -4,6 +4,7 @@
 #include <cstdio>     // for std::remove()
 #include <fstream>    // for std::ofstream
 #include <stdexcept>  // std::runtime_error
+#include <iostream>     // for debug
 
 #include "ExecResult.hpp"
 #include "HttpRequest.hpp"

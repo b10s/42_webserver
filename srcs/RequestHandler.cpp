@@ -1,7 +1,6 @@
 #include "RequestHandler.hpp"
 
 #include <stdexcept>
-#include <iostream>
 
 #include "CgiExecutor.hpp"
 #include "FileValidator.hpp"
@@ -88,10 +87,10 @@ std::string RequestHandler::ResolveFilesystemPath() const {
     return "";
   }
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
-  // std::string path = location_match_.loc->GetRoot() + req_.GetUri();
-  std::cout << "DEBUG: location root: " << location_match_.loc->GetRoot()
-       << ", request URI: " << req_.GetUri() << ", combined path: " << path
-       << std::endl;
+  std::cerr << "[DEBUG] location root: " << location_match_.loc->GetRoot()
+       << ", request URI: " << req_.GetUri() 
+       << ", remainder: " << location_match_.remainder
+       << ", combined path: " << path << std::endl;
   // Validate/normalize (security)
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
@@ -152,15 +151,13 @@ void RequestHandler::HandleGet() {
 void RequestHandler::HandlePost() {
   const std::string req_uri = req_.GetUri();
   if (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/') {
-    std::cerr << "DEBUG: POST request URI ends with '/', rejecting as directory"
+    std::cerr << "[DEBUG] POST request URI ends with '/', rejecting as directory"
          << std::endl;
     throw lib::exception::ResponseStatusException(lib::http::kMethodNotAllowed); // 405
   }
   const std::string path = filesystem_path_;
-  std::cerr << "DEBUG: POST request, resolved filesystem path: " << path
-       << std::endl;
   if (lib::utils::IsDirectory(path)) {
-    std::cerr << "DEBUG: POST request resolved to a directory, rejecting"
+    std::cerr << "[DEBUG] POST request resolved to a directory, rejecting"
          << std::endl;
     throw lib::exception::ResponseStatusException(lib::http::kMethodNotAllowed);
   }

@@ -59,5 +59,7 @@ LocationMatch ServerConfig::FindLocationForUri(const std::string& uri) const {
     if (best.remainder.empty()) best.remainder = "/";  // should not happen
     if (best.remainder[0] != '/') best.remainder = "/" + best.remainder;
   }
+  std::cerr << "Best match: location=" << best.loc->GetName()
+            << ", remainder=" << best.remainder << std::endl;
   return best;
 }
