@@ -5,12 +5,12 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <iostream>  // debug
 #include <map>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <iostream> // debug
 
 #include "Location.hpp"
 #include "LocationMatch.hpp"

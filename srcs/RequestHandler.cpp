@@ -88,9 +88,9 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   }
   std::string path = location_match_.loc->GetRoot() + location_match_.remainder;
   std::cerr << "[DEBUG] location root: " << location_match_.loc->GetRoot()
-       << ", request URI: " << req_.GetUri() 
-       << ", remainder: " << location_match_.remainder
-       << ", combined path: " << path << std::endl;
+            << ", request URI: " << req_.GetUri()
+            << ", remainder: " << location_match_.remainder
+            << ", combined path: " << path << std::endl;
   // Validate/normalize (security)
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
@@ -146,19 +146,21 @@ void RequestHandler::HandleGet() {
 }
 
 // reject directories for POST requests
-// nginx returns the 405 status code for POST method 
+// nginx returns the 405 status code for POST method
 // requesting a static file only if the file exists.
 void RequestHandler::HandlePost() {
   const std::string req_uri = req_.GetUri();
   if (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/') {
-    std::cerr << "[DEBUG] POST request URI ends with '/', rejecting as directory"
-         << std::endl;
-    throw lib::exception::ResponseStatusException(lib::http::kMethodNotAllowed); // 405
+    std::cerr
+        << "[DEBUG] POST request URI ends with '/', rejecting as directory"
+        << std::endl;
+    throw lib::exception::ResponseStatusException(
+        lib::http::kMethodNotAllowed);  // 405
   }
   const std::string path = filesystem_path_;
   if (lib::utils::IsDirectory(path)) {
     std::cerr << "[DEBUG] POST request resolved to a directory, rejecting"
-         << std::endl;
+              << std::endl;
     throw lib::exception::ResponseStatusException(lib::http::kMethodNotAllowed);
   }
   if (location_match_.loc->GetCgiEnabled()) {

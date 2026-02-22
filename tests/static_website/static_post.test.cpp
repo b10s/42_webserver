@@ -97,7 +97,7 @@ TEST_F(RequestHandlerPostTest, StaticPost_CreatesFile_AndReturns201) {
   EXPECT_EQ(ReadAll(saved), "hello post world");
 }
 
-TEST_F(RequestHandlerPostTest, StaticPost_UriEndsWithSlash_Returns400) {
+TEST_F(RequestHandlerPostTest, StaticPost_UriEndsWithSlash_Returns405) {
   HttpRequest req;
   req.SetMethod(lib::http::kPost);
   req.SetUri("/upload/dir/");          // ← trailing slash
@@ -106,10 +106,10 @@ TEST_F(RequestHandlerPostTest, StaticPost_UriEndsWithSlash_Returns400) {
   RequestHandler handler(config_, req);
   ExecResult r = handler.Run();
 
-  EXPECT_EQ(r.response.GetStatus(), lib::http::kBadRequest);
+  EXPECT_EQ(r.response.GetStatus(), lib::http::kMethodNotAllowed);
 }
 
-TEST_F(RequestHandlerPostTest, StaticPost_TargetIsDirectory_Returns400) {
+TEST_F(RequestHandlerPostTest, StaticPost_TargetIsDirectory_Returns405) {
   MakeDir(tmp_ + "/dir", 0755);
 
   HttpRequest req;
@@ -120,7 +120,7 @@ TEST_F(RequestHandlerPostTest, StaticPost_TargetIsDirectory_Returns400) {
   RequestHandler handler(config_, req);
   ExecResult r = handler.Run();
 
-  EXPECT_EQ(r.response.GetStatus(), lib::http::kBadRequest);
+  EXPECT_EQ(r.response.GetStatus(), lib::http::kMethodNotAllowed);
 }
 
 TEST_F(RequestHandlerPostTest, StaticPost_NoWritePermission_Returns403) {
