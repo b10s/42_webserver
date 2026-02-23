@@ -3,7 +3,7 @@
 [![cpp-linter](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml)
 
 ## Description
-- HTTP/1.0 server
+- an HTTP server in C++ 98.
 - epoll based
 - GET/POST/DELETE
 - CGI support
