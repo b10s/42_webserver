@@ -108,6 +108,13 @@ curl -I http://127.0.0.1:<PORT>/index.html   # headers only
 curl -v http://127.0.0.1:<PORT>/
 # curl -v http://127.0.0.1:8080/dirlist
 
+# chuncked transfer encoding
+(
+printf "POST /upload/test.txt HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n"
+sleep 1
+printf "6\r\n World\r\n0\r\n\r\n"
+) | nc -v 127.0.0.1 8080
+
 # POST upload (file)
 curl -X POST --data-binary @README.md http://localhost:8080/upload/readme.txt
 
@@ -154,3 +161,15 @@ siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
 # Check memory doesn’t grow indefinitely:
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
 ```
+
+testerでのチェック
+( printf "GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\nPOST / HTTP/1.1\r\nHost: localhost:8080\r\nContent-Length: 0\r\n\r\n" ) | nc -v 127.0.0.1 8080
+testerは1接続で複数リクエストを処理する（レスポンス送信後に HttpRequest をリセットする）ことを求めている
+
+スコープ外にするか相談
+- multipart/form-dataのアップロードは対応しない
+- absolute-form も対応しない
+    printf "GET http://127.0.0.1:8080/cgi/hello.py HTTP/1.1\r\nHost: 127.0.0.1:8080\r\n\r\n" \
+    | nc -v 127.0.0.1 8080
+    -> Bad request
+    subjectには"The HTTP 1.0 is suggested as a reference point, but not enforced."とあるのでdefence可能？

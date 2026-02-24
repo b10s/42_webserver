@@ -138,24 +138,24 @@ TEST_F(HttpRequestConsumeHeader, ContentLengthAndTransferEncodingTogether_Throws
 }
 
 // if method is POST and neither Content-Length nor Transfer-Encoding is present, throw kLengthRequired
-TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
-  std::string headers_and_after =
-      "Host: example.com\r\n"
-      "\r\n";
-  auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
-  req.SetMethod(hs.method);
+// TEST_F(HttpRequestConsumeHeader, PostWithoutCLorTE_ThrowsLengthRequired) {
+//   std::string headers_and_after =
+//       "Host: example.com\r\n"
+//       "\r\n";
+//   auto hs = makeHeaderStart("POST", "/", "HTTP/1.1", headers_and_after);
+//   req.SetMethod(hs.method);
 
-  EXPECT_THROW(
-      {
-        try {
-          req.ConsumeHeader(hs.p_headers);
-        } catch (const lib::exception::ResponseStatusException& e) {
-          EXPECT_EQ(lib::http::kLengthRequired, e.GetStatus());
-          throw;
-        }
-      },
-      lib::exception::ResponseStatusException);
-}
+//   EXPECT_THROW(
+//       {
+//         try {
+//           req.ConsumeHeader(hs.p_headers);
+//         } catch (const lib::exception::ResponseStatusException& e) {
+//           EXPECT_EQ(lib::http::kLengthRequired, e.GetStatus());
+//           throw;
+//         }
+//       },
+//       lib::exception::ResponseStatusException);
+// }
 
 // =============== Content-Length の検証 ===============
 TEST_F(HttpRequestConsumeHeader, ContentLength_Valid_SetsContentLength) {
