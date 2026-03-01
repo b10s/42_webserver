@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by ssoeno, takiga, aenshin.*
+*This project has been created as part of the 42 curriculum by ssoeno, takitaga, aenshin.*
 
 [![cpp-linter](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml)
 
