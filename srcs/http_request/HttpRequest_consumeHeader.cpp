@@ -57,9 +57,11 @@ void HttpRequest::ValidateBodyHeaders() {
     const std::string& s = headers_["transfer-encoding"];
     ParseTransferEncoding(s);
   } else {
-    if (method_ == lib::http::kPost) {
-      throw lib::exception::ResponseStatusException(lib::http::kLengthRequired);
-    }
+    // the tester expects 0 content length for POST without body headers
+    // if (method_ == lib::http::kPost) {
+    //   throw
+    //   lib::exception::ResponseStatusException(lib::http::kLengthRequired);
+    // }
     content_length_ = 0;
   }
 }

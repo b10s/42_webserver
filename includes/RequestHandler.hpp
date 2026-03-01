@@ -3,6 +3,7 @@
 
 #include <cstdio>     // for std::remove()
 #include <fstream>    // for std::ofstream
+#include <iostream>   // for debug
 #include <stdexcept>  // std::runtime_error
 
 #include "ExecResult.hpp"

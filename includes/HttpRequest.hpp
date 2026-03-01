@@ -60,9 +60,9 @@ class HttpRequest : public lib::parser::StreamParser {
   // there is no upper limit for header count in RFCs, but we set a 8192 bytes
   // (8KB) for simplicity
   static const size_t kMaxHeaderSize = 8192;
-  // the maximum size of request payload is usually 1MB or more in real servers,
-  // but we set 16KB for simplicity
-  static const size_t kMaxPayloadSize = 16384;
+  // the maximum size of request payload is usually 1MB or more
+  // we set 1MB here
+  static const size_t kMaxPayloadSize = 1048576;
   // the maximum size of request URI is 8192 bytes (8KB) in nginx but we set
   // smaller limit (1KB) for simplicity
   static const size_t kMaxUriSize = 1024;
