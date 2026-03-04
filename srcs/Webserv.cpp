@@ -29,9 +29,9 @@ Webserv::Webserv(const std::string& config_file) {
   const std::vector<ServerConfig>& configs = config_parser.GetServerConfigs();
   InitServersFromConfigs(configs);
 
-  epoll_fd_.Reset(epoll_create1(0));
+  epoll_fd_.Reset(epoll_create(0));
   if (epoll_fd_.GetFd() == -1) {
-    throw std::runtime_error("epoll_create1() failed. " +
+    throw std::runtime_error("epoll_create() failed. " +
                              std::string(strerror(errno)));
   }
 

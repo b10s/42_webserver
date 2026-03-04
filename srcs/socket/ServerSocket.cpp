@@ -8,6 +8,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 
 #include "lib/type/Fd.hpp"
@@ -22,6 +23,14 @@ lib::type::Fd CreateServerSocketFd() {
                              std::string(strerror(errno)));
   }
   return lib::type::Fd(fd);
+}
+
+std::string Ipv4ToString(in_addr addr) {
+  uint32_t ip = ntohl(addr.s_addr);
+  std::ostringstream oss;
+  oss << ((ip >> 24) & 0xFF) << "." << ((ip >> 16) & 0xFF) << "."
+      << ((ip >> 8) & 0xFF) << "." << (ip & 0xFF);
+  return oss.str();
 }
 }  // namespace
 
@@ -66,7 +75,7 @@ SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
       return result;
     }
 
-    std::string client_ip = inet_ntoa(client_addr.sin_addr);
+    std::string client_ip = Ipv4ToString(client_addr.sin_addr);
     try {
       ClientSocket* client_socket =
           new ClientSocket(client_fd, config_, client_ip);
