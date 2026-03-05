@@ -128,6 +128,30 @@ void ClientSocket::HandleEpollOut() {
   }
 }
 
+void ClientSocket::HandleTimeout(int epoll_fd) {
+  res_ = HttpResponse(lib::http::kRequestTimeout);
+  res_.AddHeader("Connection", "close");
+  res_.AddHeader("Content-Type", "text/html");
+  res_.EnsureDefaultErrorContent();
+
+  write_buffer_ = res_.ToHttpString();
+
+  while (!write_buffer_.empty()) {
+    ssize_t bytes_sent =
+        send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
+    if (bytes_sent <= 0) {
+      break;
+    }
+    if (static_cast<size_t>(bytes_sent) < write_buffer_.length()) {
+      write_buffer_ = write_buffer_.substr(bytes_sent);
+    } else {
+      write_buffer_.clear();
+    }
+  }
+
+  epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+}
+
 void ClientSocket::OnCgiExecutionFinished(int epoll_fd,
                                           const std::string& cgi_output) {
   UpdateLastActivity();
