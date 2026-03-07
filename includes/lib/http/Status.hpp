@@ -19,6 +19,7 @@ enum Status {
   kForbidden = 403,
   kNotFound = 404,
   kMethodNotAllowed = 405,
+  kRequestTimeout = 408,
   kLengthRequired = 411,
   kPayloadTooLarge = 413,
   kUriTooLong = 414,

@@ -29,6 +29,8 @@ std::string StatusToString(Status status) {
       return "Not Found";
     case kMethodNotAllowed:
       return "Method Not Allowed";
+    case kRequestTimeout:
+      return "Request Timeout";
     case kLengthRequired:
       return "Length Required";
     case kPayloadTooLarge:
