@@ -161,6 +161,18 @@ class Location {
   bool GetCgiEnabled() const {
     return cgi_enabled_;
   }
+
+  std::string GetAllowedMethodsString() const {
+    std::string result;
+    for (std::set<lib::http::Method>::const_iterator it = methods_.begin();
+         it != methods_.end(); ++it) {
+      if (it != methods_.begin()) {
+        result += ", ";
+      }
+      result += lib::http::MethodToString(*it);
+    }
+    return result;
+  }
 };
 
 #endif  // LOCATION_HPP_

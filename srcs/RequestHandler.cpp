@@ -33,8 +33,13 @@ ExecResult RequestHandler::Run() {
     lib::http::Method method = req_.GetMethod();
     if (location_match_.loc->HasAllowedMethods()) {
       if (!location_match_.loc->IsMethodAllowed(method)) {
-        throw lib::exception::ResponseStatusException(
-            lib::http::kMethodNotAllowed);
+        HttpResponse res;
+        res.SetStatus(lib::http::kMethodNotAllowed); // 405
+        res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
+        res.AddHeader("Connection", "close");
+        res.AddHeader("Content-Type", "text/html");
+        res.EnsureDefaultErrorContent();
+        return ExecResult(res);
       }
     }
 
@@ -154,18 +159,25 @@ void RequestHandler::HandlePost() {
     std::cerr
         << "[DEBUG] POST request URI ends with '/', rejecting as directory"
         << std::endl;
-    throw lib::exception::ResponseStatusException(
-        lib::http::kMethodNotAllowed);  // 405
+    HttpResponse res;
+    res.SetStatus(lib::http::kMethodNotAllowed);
+    res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
+    res.AddHeader("Connection", "close");
+    res.AddHeader("Content-Type", "text/html");
+    res.EnsureDefaultErrorContent();
+    result_ = ExecResult(res);
   }
   const std::string path = filesystem_path_;
   if (lib::utils::IsDirectory(path)) {
     std::cerr << "[DEBUG] POST request resolved to a directory, rejecting"
               << std::endl;
-    result_.HttpResponse(lib::http::kMethodNotAllowed);
-    result_.AddHeader("Allow", methods_to_string(location_match_.loc->GetAllowedMethods()));
-    result_.AddHeader("Connection", "close");
-    result_.AddHeader("Content-Type", "text/html");
-    result_.EnsureDefaultErrorContent();
+    HttpResponse res;
+    res.SetStatus(lib::http::kMethodNotAllowed); // 405
+    res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
+    res.AddHeader("Connection", "close");
+    res.AddHeader("Content-Type", "text/html");
+    res.EnsureDefaultErrorContent();
+    result_ = ExecResult(res);
   }
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, path);
