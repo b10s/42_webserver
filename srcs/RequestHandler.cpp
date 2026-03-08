@@ -161,7 +161,11 @@ void RequestHandler::HandlePost() {
   if (lib::utils::IsDirectory(path)) {
     std::cerr << "[DEBUG] POST request resolved to a directory, rejecting"
               << std::endl;
-    throw lib::exception::ResponseStatusException(lib::http::kMethodNotAllowed);
+    result_.HttpResponse(lib::http::kMethodNotAllowed);
+    result_.AddHeader("Allow", methods_to_string(location_match_.loc->GetAllowedMethods()));
+    result_.AddHeader("Connection", "close");
+    result_.AddHeader("Content-Type", "text/html");
+    result_.EnsureDefaultErrorContent();
   }
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, path);
