@@ -122,24 +122,25 @@ bool HttpRequest::AdvanceChunkedBody() {
                 << " parsed_size=" << size << " new_pos=" << pos << std::endl;
       buffer_read_pos_ = pos;
       next_chunk_size_ = static_cast<ptrdiff_t>(size);
-      // if size is 0, this is the last chunk, now expect final CRLF
-      if (next_chunk_size_ == 0) {
-        std::cerr << "[DEBUG chunk] last chunk detected (size 0)"
-                  << " validate from pos=" << buffer_read_pos_ << std::endl;
-        bool done = ValidateFinalCRLF(buffer_read_pos_);
-        std::cerr << "[DEBUG chunk] ValidateFinalCRLF -> " << done
-                  << " read_pos(after?)=" << buffer_read_pos_ << std::endl;
-        if (done) {
-          std::cerr << "[DEBUG chunk] request done, erasing consumed data"
-                    << " erase_len=" << buffer_read_pos_ << std::endl;
-          buffer_.erase(0, buffer_read_pos_);  // erase consumed data
-          buffer_read_pos_ = 0;
-          next_chunk_size_ = -1;
-          state_ = kDone;
-          return true;
-        }
-        return done;
+    }
+    // last chunk (0\r\n) has already been parsed.
+    // now we must wait for and validate the final CRLF.
+    if (next_chunk_size_ == 0) {
+      std::cerr << "[DEBUG chunk] last chunk detected (size 0)"
+                << " validate from pos=" << buffer_read_pos_ << std::endl;
+      bool done = ValidateFinalCRLF(buffer_read_pos_);
+      std::cerr << "[DEBUG chunk] ValidateFinalCRLF -> " << done
+                << " read_pos(after?)=" << buffer_read_pos_ << std::endl;
+      if (!done) {
+        return false;  // need to wait for final CRLF
       }
+      std::cerr << "[DEBUG chunk] request done, erasing consumed data"
+                << " erase_len=" << buffer_read_pos_ << std::endl;
+      buffer_.erase(0, buffer_read_pos_);  // erase consumed data
+      buffer_read_pos_ = 0;
+      next_chunk_size_ = -1;
+      state_ = kDone;
+      return true;
     }
     size_t pos = buffer_read_pos_;
     std::cerr << "[DEBUG chunk] trying AppendChunkData"
