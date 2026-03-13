@@ -1,3 +1,4 @@
+#include <iostream>
 #include <limits>  // can't use SIZE_MAX in C++98 so use std::numeric_limits instead
 
 #include "HttpRequest.hpp"
@@ -20,6 +21,19 @@
  */
 // TODO: maybe I should not throw bad request for extensions(trailing section)
 // but just ignore them. For now, we just throw bad request for simplicity.
+
+static std::string EscapeForDebug(const std::string& s) {
+  std::string out;
+  for (size_t i = 0; i < s.size(); ++i) {
+    if (s[i] == '\r')
+      out += "\\r";
+    else if (s[i] == '\n')
+      out += "\\n";
+    else
+      out += s[i];
+  }
+  return out;
+}
 
 /*
 ValidateBodyHeaders in ConsumeBodyHeaders ensures the following conditions:
@@ -73,39 +87,75 @@ bool HttpRequest::AdvanceContentLengthBody() {
 // chunked transfer encoding: "size\r\n<data>\r\n ... 0\r\n\r\n"
 // return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
+  std::cerr << "[DEBUG chunk] enter AdvanceChunkedBody"
+            << " state=" << state_ << " buffer_size=" << buffer_.size()
+            << " read_pos=" << buffer_read_pos_
+            << " next_chunk_size=" << next_chunk_size_ << std::endl;
+
   if (buffer_read_pos_ > buffer_.size()) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);  // should not happen
   }
   if (buffer_read_pos_ == buffer_.size()) {
+    std::cerr << "[DEBUG chunk] no more buffered data, need more" << std::endl;
     return false;  // parsed all available data, need more
   }
   for (;;) {
+    std::cerr << "[DEBUG chunk] loop begin"
+              << " read_pos=" << buffer_read_pos_
+              << " next_chunk_size=" << next_chunk_size_ << std::endl;
+    std::cerr << "[DEBUG chunk] remaining=["
+              << EscapeForDebug(buffer_.substr(buffer_read_pos_)) << "]"
+              << std::endl;
     if (next_chunk_size_ == -1) {
       size_t size = 0;
       size_t pos = buffer_read_pos_;
+      std::cerr << "[DEBUG chunk] trying ParseChunkSize at pos=" << pos
+                << std::endl;
+
       if (!ParseChunkSize(pos, size)) {
+        std::cerr << "[DEBUG chunk] ParseChunkSize -> false (need more data)"
+                  << std::endl;
         return false;  // need to wait for size line
       }
+      std::cerr << "[DEBUG chunk] ParseChunkSize -> true"
+                << " parsed_size=" << size << " new_pos=" << pos << std::endl;
       buffer_read_pos_ = pos;
       next_chunk_size_ = static_cast<ptrdiff_t>(size);
-      if (size == 0) {
+      // if size is 0, this is the last chunk, now expect final CRLF
+      if (next_chunk_size_ == 0) {
+        std::cerr << "[DEBUG chunk] last chunk detected (size 0)"
+                  << " validate from pos=" << buffer_read_pos_ << std::endl;
         bool done = ValidateFinalCRLF(buffer_read_pos_);
+        std::cerr << "[DEBUG chunk] ValidateFinalCRLF -> " << done
+                  << " read_pos(after?)=" << buffer_read_pos_ << std::endl;
         if (done) {
+          std::cerr << "[DEBUG chunk] request done, erasing consumed data"
+                    << " erase_len=" << buffer_read_pos_ << std::endl;
           buffer_.erase(0, buffer_read_pos_);  // erase consumed data
           buffer_read_pos_ = 0;
           next_chunk_size_ = -1;
           state_ = kDone;
+          return true;
         }
         return done;
       }
     }
     size_t pos = buffer_read_pos_;
+    std::cerr << "[DEBUG chunk] trying AppendChunkData"
+              << " pos=" << pos << " chunk_size=" << next_chunk_size_
+              << std::endl;
     if (!AppendChunkData(pos, static_cast<size_t>(next_chunk_size_))) {
+      std::cerr << "[DEBUG chunk] AppendChunkData -> false (need more data)"
+                << std::endl;
       return false;
     }
+    std::cerr << "[DEBUG chunk] AppendChunkData -> true"
+              << " new_pos=" << pos << std::endl;
     buffer_read_pos_ = pos;
     next_chunk_size_ = -1;  // reset state, read next size line
+    std::cerr << "[DEBUG chunk] chunk consumed, reset next_chunk_size"
+              << std::endl;
   }
 }
 
@@ -142,6 +192,11 @@ bool HttpRequest::ParseChunkSize(size_t& pos, size_t& chunk_size) {
 
 // called after reading "0\r\n"; now expect the final CRLF
 bool HttpRequest::ValidateFinalCRLF(size_t& pos) {
+  std::cerr << "[DEBUG chunk] ValidateFinalCRLF enter"
+            << " pos=" << pos << " buffer_size=" << buffer_.size()
+            << " remaining=[" << EscapeForDebug(buffer_.substr(pos)) << "]"
+            << std::endl;
+
   if (!ValidateAndSkipCRLF(pos)) return false;
   // ensure no extra data after final CRLF
   if (pos != buffer_.size()) {

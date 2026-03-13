@@ -76,14 +76,31 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
   char buffer[kBufferSize];
   ssize_t bytes_received = recv(fd_.GetFd(), buffer, sizeof(buffer), 0);
 
+  std::cerr << "[DEBUG] recv fd=" << fd_.GetFd() << " bytes=" << bytes_received
+            << std::endl;
+
+  if (bytes_received > 0) {
+    std::cerr << "[DEBUG] raw recv:\n"
+              << std::string(buffer, bytes_received) << std::endl;
+  }
+
   if (bytes_received <= 0) {
     throw lib::exception::ConnectionClosed();
   }
 
   req_.Parse(buffer, bytes_received);
+  std::cerr << "[DEBUG] req done=" << req_.IsDone() << std::endl;
   if (req_.IsDone()) {
     RequestHandler handler(config_, req_);
     ExecResult result = handler.Run();
+
+    std::cerr << "[DEBUG] final response status = "
+              << result.response.GetStatus() << std::endl;
+
+    res_ = result.response;
+    write_buffer_ = res_.ToHttpString();
+
+    std::cerr << "[DEBUG] raw response:\n" << write_buffer_ << std::endl;
 
     if (result.is_async) {
       if (result.new_socket) {

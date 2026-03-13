@@ -34,7 +34,7 @@ ExecResult RequestHandler::Run() {
     if (location_match_.loc->HasAllowedMethods()) {
       if (!location_match_.loc->IsMethodAllowed(method)) {
         HttpResponse res;
-        res.SetStatus(lib::http::kMethodNotAllowed); // 405
+        res.SetStatus(lib::http::kMethodNotAllowed);  // 405
         res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
         res.AddHeader("Connection", "close");
         res.AddHeader("Content-Type", "text/html");
@@ -166,18 +166,20 @@ void RequestHandler::HandlePost() {
     res.AddHeader("Content-Type", "text/html");
     res.EnsureDefaultErrorContent();
     result_ = ExecResult(res);
+    return;
   }
   const std::string path = filesystem_path_;
   if (lib::utils::IsDirectory(path)) {
     std::cerr << "[DEBUG] POST request resolved to a directory, rejecting"
               << std::endl;
     HttpResponse res;
-    res.SetStatus(lib::http::kMethodNotAllowed); // 405
+    res.SetStatus(lib::http::kMethodNotAllowed);  // 405
     res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
     res.AddHeader("Connection", "close");
     res.AddHeader("Content-Type", "text/html");
     res.EnsureDefaultErrorContent();
     result_ = ExecResult(res);
+    return;
   }
   if (location_match_.loc->GetCgiEnabled()) {
     CgiExecutor cgi(req_, *location_match_.loc, path);
