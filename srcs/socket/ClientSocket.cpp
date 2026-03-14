@@ -7,6 +7,8 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <algorithm>
+#include <cstddef>
 
 #include "CgiResponseParser.hpp"
 #include "RequestHandler.hpp"
@@ -15,6 +17,16 @@
 #include "lib/type/Fd.hpp"
 #include "lib/utils/file_utils.hpp"
 #include "socket/CgiSocket.hpp"
+
+namespace {
+
+// Set to true in debug builds to enable detailed ClientSocket logging.
+static const bool kEnableClientSocketDebugLogging = false;
+
+// Maximum number of bytes of raw data to log to stderr.
+static const std::size_t kMaxDebugLogBytes = 1024;
+
+}  // namespace
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
@@ -76,12 +88,19 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
   char buffer[kBufferSize];
   ssize_t bytes_received = recv(fd_.GetFd(), buffer, sizeof(buffer), 0);
 
-  std::cerr << "[DEBUG] recv fd=" << fd_.GetFd() << " bytes=" << bytes_received
-            << std::endl;
+  if (kEnableClientSocketDebugLogging) {
+    std::cerr << "[DEBUG] recv fd=" << fd_.GetFd()
+              << " bytes=" << bytes_received << std::endl;
+  }
 
-  if (bytes_received > 0) {
-    std::cerr << "[DEBUG] raw recv:\n"
-              << std::string(buffer, bytes_received) << std::endl;
+  if (kEnableClientSocketDebugLogging && bytes_received > 0) {
+    std::size_t len =
+        std::min(static_cast<std::size_t>(bytes_received), kMaxDebugLogBytes);
+    std::string data(buffer, len);
+    if (len < static_cast<std::size_t>(bytes_received)) {
+      data.append("...(truncated)");
+    }
+    std::cerr << "[DEBUG] raw recv:\n" << data << std::endl;
   }
 
   if (bytes_received <= 0) {
@@ -89,18 +108,30 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
   }
 
   req_.Parse(buffer, bytes_received);
-  std::cerr << "[DEBUG] req done=" << req_.IsDone() << std::endl;
+  if (kEnableClientSocketDebugLogging) {
+    std::cerr << "[DEBUG] req done=" << req_.IsDone() << std::endl;
+  }
   if (req_.IsDone()) {
     RequestHandler handler(config_, req_);
     ExecResult result = handler.Run();
 
-    std::cerr << "[DEBUG] final response status = "
-              << result.response.GetStatus() << std::endl;
+    if (kEnableClientSocketDebugLogging) {
+      std::cerr << "[DEBUG] final response status = "
+                << result.response.GetStatus() << std::endl;
+    }
 
     res_ = result.response;
     write_buffer_ = res_.ToHttpString();
 
-    std::cerr << "[DEBUG] raw response:\n" << write_buffer_ << std::endl;
+    if (kEnableClientSocketDebugLogging) {
+      std::size_t len =
+          std::min(write_buffer_.size(), kMaxDebugLogBytes);
+      std::string data(write_buffer_.c_str(), len);
+      if (len < write_buffer_.size()) {
+        data.append("...(truncated)");
+      }
+      std::cerr << "[DEBUG] raw response:\n" << data << std::endl;
+    }
 
     if (result.is_async) {
       if (result.new_socket) {
