@@ -3,6 +3,10 @@
 
 #include "HttpRequest.hpp"
 
+// File-local flag to enable/disable verbose chunked-body debug logging.
+// Set to true only when actively debugging; default is false for production.
+static const bool kEnableChunkDebugLogging = false;
+
 /**
  * @brief handle body parsing advancement, either by content-length or chunked
  *
@@ -87,55 +91,75 @@ bool HttpRequest::AdvanceContentLengthBody() {
 // chunked transfer encoding: "size\r\n<data>\r\n ... 0\r\n\r\n"
 // return false if need more data
 bool HttpRequest::AdvanceChunkedBody() {
-  std::cerr << "[DEBUG chunk] enter AdvanceChunkedBody"
-            << " state=" << state_ << " buffer_size=" << buffer_.size()
-            << " read_pos=" << buffer_read_pos_
-            << " next_chunk_size=" << next_chunk_size_ << std::endl;
+  if (kEnableChunkDebugLogging) {
+    std::cerr << "[DEBUG chunk] enter AdvanceChunkedBody"
+              << " state=" << state_ << " buffer_size=" << buffer_.size()
+              << " read_pos=" << buffer_read_pos_
+              << " next_chunk_size=" << next_chunk_size_ << std::endl;
+  }
 
   if (buffer_read_pos_ > buffer_.size()) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);  // should not happen
   }
   if (buffer_read_pos_ == buffer_.size()) {
-    std::cerr << "[DEBUG chunk] no more buffered data, need more" << std::endl;
+    if (kEnableChunkDebugLogging) {
+      std::cerr << "[DEBUG chunk] no more buffered data, need more"
+                << std::endl;
+    }
     return false;  // parsed all available data, need more
   }
   for (;;) {
-    std::cerr << "[DEBUG chunk] loop begin"
-              << " read_pos=" << buffer_read_pos_
-              << " next_chunk_size=" << next_chunk_size_ << std::endl;
-    std::cerr << "[DEBUG chunk] remaining=["
-              << EscapeForDebug(buffer_.substr(buffer_read_pos_)) << "]"
-              << std::endl;
+    if (kEnableChunkDebugLogging) {
+      std::cerr << "[DEBUG chunk] loop begin"
+                << " read_pos=" << buffer_read_pos_
+                << " next_chunk_size=" << next_chunk_size_ << std::endl;
+      std::cerr << "[DEBUG chunk] remaining=["
+                << EscapeForDebug(buffer_.substr(buffer_read_pos_)) << "]"
+                << std::endl;
+    }
     if (next_chunk_size_ == -1) {
       size_t size = 0;
       size_t pos = buffer_read_pos_;
-      std::cerr << "[DEBUG chunk] trying ParseChunkSize at pos=" << pos
-                << std::endl;
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] trying ParseChunkSize at pos=" << pos
+                  << std::endl;
+      }
 
       if (!ParseChunkSize(pos, size)) {
-        std::cerr << "[DEBUG chunk] ParseChunkSize -> false (need more data)"
-                  << std::endl;
+        if (kEnableChunkDebugLogging) {
+          std::cerr << "[DEBUG chunk] ParseChunkSize -> false (need more data)"
+                    << std::endl;
+        }
         return false;  // need to wait for size line
       }
-      std::cerr << "[DEBUG chunk] ParseChunkSize -> true"
-                << " parsed_size=" << size << " new_pos=" << pos << std::endl;
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] ParseChunkSize -> true"
+                  << " parsed_size=" << size << " new_pos=" << pos
+                  << std::endl;
+      }
       buffer_read_pos_ = pos;
       next_chunk_size_ = static_cast<ptrdiff_t>(size);
     }
     // last chunk (0\r\n) has already been parsed.
     // now we must wait for and validate the final CRLF.
     if (next_chunk_size_ == 0) {
-      std::cerr << "[DEBUG chunk] last chunk detected (size 0)"
-                << " validate from pos=" << buffer_read_pos_ << std::endl;
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] last chunk detected (size 0)"
+                  << " validate from pos=" << buffer_read_pos_ << std::endl;
+      }
       bool done = ValidateFinalCRLF(buffer_read_pos_);
-      std::cerr << "[DEBUG chunk] ValidateFinalCRLF -> " << done
-                << " read_pos(after?)=" << buffer_read_pos_ << std::endl;
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] ValidateFinalCRLF -> " << done
+                  << " read_pos(after?)=" << buffer_read_pos_ << std::endl;
+      }
       if (!done) {
         return false;  // need to wait for final CRLF
       }
-      std::cerr << "[DEBUG chunk] request done, erasing consumed data"
-                << " erase_len=" << buffer_read_pos_ << std::endl;
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] request done, erasing consumed data"
+                  << " erase_len=" << buffer_read_pos_ << std::endl;
+      }
       buffer_.erase(0, buffer_read_pos_);  // erase consumed data
       buffer_read_pos_ = 0;
       next_chunk_size_ = -1;
@@ -143,20 +167,28 @@ bool HttpRequest::AdvanceChunkedBody() {
       return true;
     }
     size_t pos = buffer_read_pos_;
-    std::cerr << "[DEBUG chunk] trying AppendChunkData"
-              << " pos=" << pos << " chunk_size=" << next_chunk_size_
-              << std::endl;
-    if (!AppendChunkData(pos, static_cast<size_t>(next_chunk_size_))) {
-      std::cerr << "[DEBUG chunk] AppendChunkData -> false (need more data)"
+    if (kEnableChunkDebugLogging) {
+      std::cerr << "[DEBUG chunk] trying AppendChunkData"
+                << " pos=" << pos << " chunk_size=" << next_chunk_size_
                 << std::endl;
+    }
+    if (!AppendChunkData(pos, static_cast<size_t>(next_chunk_size_))) {
+      if (kEnableChunkDebugLogging) {
+        std::cerr << "[DEBUG chunk] AppendChunkData -> false (need more data)"
+                  << std::endl;
+      }
       return false;
     }
-    std::cerr << "[DEBUG chunk] AppendChunkData -> true"
-              << " new_pos=" << pos << std::endl;
+    if (kEnableChunkDebugLogging) {
+      std::cerr << "[DEBUG chunk] AppendChunkData -> true"
+                << " new_pos=" << pos << std::endl;
+    }
     buffer_read_pos_ = pos;
     next_chunk_size_ = -1;  // reset state, read next size line
-    std::cerr << "[DEBUG chunk] chunk consumed, reset next_chunk_size"
-              << std::endl;
+    if (kEnableChunkDebugLogging) {
+      std::cerr << "[DEBUG chunk] chunk consumed, reset next_chunk_size"
+                << std::endl;
+    }
   }
 }
 
