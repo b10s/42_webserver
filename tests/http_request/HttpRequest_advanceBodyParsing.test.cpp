@@ -203,3 +203,17 @@ TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_ChunkSizeLargeButValid_WorksC
   EXPECT_FALSE(done); // still waiting for body data
   EXPECT_EQ("", req.GetBody());
 }
+
+// 空の chunked body を分割で受ける
+TEST_F(HttpRequestAdvanceBody, AdvanceBody_Chunked_EmptyBodySplitAcrossRecvs) {
+  req.SetContentLengthForTest(-1);
+  req.SetBufferForTest("0\r\n");
+  bool done = req.AdvanceBody();
+  EXPECT_FALSE(done); // still waiting for final CRLF
+  EXPECT_EQ("", req.GetBody());
+
+  req.AppendToBufferForTest("\r\n");
+  done = req.AdvanceBody();
+  EXPECT_TRUE(done);
+  EXPECT_EQ("", req.GetBody());
+}

@@ -86,9 +86,9 @@ curl -v http://127.0.0.1:8081/
 
 # Port conflict behavior (coherent and non-crashing)
 # Terminal A
-./webserv demo/conf/webserv_eval.conf
+./webserv demo/conf/webserv_eval_browser.conf
 # Terminal B: start another instance using same interface:port
-./webserv demo/conf/webserv_eval.conf
+./webserv demo/conf/webserv_eval_browser.conf
 # Expect: clean error (bind failure), no crash, clear message.
 
 # Must not crash / never hang indefinitely”
@@ -162,9 +162,11 @@ siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
 ```
 
-testerでのチェック
-( printf "GET / HTTP/1.1\r\nHost: localhost:8080\r\n\r\nPOST / HTTP/1.1\r\nHost: localhost:8080\r\nContent-Length: 0\r\n\r\n" ) | nc -v 127.0.0.1 8080
-testerは1接続で複数リクエストを処理する（レスポンス送信後に HttpRequest をリセットする）ことを求めている
+# Test with the official tester
+# Terminal A
+./webserv
+# Terminal B
+./tester http://localhost:8080
 
 スコープ外にするか相談
 - multipart/form-dataのアップロードは対応しない
