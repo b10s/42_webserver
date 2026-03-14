@@ -135,8 +135,7 @@ bool HttpRequest::AdvanceChunkedBody() {
       }
       if (kEnableChunkDebugLogging) {
         std::cerr << "[DEBUG chunk] ParseChunkSize -> true"
-                  << " parsed_size=" << size << " new_pos=" << pos
-                  << std::endl;
+                  << " parsed_size=" << size << " new_pos=" << pos << std::endl;
       }
       buffer_read_pos_ = pos;
       next_chunk_size_ = static_cast<ptrdiff_t>(size);

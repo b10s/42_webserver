@@ -4,11 +4,11 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <cerrno>
+#include <cstddef>
 #include <cstring>
 #include <iostream>
-#include <algorithm>
-#include <cstddef>
 
 #include "CgiResponseParser.hpp"
 #include "RequestHandler.hpp"
@@ -124,8 +124,7 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     write_buffer_ = res_.ToHttpString();
 
     if (kEnableClientSocketDebugLogging) {
-      std::size_t len =
-          std::min(write_buffer_.size(), kMaxDebugLogBytes);
+      std::size_t len = std::min(write_buffer_.size(), kMaxDebugLogBytes);
       std::string data(write_buffer_.c_str(), len);
       if (len < write_buffer_.size()) {
         data.append("...(truncated)");
