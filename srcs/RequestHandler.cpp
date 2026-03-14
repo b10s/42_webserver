@@ -161,7 +161,6 @@ void RequestHandler::HandlePost() {
         << std::endl;
     HttpResponse res;
     res.SetStatus(lib::http::kMethodNotAllowed);
-    res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
     res.AddHeader("Connection", "close");
     res.AddHeader("Content-Type", "text/html");
     res.EnsureDefaultErrorContent();
@@ -174,7 +173,6 @@ void RequestHandler::HandlePost() {
               << std::endl;
     HttpResponse res;
     res.SetStatus(lib::http::kMethodNotAllowed);  // 405
-    res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
     res.AddHeader("Connection", "close");
     res.AddHeader("Content-Type", "text/html");
     res.EnsureDefaultErrorContent();
