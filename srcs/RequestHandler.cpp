@@ -134,6 +134,17 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
 }
 
 void RequestHandler::HandleGet() {
+  const std::string req_uri = req_.GetUri();
+  const bool req_uri_ends_with_slash =
+      (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
+  if (lib::utils::IsDirectory(filesystem_path_) && !req_uri_ends_with_slash) {
+      HttpResponse res;
+      res.SetStatus(lib::http::kMovedPermanently);
+      res.AddHeader("Location", req_uri + "/");
+      result_ = ExecResult(res);
+      return;
+  }
+
   std::string path_with_index =
       AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
   if (location_match_.loc->GetCgiEnabled()) {
