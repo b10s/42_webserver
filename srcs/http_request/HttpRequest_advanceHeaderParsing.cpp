@@ -1,4 +1,5 @@
 #include "HttpRequest.hpp"
+#include <iostream>
 
 /**
  * @brief Wait until the header terminator ("\r\n\r\n") appears, then parse
@@ -23,13 +24,23 @@ bool HttpRequest::AdvanceHeader() {
     return false;  // need more data
   }
   try {
-    const char* begin = buffer_.c_str();
+    std::string header_str = buffer_.substr(0, end_of_header);
+    const char* begin = header_str.c_str();
     const char* cur = begin;
+    std::cerr << "[DEBUG] before ConsumeMethod" << std::endl;
     cur = this->ConsumeMethod(cur);
+    std::cerr << "[DEBUG] after ConsumeMethod" << std::endl;
     cur = this->ConsumeUri(cur);
+    std::cerr << "[DEBUG] after ConsumeUri" << std::endl;
     cur = this->ConsumeVersion(cur);
+    std::cerr << "[DEBUG] after ConsumeVersion" << std::endl;
     this->ConsumeHeader(cur);  // throw 413 if content_length_ exceeds limit
-  } catch (lib::exception::ResponseStatusException&) {
+    std::cerr << "[DEBUG] found end of headers at pos=" << end_of_header << std::endl;
+    std::cerr << "[DEBUG] total buffer size=" << buffer_.size() << std::endl;
+    std::cerr << "[DEBUG] remaining after headers="
+          << (buffer_.size() - end_of_header) << std::endl;
+  } catch (lib::exception::ResponseStatusException& e) {
+    std::cerr << "[DEBUG] AdvanceHeader caught status=" << e.GetStatus() << std::endl;
     throw;
   } catch (std::exception&) {
     throw lib::exception::ResponseStatusException(

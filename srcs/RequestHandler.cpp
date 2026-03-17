@@ -104,22 +104,8 @@ std::string RequestHandler::ResolveFilesystemPath() const {
 
 std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
     const std::string& base_path) const {
-  const std::string req_uri = req_.GetUri();
-  const bool req_uri_ends_with_slash =
-      (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
-  bool is_directory =
-      (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
-  /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
-  bool is_directory = false;
-  if (req_uri_ends_with_slash) {
-    is_directory = true;
-  } else {
-    struct stat st = lib::utils::StatOrThrow(path);
-    is_directory = S_ISDIR(st.st_mode);
-  }
-  */
   std::string path = base_path;
-  if (is_directory) {
+  if (lib::utils::IsDirectory(base_path)) {
     const std::string index = location_match_.loc->GetIndexFile();
     if (index.empty()) {
       throw lib::exception::ResponseStatusException(
@@ -130,6 +116,10 @@ std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
   }
   path = FileValidator::ValidateAndNormalizePath(
       path, location_match_.loc->GetRoot());
+
+  std::cerr << "[DEBUG] base_path=" << base_path << std::endl;
+  std::cerr << "[DEBUG] after append index path=" << path << std::endl;
+  std::cerr << "[DEBUG] root=" << location_match_.loc->GetRoot() << std::endl;
   return path;
 }
 
@@ -147,11 +137,21 @@ void RequestHandler::HandleGet() {
 
   std::string path_with_index =
       AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
-  if (location_match_.loc->GetCgiEnabled()) {
+
+  std::cerr << "[DEBUG] GetCgiEnabled=" << location_match_.loc->GetCgiEnabled()
+          << " path=" << path_with_index << std::endl;
+  
+  bool should_use_cgi = location_match_.loc->GetCgiEnabled() && location_match_.loc->ContainsCgiExtension(path_with_index);
+  std::cerr << "[DEBUG] HandleGet - Should use CGI? " << should_use_cgi << std::endl;
+  if (should_use_cgi) {
     CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
     result_ = cgi.Run();
   } else {
+    std::cerr << "[DEBUG] before ReadFileToStringOrThrow: " << path_with_index
+              << std::endl;
     std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
+    std::cerr << "[DEBUG] after ReadFileToStringOrThrow: body size=" << body.size()
+              << std::endl;
     HttpResponse res;
     res.AddHeader("Content-Type",
                   lib::http::DetectMimeTypeFromPath(path_with_index));
@@ -190,7 +190,9 @@ void RequestHandler::HandlePost() {
     result_ = ExecResult(res);
     return;
   }
-  if (location_match_.loc->GetCgiEnabled()) {
+  bool should_use_cgi = location_match_.loc->GetCgiEnabled() && location_match_.loc->ContainsCgiExtension(path);
+  std::cerr << "[DEBUG] HandlePost - Should use CGI? " << should_use_cgi << std::endl;
+  if (should_use_cgi) {
     CgiExecutor cgi(req_, *location_match_.loc, path);
     result_ = cgi.Run();
   } else {

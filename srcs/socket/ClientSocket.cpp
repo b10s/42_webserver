@@ -21,7 +21,7 @@
 namespace {
 
 // Set to true in debug builds to enable detailed ClientSocket logging.
-static const bool kEnableClientSocketDebugLogging = false;
+static const bool kEnableClientSocketDebugLogging = true;
 
 // Maximum number of bytes of raw data to log to stderr.
 static const std::size_t kMaxDebugLogBytes = 1024;
@@ -163,7 +163,10 @@ void ClientSocket::HandleEpollOut() {
   ssize_t bytes_sent =
       send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
 
-  if (bytes_sent == -1) {
+  if (bytes_sent < 0) {
+    if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) {
+      return;
+    }
     throw lib::exception::ConnectionClosed();
   }
 

@@ -162,6 +162,20 @@ class Location {
     return cgi_enabled_;
   }
 
+  bool ContainsCgiExtension(const std::string& path) const {
+    size_t dot_pos = path.rfind('.');
+    if (dot_pos == std::string::npos) {
+      return false;  // no extension, reject
+    }
+    std::string ext = path.substr(dot_pos);
+    for (size_t i = 0; i < cgi_allowed_extensions_.size(); ++i) {
+      if (ext == cgi_allowed_extensions_[i]) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   std::string GetAllowedMethodsString() const {
     std::string result;
     for (std::set<lib::http::Method>::const_iterator it = methods_.begin();

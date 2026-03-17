@@ -2,6 +2,7 @@
 
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/CharValidation.hpp"
+#include <iostream>
 
 /*
 percent-decode and resolving symlinks are not handled in this class
@@ -89,6 +90,8 @@ bool FileValidator::IsPathUnderDocumentRoot(const std::string& path,
 // path always starts with "/" (absolute path)
 std::string FileValidator::ValidateAndNormalizePath(
     const std::string& path, const std::string& document_root) {
+  std::cerr << "[DEBUG] ValidateAndNormalizePath input path=" << path
+          << " root=" << document_root << std::endl;
   if (ContainsUnsafeChars(path)) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
@@ -96,5 +99,7 @@ std::string FileValidator::ValidateAndNormalizePath(
   if (!IsPathUnderDocumentRoot(normalized_path, document_root)) {
     throw lib::exception::ResponseStatusException(lib::http::kNotFound);
   }
+  std::cerr << "[DEBUG] ValidateAndNormalizePath normalized_path=" << normalized_path
+            << std::endl;
   return normalized_path;
 }

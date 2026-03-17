@@ -72,6 +72,14 @@ void HttpRequest::ParseContentLength(const std::string& s) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   long len = res.Value();
+  // static_cast<size_t>(len) > kMaxPayloadSize を削除すると
+  // head -c 100000000 /dev/zero | \
+  // curl -v -X POST \
+  //   -H "Content-Type: test/file" \
+  //   -H "Expect:" \
+  //   --data-binary @- \
+  //   http://127.0.0.1:8080/directory/youpi.bla
+  // のようなリクエストで無限ループっぽくなる。
   if (len < 0 || static_cast<size_t>(len) > kMaxPayloadSize) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }

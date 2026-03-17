@@ -1,4 +1,5 @@
 #include "lib/utils/file_utils.hpp"
+#include <iostream>
 
 namespace lib {
 namespace utils {
@@ -59,17 +60,25 @@ void EnsureRegularFileOrThrowForbidden(const struct stat& st) {
 
 // read entire file content into a string
 std::string ReadFileToStringOrThrow(const std::string& filename) {
+  std::cerr << "[DEBUG] ReadFileToStringOrThrow enter: " << filename << std::endl;
   struct stat buffer = StatOrThrow(filename);
+  std::cerr << "[DEBUG] stat ok: mode=" << buffer.st_mode << std::endl;
   EnsureRegularFileOrThrowForbidden(buffer);
+  std::cerr << "[DEBUG] regular file check ok" << std::endl;
   EnsureAccessOrThrow(filename, R_OK);
+  std::cerr << "[DEBUG] access check ok" << std::endl;
   std::ifstream file(filename.c_str());
+  std::cerr << "[DEBUG] ifstream is_open=" << file.is_open() << std::endl;
+
   if (!file.is_open()) {  // errno might be unreliable here
     int saved_errno = errno;
+    std::cerr << "[DEBUG] ifstream open failed errno=" << saved_errno << std::endl;
     throw lib::exception::ResponseStatusException(
         MapErrnoToHttpStatus(saved_errno));
   }
   std::string content((std::istreambuf_iterator<char>(file)),
                       std::istreambuf_iterator<char>());
+  std::cerr << "[DEBUG] read success size=" << content.size() << std::endl;
   file.close();
   return content;
 }
