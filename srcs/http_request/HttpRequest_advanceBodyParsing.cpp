@@ -5,7 +5,7 @@
 
 // File-local flag to enable/disable verbose chunked-body debug logging.
 // Set to true only when actively debugging; default is false for production.
-static const bool kEnableChunkDebugLogging = true;
+static const bool kEnableChunkDebugLogging = false;
 
 /**
  * @brief handle body parsing advancement, either by content-length or chunked

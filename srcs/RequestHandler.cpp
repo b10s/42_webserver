@@ -137,29 +137,56 @@ void RequestHandler::HandleGet() {
 
   std::string path_with_index =
       AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
-
-  std::cerr << "[DEBUG] GetCgiEnabled=" << location_match_.loc->GetCgiEnabled()
-          << " path=" << path_with_index << std::endl;
-  
-  bool should_use_cgi = location_match_.loc->GetCgiEnabled() && location_match_.loc->ContainsCgiExtension(path_with_index);
-  std::cerr << "[DEBUG] HandleGet - Should use CGI? " << should_use_cgi << std::endl;
-  if (should_use_cgi) {
-    CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
-    result_ = cgi.Run();
-  } else {
-    std::cerr << "[DEBUG] before ReadFileToStringOrThrow: " << path_with_index
-              << std::endl;
-    std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
-    std::cerr << "[DEBUG] after ReadFileToStringOrThrow: body size=" << body.size()
-              << std::endl;
-    HttpResponse res;
-    res.AddHeader("Content-Type",
-                  lib::http::DetectMimeTypeFromPath(path_with_index));
-    res.SetBody(body);
-    res.SetStatus(lib::http::kOk);
-    result_ = ExecResult(res);
-  }
+  std::cerr << "[DEBUG] before ReadFileToStringOrThrow: " << path_with_index
+            << std::endl;
+  std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
+  std::cerr << "[DEBUG] after ReadFileToStringOrThrow: body size=" << body.size()
+            << std::endl;
+  HttpResponse res;
+  res.AddHeader("Content-Type",
+                lib::http::DetectMimeTypeFromPath(path_with_index));
+  res.SetBody(body);
+  res.SetStatus(lib::http::kOk);
+  result_ = ExecResult(res);
 }
+
+// void RequestHandler::HandleGet() {
+//   const std::string req_uri = req_.GetUri();
+//   const bool req_uri_ends_with_slash =
+//       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
+//   if (lib::utils::IsDirectory(filesystem_path_) && !req_uri_ends_with_slash) {
+//       HttpResponse res;
+//       res.SetStatus(lib::http::kMovedPermanently);
+//       res.AddHeader("Location", req_uri + "/");
+//       result_ = ExecResult(res);
+//       return;
+//   }
+
+//   std::string path_with_index =
+//       AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
+
+//   std::cerr << "[DEBUG] GetCgiEnabled=" << location_match_.loc->GetCgiEnabled()
+//           << " path=" << path_with_index << std::endl;
+  
+//   bool should_use_cgi = location_match_.loc->GetCgiEnabled() && location_match_.loc->ContainsCgiExtension(path_with_index);
+//   std::cerr << "[DEBUG] HandleGet - Should use CGI? " << should_use_cgi << std::endl;
+//   if (should_use_cgi) {
+//     CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
+//     result_ = cgi.Run();
+//   } else {
+//     std::cerr << "[DEBUG] before ReadFileToStringOrThrow: " << path_with_index
+//               << std::endl;
+//     std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
+//     std::cerr << "[DEBUG] after ReadFileToStringOrThrow: body size=" << body.size()
+//               << std::endl;
+//     HttpResponse res;
+//     res.AddHeader("Content-Type",
+//                   lib::http::DetectMimeTypeFromPath(path_with_index));
+//     res.SetBody(body);
+//     res.SetStatus(lib::http::kOk);
+//     result_ = ExecResult(res);
+//   }
+// }
 
 // reject directories for POST requests
 // nginx returns the 405 status code for POST method
@@ -191,11 +218,15 @@ void RequestHandler::HandlePost() {
     return;
   }
   bool should_use_cgi = location_match_.loc->GetCgiEnabled() && location_match_.loc->ContainsCgiExtension(path);
+  std::cerr << "[DEBUG] HandlePost - CgiEnabled=" << location_match_.loc->GetCgiEnabled()
+            << " path=" << path << std::endl
+            << " path contains CGI extension?: " << location_match_.loc->ContainsCgiExtension(path) << std::endl;
   std::cerr << "[DEBUG] HandlePost - Should use CGI? " << should_use_cgi << std::endl;
   if (should_use_cgi) {
     CgiExecutor cgi(req_, *location_match_.loc, path);
     result_ = cgi.Run();
   } else {
+    // should use CGIがfalseのときは全てファイルに書き込む
     std::ofstream ofs(path.c_str(), std::ios::binary);
     if (!ofs) {
       throw lib::exception::ResponseStatusException(lib::http::kForbidden);

@@ -100,7 +100,7 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     if (len < static_cast<std::size_t>(bytes_received)) {
       data.append("...(truncated)");
     }
-    std::cerr << "[DEBUG] raw recv:\n" << data << std::endl;
+    // std::cerr << "[DEBUG] raw recv:\n" << data << std::endl;
   }
 
   if (bytes_received <= 0) {
