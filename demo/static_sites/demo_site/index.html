@@ -16,6 +16,35 @@
     <button type="submit">POST</button>
   </form>
 
+
+<hr/>
+<!-- index.html with JavaScript -->
+<form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data">
+    <input type="file" name="filename"  id="fileInput" />
+    <input type="submit" value="Upload" />
+</form>
+
+<script>
+document.querySelector('#uploadForm').addEventListener('submit', function(event) {
+    event.preventDefault(); // Stop the default form submission and page reload
+    var formData = new FormData(this);
+
+    var fileInput = document.querySelector('#fileInput');
+    var file = fileInput.files[0];           // get selected file
+    var fileName = encodeURIComponent(file.name); // safe for URL
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/upload/' + fileName, true);
+    xhr.onload = function () {
+        if (xhr.status === 201) {
+            // Redirect after successful upload
+            window.location.href = '/';
+        }
+    };
+    xhr.send(formData);
+});
+</script>
+<hr/>
+
   <p>DELETE test (use curl): <code>curl -X DELETE http://127.0.0.1:8080/upload/posted.txt</code></p>
 </body>
 </html>
