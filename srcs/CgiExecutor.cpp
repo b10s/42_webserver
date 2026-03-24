@@ -142,6 +142,10 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
           : lib::type::Optional<std::string>();
   // RFC 3875 4.1.7.
   meta_vars_["QUERY_STRING"] = lib::type::Optional<std::string>(req.GetQuery());
+  // REQUEST_URI is not defined as a CGI meta-variable by RFC 3875, but the
+  // project’s CGI test tool (`cgi_tester`) expects REQUEST_URI to be present
+  // and to have the same value as PATH_INFO when invoking CGI scripts.
+  meta_vars_["REQUEST_URI"] = lib::type::Optional<std::string>(path_info);
   // RFC 3875 4.1.8.
   meta_vars_["REMOTE_ADDR"] =
       lib::type::Optional<std::string>(req.GetClientIp());
