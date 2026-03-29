@@ -1,5 +1,7 @@
 #include "ServerConfig.hpp"
 
+#include "HttpRequest.hpp"
+
 /*
 If the port is omitted, the default port is 80.
 If the address is omitted, the server listens on all addresses (0.0.0.0).
@@ -8,7 +10,7 @@ ServerConfig::ServerConfig()
     : host_("0.0.0.0"),
       port_(80),
       server_name_(),
-      max_body_size_(0),
+      max_body_size_(HttpRequest::kMaxPayloadSize),
       has_listen_(false),
       has_server_name_(false),
       has_max_body_(false) {
