@@ -20,6 +20,7 @@ class CgiSocket : public ASocket {
   CgiSocket();
   int pid_;
   ClientSocket* owner_;
+  bool write_done_;
 
   static const size_t kBufferSize = 1024;
 };
