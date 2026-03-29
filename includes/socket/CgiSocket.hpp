@@ -21,6 +21,8 @@ class CgiSocket : public ASocket {
   int pid_;
   ClientSocket* owner_;
   bool write_done_;
+  void HandleEpollIn(int epoll_fd, SocketResult& result);
+  void HandleEpollOut(int epoll_fd, SocketResult& result);
 
   static const size_t kBufferSize = 1024;
 };
