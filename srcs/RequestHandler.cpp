@@ -179,10 +179,16 @@ void RequestHandler::HandlePost() {
     result_ = ExecResult(res);
     return;
   }
+  std::cerr << "[DEBUG] HandlePost uri=" << req_uri << " path=" << path
+            << " cgi_enabled=" << location_match_.loc->GetCgiEnabled()
+            << " body_size=" << req_.GetBody().size() << std::endl;
   if (location_match_.loc->GetCgiEnabled()) {
+    std::cerr << "[DEBUG] HandlePost entering CGI path" << std::endl;
     CgiExecutor cgi(req_, *location_match_.loc, path);
     result_ = cgi.Run();
   } else {
+    std::cerr << "[DEBUG] HandlePost entering static file write path"
+              << std::endl;
     std::ofstream ofs(path.c_str(), std::ios::binary);
     if (!ofs) {
       throw lib::exception::ResponseStatusException(lib::http::kForbidden);

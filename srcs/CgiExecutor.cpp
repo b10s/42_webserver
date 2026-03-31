@@ -9,6 +9,7 @@
 #include <cerrno>
 #include <cstdlib>
 #include <cstring>
+#include <iostream>  // for debug logging
 #include <stdexcept>
 
 #include "CgiResponseParser.hpp"
@@ -128,7 +129,13 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
                                 ? lib::utils::GetFirstToken(auth.Value(), " ")
                                 : lib::type::Optional<std::string>();
   // RFC 3875 4.1.2.
-  meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
+  // meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
+  if (lib::http::MethodToString(req.GetMethod()) == "POST") {
+    meta_vars_["CONTENT_LENGTH"] = lib::type::Optional<std::string>(
+        lib::utils::ToString(req.GetBody().size()));
+  } else {
+    meta_vars_["CONTENT_LENGTH"] = req.GetHeader("content-length");
+  }
   // RFC 3875 4.1.3.
   meta_vars_["CONTENT_TYPE"] = req.GetHeader("content-type");
   // RFC 3875 4.1.4.
@@ -187,18 +194,34 @@ void CgiExecutor::InitializeMetaVars(const HttpRequest& req) {
 // GET and DELETE methods are handled same. POST method requires the body to be
 // passed to STDIN of the CGI script.
 ExecResult CgiExecutor::Run() {
-  if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
+  std::cerr << "[DEBUG CGI] Run start"
+            << " script_path=" << script_path_ << " body_size=" << body_.size()
+            << std::endl;
+  if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions())) {
+    std::cerr << "[DEBUG CGI] script extension not allowed: " << script_path_
+              << std::endl;
     return ExecResult(HttpResponse(lib::http::kForbidden));
+  }
 
   int sv[2];
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
   }
+  std::cerr << "[DEBUG CGI] socketpair ok sv[0]=" << sv[0] << " sv[1]=" << sv[1]
+            << std::endl;
   lib::type::Fd sv0(sv[0]);
   lib::type::Fd sv1(sv[1]);
 
   std::vector<std::string> meta_vars = GetMetaVars();
+  std::cerr << "[DEBUG CGI] REQUEST_METHOD=" << GetMetaVar("REQUEST_METHOD")
+            << std::endl;
+
+  std::cerr << "[DEBUG CGI] CONTENT_LENGTH="
+            << (meta_vars_["CONTENT_LENGTH"].HasValue()
+                    ? meta_vars_["CONTENT_LENGTH"].Value()
+                    : "(none)")
+            << std::endl;
   std::vector<char*> envp = CreateEnvp(meta_vars);
 
   int pid = fork();
@@ -208,6 +231,8 @@ ExecResult CgiExecutor::Run() {
   }
 
   std::string req_method = GetMetaVar("REQUEST_METHOD");
+  std::cerr << "[DEBUG CGI] fork result pid=" << pid
+            << " req_method=" << req_method << std::endl;
 
   if (pid == 0) {  // Child process
     sv0.Reset();
@@ -216,13 +241,18 @@ ExecResult CgiExecutor::Run() {
     sv1.Reset();
 
     char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
+    std::cerr << "[DEBUG CGI child] execve script=" << script_path_
+              << std::endl;
     execve(script_path_.c_str(), argv, envp.data());
+    std::cerr << "[DEBUG CGI child] execve failed errno=" << errno << std::endl;
     exit(1);
   } else {  // Parent process
     sv1.Reset();
     CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
 
     if (req_method == "POST") {
+      std::cerr << "[DEBUG CGI parent] sending POST body size=" << body_.size()
+                << std::endl;
       cgi_socket->Send(body_);
     }
 
