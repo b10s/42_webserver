@@ -191,7 +191,13 @@ ExecResult CgiExecutor::Run() {
 
   int input_pipe[2];
   int output_pipe[2];
-  if (pipe(input_pipe) < 0 || pipe(output_pipe) < 0) {
+  if (pipe(input_pipe) < 0) {
+    throw lib::exception::ResponseStatusException(
+        lib::http::kInternalServerError);
+  }
+  if (pipe(output_pipe) < 0) {
+    close(input_pipe[kReadEnd]);
+    close(input_pipe[kWriteEnd]);
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
   }
