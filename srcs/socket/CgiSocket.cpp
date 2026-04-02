@@ -83,6 +83,11 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
         owner_->OnCgiExecutionError(epoll_fd);
       }
     }
+  } else if (n == -1 && errno != EAGAIN) {
+    if (owner_) {
+      owner_->OnCgiExecutionError(epoll_fd);
+    }
+    result.remove_socket = true;
   }
 }
 
