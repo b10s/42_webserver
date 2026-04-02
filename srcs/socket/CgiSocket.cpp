@@ -1,5 +1,6 @@
 #include "socket/CgiSocket.hpp"
 
+#include <fcntl.h>
 #include <sys/epoll.h>
 #include <sys/wait.h>
 #include <unistd.h>
@@ -12,8 +13,16 @@
 #include "lib/utils/file_utils.hpp"
 #include "socket/ClientSocket.hpp"
 
-CgiSocket::CgiSocket(lib::type::Fd fd, int pid)
-    : ASocket(fd), pid_(pid), owner_(NULL), write_done_(true) {
+CgiSocket::CgiSocket(lib::type::Fd output_fd, lib::type::Fd input_write_fd,
+                     int pid)
+    : ASocket(output_fd),
+      pid_(pid),
+      owner_(NULL),
+      input_write_fd_(input_write_fd) {
+  int flags = fcntl(input_write_fd_.GetFd(), F_GETFL, 0);
+  if (flags != -1) {
+    fcntl(input_write_fd_.GetFd(), F_SETFL, flags | O_NONBLOCK);
+  }
 }
 
 CgiSocket::~CgiSocket() {
@@ -29,7 +38,7 @@ CgiSocket::~CgiSocket() {
 SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;
   try {
-    if (events & EPOLLIN) {
+    if (events & (EPOLLIN | EPOLLHUP)) {
       HandleEpollIn(epoll_fd, result);
     }
     if (events & EPOLLOUT) {
@@ -46,13 +55,6 @@ SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
 }
 
 void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
-  if (!write_done_) {
-    epoll_event ev;
-    ev.events = EPOLLIN | EPOLLOUT;
-    ev.data.ptr = this;
-    epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
-    return;
-  }
   char buf[kBufferSize];
   ssize_t n = read(fd_.GetFd(), buf, sizeof(buf));
   if (n > 0) {
@@ -69,6 +71,11 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
           lib::utils::MapErrnoToHttpStatus(saved_errno));
     }
 
+    int write_fd = input_write_fd_.GetFd();
+    if (write_fd != -1) {
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, write_fd, NULL);
+    }
+
     if (owner_) {
       if (WIFEXITED(status) && WEXITSTATUS(status) == 0) {
         owner_->OnCgiExecutionFinished(epoll_fd, read_buffer_);
@@ -80,17 +87,21 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
 }
 
 void CgiSocket::HandleEpollOut(int epoll_fd, SocketResult& result) {
-  if (write_buffer_.empty()) return;
+  if (write_buffer_.empty()) {
+    if (input_write_fd_.GetFd() != -1) {
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, input_write_fd_.GetFd(), NULL);
+      input_write_fd_.Reset();
+    }
+    return;
+  }
 
-  ssize_t n = write(fd_.GetFd(), write_buffer_.data(), write_buffer_.size());
+  ssize_t n = write(input_write_fd_.GetFd(), write_buffer_.data(),
+                    write_buffer_.size());
   if (n > 0) {
     write_buffer_.erase(0, n);
     if (write_buffer_.empty()) {
-      write_done_ = true;
-      epoll_event ev;
-      ev.events = EPOLLIN;
-      ev.data.ptr = this;
-      epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev);
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, input_write_fd_.GetFd(), NULL);
+      input_write_fd_.Reset();
     }
   } else if (n == -1 && errno != EAGAIN) {
     if (owner_) {
@@ -102,10 +113,17 @@ void CgiSocket::HandleEpollOut(int epoll_fd, SocketResult& result) {
 
 ssize_t CgiSocket::Send(const std::string& data) {
   write_buffer_ = data;
-  write_done_ = false;
   return write_buffer_.size();
 }
 
 void CgiSocket::OnSetOwner(ClientSocket* owner) {
   owner_ = owner;
+}
+
+int CgiSocket::GetWriteFd() const {
+  return input_write_fd_.GetFd();
+}
+
+void CgiSocket::CloseWriteFd() {
+  input_write_fd_.Reset();
 }

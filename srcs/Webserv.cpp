@@ -86,6 +86,18 @@ void Webserv::Run() {
                     << std::endl;
           sockets_.erase(result.new_socket->GetFd());
           delete result.new_socket;
+        } else {
+          int write_fd = result.new_socket->GetWriteFd();
+          if (write_fd != -1) {
+            epoll_event write_ev;
+            write_ev.events = EPOLLOUT;
+            write_ev.data.ptr = result.new_socket;
+            if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_ADD, write_fd,
+                          &write_ev) == -1) {
+              std::cerr << "epoll_ctl() failed for write fd. "
+                        << strerror(errno) << std::endl;
+            }
+          }
         }
       }
 

@@ -1,7 +1,6 @@
 #include "CgiExecutor.hpp"
 
 #include <sys/epoll.h>
-#include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
 
@@ -190,13 +189,16 @@ ExecResult CgiExecutor::Run() {
   if (!IsScriptExtensionAllowed(script_path_, loc_.GetCgiAllowedExtensions()))
     return ExecResult(HttpResponse(lib::http::kForbidden));
 
-  int sv[2];
-  if (socketpair(AF_UNIX, SOCK_STREAM, 0, sv) < 0) {
+  int input_pipe[2];
+  int output_pipe[2];
+  if (pipe(input_pipe) < 0 || pipe(output_pipe) < 0) {
     throw lib::exception::ResponseStatusException(
         lib::http::kInternalServerError);
   }
-  lib::type::Fd sv0(sv[0]);
-  lib::type::Fd sv1(sv[1]);
+  lib::type::Fd input_read(input_pipe[kReadEnd]);
+  lib::type::Fd input_write(input_pipe[kWriteEnd]);
+  lib::type::Fd output_read(output_pipe[kReadEnd]);
+  lib::type::Fd output_write(output_pipe[kWriteEnd]);
 
   std::vector<std::string> meta_vars = GetMetaVars();
   std::vector<char*> envp = CreateEnvp(meta_vars);
@@ -209,21 +211,26 @@ ExecResult CgiExecutor::Run() {
 
   std::string req_method = GetMetaVar("REQUEST_METHOD");
 
-  if (pid == 0) {  // Child process
-    sv0.Reset();
-    dup2(sv1.GetFd(), STDIN_FILENO);
-    dup2(sv1.GetFd(), STDOUT_FILENO);
-    sv1.Reset();
+  if (pid == 0) {
+    input_write.Reset();
+    output_read.Reset();
+    dup2(input_read.GetFd(), STDIN_FILENO);
+    dup2(output_write.GetFd(), STDOUT_FILENO);
+    input_read.Reset();
+    output_write.Reset();
 
     char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
     execve(script_path_.c_str(), argv, envp.data());
     exit(1);
-  } else {  // Parent process
-    sv1.Reset();
-    CgiSocket* cgi_socket = new CgiSocket(sv0, pid);
+  } else {
+    input_read.Reset();
+    output_write.Reset();
+    CgiSocket* cgi_socket = new CgiSocket(output_read, input_write, pid);
 
     if (req_method == "POST") {
       cgi_socket->Send(body_);
+    } else {
+      cgi_socket->CloseWriteFd();
     }
 
     return ExecResult(cgi_socket);
