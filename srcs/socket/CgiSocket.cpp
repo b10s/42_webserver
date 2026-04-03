@@ -61,6 +61,7 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
     read_buffer_.append(buf, n);
   } else if (n == 0) {
     int status;
+    kill(pid_, SIGTERM);
     waitpid(pid_, &status, 0);
     pid_ = -1;
 
