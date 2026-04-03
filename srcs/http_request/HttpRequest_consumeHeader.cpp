@@ -47,12 +47,6 @@ void HttpRequest::ValidateBodyHeaders() {
   if (has_cl) {
     const std::string& s = headers_["content-length"];
     ParseContentLength(s);
-    // Once content_length_ is determined, throw if it exceeds max_body_size_.
-    if (content_length_ >= 0 &&
-        static_cast<size_t>(content_length_) > max_body_size_limit_) {
-      throw lib::exception::ResponseStatusException(
-          lib::http::kPayloadTooLarge);
-    }
   } else if (has_te) {
     const std::string& s = headers_["transfer-encoding"];
     ParseTransferEncoding(s);
@@ -72,8 +66,11 @@ void HttpRequest::ParseContentLength(const std::string& s) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
   }
   long len = res.Value();
-  if (len < 0 || static_cast<size_t>(len) > kMaxPayloadSize) {
+  if (len < 0) {
     throw lib::exception::ResponseStatusException(lib::http::kBadRequest);
+  }
+  if (static_cast<size_t>(len) > max_body_size_limit_) {
+    throw lib::exception::ResponseStatusException(lib::http::kPayloadTooLarge);
   }
   content_length_ = len;
 }

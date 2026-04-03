@@ -45,6 +45,10 @@ class ASocket {
 
   int GetFd() const;
 
+  virtual int GetWriteFd() const {
+    return -1;
+  }
+
  protected:
   lib::type::Fd fd_;
   time_t last_activity_time_;

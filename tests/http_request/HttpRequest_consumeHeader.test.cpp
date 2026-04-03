@@ -191,7 +191,8 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_NonNumeric_ThrowsBadRequest) {
       lib::exception::ResponseStatusException);
 }
 
-TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
+TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsPayloadTooLarge) {
+  req.SetMaxBodySizeLimit(HttpRequest::kMaxPayloadSize);
   std::stringstream ss;
   ss << (HttpRequest::kMaxPayloadSize + 1);
   std::string headers_and_after =
@@ -205,7 +206,7 @@ TEST_F(HttpRequestConsumeHeader, ContentLength_TooLarge_ThrowsBadRequest) {
         try {
           req.ConsumeHeader(hs.p_headers);
         } catch (const lib::exception::ResponseStatusException& e) {
-          EXPECT_EQ(lib::http::kBadRequest, e.GetStatus());
+          EXPECT_EQ(lib::http::kPayloadTooLarge, e.GetStatus());
           throw;
         }
       },
