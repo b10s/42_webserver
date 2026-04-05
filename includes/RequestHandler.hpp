@@ -3,13 +3,14 @@
 
 #include <dirent.h>    // for DIR, opendir(), readdir(), closedir()
 #include <sys/stat.h>  // for struct stat, stat()
+
 #include <cstdio>     // for std::remove()
+#include <ctime>      // for struct tm, localtime_r(), strftime()
 #include <fstream>    // for std::ofstream
 #include <iostream>   // for debug
 #include <sstream>    // for std::stringstream
 #include <stdexcept>  // std::runtime_error
 #include <vector>
-#include <ctime>      // for struct tm, localtime_r(), strftime()
 
 #include "ExecResult.hpp"
 #include "HttpRequest.hpp"
@@ -48,9 +49,7 @@ class RequestHandler {
   ExecResult Run();
   void PrepareRoutingContext();
   std::string ResolveFilesystemPath() const;  // for testing purpose
-  std::string AppendIndexFileIfDirectoryOrThrow(
-      const std::string &base_path) const;
-  GetTarget ResolveGetTarget();  // public for testing purpose
+  GetTarget ResolveGetTarget();               // public for testing purpose
 
  private:
   RequestHandler();  // shouldn't use default constructor

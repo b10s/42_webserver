@@ -264,37 +264,6 @@ GetTarget RequestHandler::ResolveGetTarget() {
   return target;
 }
 
-// std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
-//     const std::string& base_path) const {
-//   const std::string req_uri = req_.GetUri();
-//   const bool req_uri_ends_with_slash =
-//       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
-//   bool is_directory =
-//       (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
-//   /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
-//   bool is_directory = false;
-//   if (req_uri_ends_with_slash) {
-//     is_directory = true;
-//   } else {
-//     struct stat st = lib::utils::StatOrThrow(path);
-//     is_directory = S_ISDIR(st.st_mode);
-//   }
-//   */
-//   std::string path = base_path;
-//   if (is_directory) {
-//     const std::string index = location_match_.loc->GetIndexFile();
-//     if (index.empty()) {
-//       throw lib::exception::ResponseStatusException(
-//           lib::http::kForbidden);  // or kNotFound?
-//     }
-//     if (path.empty() || path[path.size() - 1] != '/') path += '/';
-//     path += index;
-//   }
-//   path = FileValidator::ValidateAndNormalizePath(
-//       path, location_match_.loc->GetRoot());
-//   return path;
-// }
-
 FileEntry::FileEntry(const std::string& file_name,
                      const std::string& last_modified_time,
                      lib::type::Optional<long> file_size, bool is_directory)
