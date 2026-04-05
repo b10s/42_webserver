@@ -30,6 +30,17 @@ struct FileEntry {
             lib::type::Optional<long> file_size, bool is_directory);
 };
 
+struct GetTarget {
+  enum Type { kStaticFile, kCgi, kAutoIndex };
+
+  Type type;
+  std::string path;
+  std::string body;
+
+  GetTarget() : type(kStaticFile) {
+  }
+};
+
 class RequestHandler {
  public:
   RequestHandler(ServerConfig conf, HttpRequest req);
@@ -40,6 +51,7 @@ class RequestHandler {
   std::string ResolveFilesystemPath() const;  // for testing purpose
   std::string AppendIndexFileIfDirectoryOrThrow(
       const std::string &base_path) const;
+  GetTarget ResolveGetTarget();  // public for testing purpose
 
  private:
   RequestHandler();  // shouldn't use default constructor
@@ -52,7 +64,8 @@ class RequestHandler {
   void HandleGet();
   void HandlePost();
   void HandleDelete();
-  std::string GenerateDirectoryListing(const std::string &path);
+  std::string GenerateDirectoryListing(const std::string &path,
+                                       const std::string &req_uri) const;
 };
 
 #endif

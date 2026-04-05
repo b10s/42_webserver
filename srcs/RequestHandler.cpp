@@ -102,52 +102,37 @@ std::string RequestHandler::ResolveFilesystemPath() const {
   return path;
 }
 
-std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
-    const std::string& base_path) const {
-  const std::string req_uri = req_.GetUri();
-  const bool req_uri_ends_with_slash =
-      (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
-  bool is_directory =
-      (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
-  /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
-  bool is_directory = false;
-  if (req_uri_ends_with_slash) {
-    is_directory = true;
-  } else {
-    struct stat st = lib::utils::StatOrThrow(path);
-    is_directory = S_ISDIR(st.st_mode);
-  }
-  */
-  std::string path = base_path;
-  if (is_directory) {
-    const std::string index = location_match_.loc->GetIndexFile();
-    if (index.empty()) {
-      throw lib::exception::ResponseStatusException(
-          lib::http::kForbidden);  // or kNotFound?
-    }
-    if (path.empty() || path[path.size() - 1] != '/') path += '/';
-    path += index;
-  }
-  path = FileValidator::ValidateAndNormalizePath(
-      path, location_match_.loc->GetRoot());
-  return path;
-}
-
 void RequestHandler::HandleGet() {
-  std::string path_with_index =
-      AppendIndexFileIfDirectoryOrThrow(filesystem_path_);
-  if (location_match_.loc->GetCgiEnabled()) {
-    CgiExecutor cgi(req_, *location_match_.loc, path_with_index);
-    result_ = cgi.Run();
-  } else {
-    std::string body = lib::utils::ReadFileToStringOrThrow(path_with_index);
-    HttpResponse res;
-    res.AddHeader("Content-Type",
-                  lib::http::DetectMimeTypeFromPath(path_with_index));
-    res.SetBody(body);
-    res.SetStatus(lib::http::kOk);
-    result_ = ExecResult(res);
+  const std::string req_uri = req_.GetUri();
+  if (lib::utils::IsDirectory(filesystem_path_)) {
+    if (req_uri.empty() || req_uri[req_uri.size() - 1] != '/') {
+      HttpResponse res;
+      res.SetStatus(lib::http::kMovedPermanently);
+      res.AddHeader("Location", req_uri + "/");
+      result_ = ExecResult(res);
+      return;
+    }
   }
+  GetTarget target = ResolveGetTarget();
+  if (target.type == GetTarget::kAutoIndex) {
+    HttpResponse res;
+    res.SetStatus(lib::http::kOk);
+    res.AddHeader("Content-Type", "text/html");
+    res.SetBody(target.body);
+    result_ = ExecResult(res);
+    return;
+  }
+  if (target.type == GetTarget::kCgi) {
+    CgiExecutor cgi(req_, *location_match_.loc, target.path);
+    result_ = cgi.Run();
+    return;
+  }
+  std::string body = lib::utils::ReadFileToStringOrThrow(target.path);
+  HttpResponse res;
+  res.AddHeader("Content-Type", lib::http::DetectMimeTypeFromPath(target.path));
+  res.SetBody(body);
+  res.SetStatus(lib::http::kOk);
+  result_ = ExecResult(res);
 }
 
 // reject directories for POST requests
@@ -225,6 +210,86 @@ void RequestHandler::HandleDelete() {
   result_ = ExecResult(res);
 }
 
+GetTarget RequestHandler::ResolveGetTarget() {
+  GetTarget target;
+  std::string path = filesystem_path_;
+
+  const std::string req_uri = req_.GetUri();
+  // if path is a directory, try to append index file or generate autoindex
+  if (lib::utils::IsDirectory(path)) {
+    const std::string index = location_match_.loc->GetIndexFile();
+    if (!index.empty()) {  // if index file specified, try to serve it
+      std::string index_path = path;
+      if (index_path[index_path.size() - 1] != '/') index_path += "/";
+      index_path += index;
+
+      struct stat st;
+      if (::stat(index_path.c_str(), &st) == 0 && S_ISREG(st.st_mode)) {
+        path = index_path;
+      } else {
+        if (location_match_.loc
+                ->GetAutoIndex()) {  // if index file can't be served but
+                                     // autoindex enabled, generate autoindex
+          target.type = GetTarget::kAutoIndex;
+          target.body = GenerateDirectoryListing(path, req_uri);
+          return target;
+        }
+        throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+      }
+    } else {  // if no index file specified, try to serve directory listing if
+              // autoindex enabled
+      if (location_match_.loc->GetAutoIndex()) {
+        target.type = GetTarget::kAutoIndex;
+        target.body = GenerateDirectoryListing(path, req_uri);
+        return target;
+      }
+      throw lib::exception::ResponseStatusException(lib::http::kForbidden);
+    }
+  }
+  // CGI check should be after directory/index resolution
+  // as CGI can be enabled for a directory but the actual request target is a
+  // file.
+  if (location_match_.loc->GetCgiEnabled()) {
+    target.type = GetTarget::kCgi;
+    target.path = path;
+    return target;
+  }
+  target.type = GetTarget::kStaticFile;
+  target.path = path;
+  return target;
+}
+
+// std::string RequestHandler::AppendIndexFileIfDirectoryOrThrow(
+//     const std::string& base_path) const {
+//   const std::string req_uri = req_.GetUri();
+//   const bool req_uri_ends_with_slash =
+//       (!req_uri.empty() && req_uri[req_uri.size() - 1] == '/');
+//   bool is_directory =
+//       (req_uri_ends_with_slash || lib::utils::IsDirectory(base_path));
+//   /* TODO: replace lib::utils::IsDirectory() with StatOrThrow + S_ISDIR later
+//   bool is_directory = false;
+//   if (req_uri_ends_with_slash) {
+//     is_directory = true;
+//   } else {
+//     struct stat st = lib::utils::StatOrThrow(path);
+//     is_directory = S_ISDIR(st.st_mode);
+//   }
+//   */
+//   std::string path = base_path;
+//   if (is_directory) {
+//     const std::string index = location_match_.loc->GetIndexFile();
+//     if (index.empty()) {
+//       throw lib::exception::ResponseStatusException(
+//           lib::http::kForbidden);  // or kNotFound?
+//     }
+//     if (path.empty() || path[path.size() - 1] != '/') path += '/';
+//     path += index;
+//   }
+//   path = FileValidator::ValidateAndNormalizePath(
+//       path, location_match_.loc->GetRoot());
+//   return path;
+// }
+
 FileEntry::FileEntry(const std::string& file_name,
                      const std::string& last_modified_time,
                      lib::type::Optional<long> file_size, bool is_directory)
@@ -234,7 +299,8 @@ FileEntry::FileEntry(const std::string& file_name,
       is_directory(is_directory) {
 }
 
-std::string RequestHandler::GenerateDirectoryListing(const std::string& path) {
+std::string RequestHandler::GenerateDirectoryListing(
+    const std::string& path, const std::string& req_uri) const {
   DIR* dir;
   struct dirent* entry;
   struct stat file_stat;
@@ -282,7 +348,7 @@ std::string RequestHandler::GenerateDirectoryListing(const std::string& path) {
       << "    <meta charset=\"UTF-8\">\n"
       << "    <meta name=\"viewport\" content=\"width=device-width, "
          "initial-scale=1.0\">\n"
-      << "    <title>Index of " << location_match_.remainder << "</title>\n"
+      << "    <title>Index of " << req_uri << "</title>\n"
       << "    <style>\n"
       << "        body { font-family: Arial, sans-serif; margin: 20px; }\n"
       << "        h1 { border-bottom: 1px solid #ccc; padding-bottom: 10px; }\n"
@@ -292,7 +358,7 @@ std::string RequestHandler::GenerateDirectoryListing(const std::string& path) {
       << "    </style>\n"
       << "</head>\n"
       << "<body>\n"
-      << "    <h1>Index of " << location_match_.remainder << "</h1>\n"
+      << "    <h1>Index of " << req_uri << "</h1>\n"
       << "    <table>\n"
       << "        <tr>\n"
       << "            <th>Name</th>\n"
