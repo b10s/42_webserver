@@ -108,7 +108,12 @@ void RequestHandler::HandleGet() {
     if (req_uri.empty() || req_uri[req_uri.size() - 1] != '/') {
       HttpResponse res;
       res.SetStatus(lib::http::kMovedPermanently);
-      res.AddHeader("Location", req_uri + "/");
+      std::string location = req_uri + "/";
+      const std::string query = req_.GetQuery();
+      if (!query.empty()) {
+        location += "?" + query;
+      }
+      res.AddHeader("Location", location);
       result_ = ExecResult(res);
       return;
     }
