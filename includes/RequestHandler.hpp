@@ -3,14 +3,13 @@
 
 #include <dirent.h>    // for DIR, opendir(), readdir(), closedir()
 #include <sys/stat.h>  // for struct stat, stat()
-
-#include <algorithm>  // for std::sort
 #include <cstdio>     // for std::remove()
 #include <fstream>    // for std::ofstream
 #include <iostream>   // for debug
 #include <sstream>    // for std::stringstream
 #include <stdexcept>  // std::runtime_error
 #include <vector>
+#include <ctime>      // for struct tm, localtime_r(), strftime()
 
 #include "ExecResult.hpp"
 #include "HttpRequest.hpp"

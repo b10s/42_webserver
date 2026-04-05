@@ -327,8 +327,9 @@ std::string RequestHandler::GenerateDirectoryListing(
     }
     bool is_directory = S_ISDIR(file_stat.st_mode);
     char time_buf[20];
-    strftime(time_buf, sizeof(time_buf), "%d-%b-%Y %H:%M",
-             localtime(&file_stat.st_mtime));
+    struct tm tm;
+    localtime_r(&file_stat.st_mtime, &tm);
+    strftime(time_buf, sizeof(time_buf), "%d-%b-%Y %H:%M", &tm);
     entries.push_back(
         FileEntry(file_name, std::string(time_buf),
                   is_directory ? lib::type::Optional<long>()
