@@ -25,6 +25,8 @@ std::string StatusToString(Status status) {
       return "Unauthorized";
     case kForbidden:
       return "Forbidden";
+    case kMovedPermanently:
+      return "Moved Permanently";
     case kNotFound:
       return "Not Found";
     case kMethodNotAllowed:
