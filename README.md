@@ -187,13 +187,6 @@ siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
 ```
 
-# Test with the official tester
-# Terminal A
-./webserv
-# Terminal B
-./tester http://localhost:8080
-
-
 ## Limitations
 
 - multipart/form-data is not supported
