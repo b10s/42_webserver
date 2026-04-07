@@ -35,7 +35,7 @@ document.querySelector('#uploadForm').addEventListener('submit', function(event)
         return;
     }
     var file = fileInput.files[0];           // get selected file
-    var fileName = encodeURIComponent(file.name); // safe for URL
+    var fileName = file.name; // use raw file name; server expects unencoded paths
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '/upload/' + fileName, true);
     xhr.onload = function () {
