@@ -30,6 +30,10 @@ document.querySelector('#uploadForm').addEventListener('submit', function(event)
     var formData = new FormData(this);
 
     var fileInput = document.querySelector('#fileInput');
+    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        alert('Please select a file to upload before submitting.');
+        return;
+    }
     var file = fileInput.files[0];           // get selected file
     var fileName = encodeURIComponent(file.name); // safe for URL
     var xhr = new XMLHttpRequest();
