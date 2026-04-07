@@ -3,3 +3,6 @@ webserv
 *.o
 build
 compile_flags.txt
+*.swp
+*.swo
+
