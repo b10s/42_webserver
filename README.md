@@ -9,7 +9,7 @@
   - client connections
   - request parsing
   - response sending
-- Non-blocking I/O with EAGAIN handling
+- Non-blocking I/O
 - CGI handled via fork + execve
 
 ### How it works
