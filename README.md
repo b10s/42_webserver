@@ -39,7 +39,7 @@ make test
 - Name all test files with the `.test.cpp` extension.
 
 ## Resources
-- RFC9110, 9112
+- RFC9110, 9112, 3875
 - nginx documentation https://nginx.org/en/docs/
 - How AI was used
     - to review pull requests
