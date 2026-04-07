@@ -4,9 +4,23 @@
 
 ## Description
 - an HTTP server in C++ 98.
-- epoll based
-- GET/POST/DELETE
-- CGI support
+- Event-driven server using epoll
+- Single event loop handling:
+  - client connections
+  - request parsing
+  - response sending
+- Non-blocking I/O with EAGAIN handling
+- CGI handled via fork + execve
+
+### How it works
+1. epoll_wait monitors all file descriptors
+2. On read event:
+   - parse HTTP request incrementally
+3. On write event:
+   - send response buffer
+4. CGI:
+   - fork + execve
+   - communicate via pipe/socketpair
 
 ## Instructions
 
@@ -69,6 +83,17 @@ If you want to fix lint errors automatically, use following command.
 ```bash
 make tidy-fix
 ```
+
+## Configuration
+
+The server supports:
+
+- multiple ports
+- route-based configuration
+- allowed methods per route
+- file upload directory
+- CGI execution by extension
+- autoindex on/off
 
 ## Testing with curl
 Open different terminal and run following curl commands to test the server in a dev container:
@@ -168,10 +193,12 @@ watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
 # Terminal B
 ./tester http://localhost:8080
 
-スコープ外にするか相談
-- multipart/form-dataのアップロードは対応しない
-- absolute-form も対応しない
+
+## Limitations
+
+- multipart/form-data is not supported
+- absolute-form requests are not supported
+- percent-decoding is not implemented
     printf "GET http://127.0.0.1:8080/cgi/hello.py HTTP/1.1\r\nHost: 127.0.0.1:8080\r\n\r\n" \
     | nc -v 127.0.0.1 8080
     -> Bad request
-    subjectには"The HTTP 1.0 is suggested as a reference point, but not enforced."とあるのでdefence可能？
