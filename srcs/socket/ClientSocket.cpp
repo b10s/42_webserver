@@ -45,7 +45,10 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
   UpdateLastActivity();
   SocketResult result;
   try {
-    if (events & (EPOLLIN | EPOLLERR)) {
+    if (events & EPOLLERR) {
+      result.remove_socket = true;
+      epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+    } else if (events & EPOLLIN) {
       SocketResult in_result = HandleEpollIn(epoll_fd);
       if (in_result.new_socket) {
         result.new_socket = in_result.new_socket;
@@ -103,8 +106,12 @@ SocketResult ClientSocket::HandleEpollIn(int epoll_fd) {
     std::cerr << "[DEBUG] raw recv:\n" << data << std::endl;
   }
 
-  if (bytes_received <= 0) {
+  if (bytes_received == 0) {
     throw lib::exception::ConnectionClosed();
+  }
+  if (bytes_received == -1) {
+    // EAGAIN: next epoll_wait will notify again
+    return SocketResult();
   }
 
   req_.Parse(buffer, bytes_received);
@@ -163,7 +170,7 @@ void ClientSocket::HandleEpollOut() {
   ssize_t bytes_sent =
       send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
 
-  if (bytes_sent == -1) {
+  if (bytes_sent <= 0) {
     throw lib::exception::ConnectionClosed();
   }
 
