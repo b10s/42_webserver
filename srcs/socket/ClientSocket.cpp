@@ -48,6 +48,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     if (events & EPOLLERR) {
       result.remove_socket = true;
       epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+      return result;
     } else if (events & EPOLLIN) {
       SocketResult in_result = HandleEpollIn(epoll_fd);
       if (in_result.new_socket) {
