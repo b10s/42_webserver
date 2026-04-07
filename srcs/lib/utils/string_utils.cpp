@@ -32,6 +32,16 @@ lib::type::Optional<unsigned short> StrToUnsignedShort(const std::string& s) {
   return lib::type::Optional<unsigned short>(result);
 }
 
+lib::type::Optional<std::string> OptionalLongToString(
+    lib::type::Optional<long> n) {
+  if (!n.HasValue()) {
+    return lib::type::Optional<std::string>();
+  }
+  std::stringstream ss;
+  ss << n.Value();
+  return lib::type::Optional<std::string>(ss.str());
+}
+
 bool StartsWith(const std::string& str, const std::string& prefix) {
   if (prefix.size() > str.size()) {
     return false;
