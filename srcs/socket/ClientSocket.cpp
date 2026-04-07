@@ -171,7 +171,10 @@ void ClientSocket::HandleEpollOut() {
   ssize_t bytes_sent =
       send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
 
-  if (bytes_sent <= 0) {
+  if (bytes_sent == -1) {
+    return;
+  }
+  if (bytes_sent == 0) {
     throw lib::exception::ConnectionClosed();
   }
 
