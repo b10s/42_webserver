@@ -45,7 +45,7 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
   UpdateLastActivity();
   SocketResult result;
   try {
-    if (events & EPOLLIN) {
+    if (events & (EPOLLIN | EPOLLERR)) {
       SocketResult in_result = HandleEpollIn(epoll_fd);
       if (in_result.new_socket) {
         result.new_socket = in_result.new_socket;
