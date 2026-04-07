@@ -146,9 +146,13 @@ void Webserv::CheckTimeout() {
     if (it->second->IsTimeout(threshold)) {
       ASocket* socket = it->second;
       int fd = socket->GetFd();
-      socket->HandleTimeout(epoll_fd_.GetFd());
-      delete socket;
-      sockets_.erase(it++);
+      bool should_delete = socket->HandleTimeout(epoll_fd_.GetFd());
+      if (should_delete) {
+        delete socket;
+        sockets_.erase(it++);
+      } else {
+        ++it;
+      }
       std::cerr << "Connection timed out. fd: " << fd << std::endl;
     } else {
       ++it;

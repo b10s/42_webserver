@@ -30,7 +30,10 @@ static const std::size_t kMaxDebugLogBytes = 1024;
 
 ClientSocket::ClientSocket(lib::type::Fd fd, const ServerConfig& config,
                            const std::string& client_ip)
-    : ASocket(fd), config_(config), cgi_socket_(NULL) {
+    : ASocket(fd),
+      config_(config),
+      cgi_socket_(NULL),
+      close_after_send_(false) {
   req_.SetClientIp(client_ip);
   req_.SetMaxBodySizeLimit(config_.GetMaxBodySize());
 }
@@ -175,28 +178,22 @@ void ClientSocket::HandleEpollOut() {
   }
 }
 
-void ClientSocket::HandleTimeout(int epoll_fd) {
+bool ClientSocket::HandleTimeout(int epoll_fd) {
   res_ = HttpResponse(lib::http::kRequestTimeout);
   res_.AddHeader("Connection", "close");
   res_.AddHeader("Content-Type", "text/html");
   res_.EnsureDefaultErrorContent();
-
   write_buffer_ = res_.ToHttpString();
+  close_after_send_ = true;
+  UpdateLastActivity();
 
-  while (!write_buffer_.empty()) {
-    ssize_t bytes_sent =
-        send(fd_.GetFd(), write_buffer_.c_str(), write_buffer_.length(), 0);
-    if (bytes_sent <= 0) {
-      break;
-    }
-    if (static_cast<size_t>(bytes_sent) < write_buffer_.length()) {
-      write_buffer_ = write_buffer_.substr(bytes_sent);
-    } else {
-      write_buffer_.clear();
-    }
+  epoll_event ev;
+  ev.events = EPOLLOUT;
+  ev.data.ptr = this;
+  if (epoll_ctl(epoll_fd, EPOLL_CTL_MOD, fd_.GetFd(), &ev) == -1) {
+    return true;
   }
-
-  epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL);
+  return false;
 }
 
 void ClientSocket::OnCgiExecutionFinished(int epoll_fd,

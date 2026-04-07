@@ -35,8 +35,9 @@ class ASocket {
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events) = 0;
 
-  virtual void HandleTimeout(int epoll_fd) {
+  virtual bool HandleTimeout(int epoll_fd) {
     (void)epoll_fd;
+    return true;
   }
 
   virtual void OnSetOwner(ClientSocket* owner) {
