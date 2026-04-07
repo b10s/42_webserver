@@ -16,7 +16,7 @@ class ClientSocket : public ASocket {
   virtual ~ClientSocket();
 
   virtual SocketResult HandleEvent(int epoll_fd, uint32_t events);
-  virtual void HandleTimeout(int epoll_fd);
+  virtual bool HandleTimeout(int epoll_fd);
   void OnCgiExecutionFinished(int epoll_fd, const std::string& cgi_output);
   void OnCgiExecutionError(int epoll_fd);
   void RemoveCgiSocket(ASocket* sock);
@@ -27,6 +27,7 @@ class ClientSocket : public ASocket {
   HttpRequest req_;
   HttpResponse res_;
   ASocket* cgi_socket_;
+  bool close_after_send_;
   SocketResult HandleEpollIn(int epoll_fd);
   void HandleEpollOut();
 
