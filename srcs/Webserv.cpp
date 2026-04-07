@@ -8,6 +8,7 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <set>
 
 #include "ConfigParser.hpp"
 #include "lib/type/Fd.hpp"
@@ -70,8 +71,10 @@ void Webserv::Run() {
       continue;
     }
 
+    std::set<ASocket*> to_delete;
     for (int i = 0; i < nfds; ++i) {
       ASocket* socket = static_cast<ASocket*>(events[i].data.ptr);
+      if (to_delete.count(socket)) continue;
       SocketResult result =
           socket->HandleEvent(epoll_fd_.GetFd(), events[i].events);
 
@@ -102,9 +105,13 @@ void Webserv::Run() {
       }
 
       if (result.remove_socket) {
-        sockets_.erase(socket->GetFd());
-        delete socket;
+        to_delete.insert(socket);
       }
+    }
+    for (std::set<ASocket*>::iterator dit = to_delete.begin();
+         dit != to_delete.end(); ++dit) {
+      sockets_.erase((*dit)->GetFd());
+      delete *dit;
     }
   }
 }

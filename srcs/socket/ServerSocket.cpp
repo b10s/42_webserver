@@ -65,7 +65,7 @@ ServerSocket::~ServerSocket() {
 SocketResult ServerSocket::HandleEvent(int epoll_fd, uint32_t events) {
   (void)epoll_fd;
   SocketResult result;
-  if (events & EPOLLIN) {
+  if (events & (EPOLLIN | EPOLLERR)) {
     sockaddr_in client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     lib::type::Fd client_fd(

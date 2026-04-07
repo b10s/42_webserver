@@ -5,7 +5,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#include <cerrno>
 #include <iostream>
 
 #include "lib/exception/ResponseStatusException.hpp"
@@ -38,11 +37,18 @@ CgiSocket::~CgiSocket() {
 SocketResult CgiSocket::HandleEvent(int epoll_fd, uint32_t events) {
   SocketResult result;
   try {
-    if (events & (EPOLLIN | EPOLLHUP)) {
-      HandleEpollIn(epoll_fd, result);
-    }
-    if (events & EPOLLOUT) {
-      HandleEpollOut(epoll_fd, result);
+    if (events & EPOLLERR) {
+      if (owner_) {
+        owner_->OnCgiExecutionError(epoll_fd);
+      }
+      result.remove_socket = true;
+    } else {
+      if (events & (EPOLLIN | EPOLLHUP)) {
+        HandleEpollIn(epoll_fd, result);
+      }
+      if (events & EPOLLOUT) {
+        HandleEpollOut(epoll_fd, result);
+      }
     }
   } catch (const std::exception& e) {
     std::cerr << "CgiSocket error: " << e.what() << std::endl;
@@ -67,9 +73,8 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
 
     result.remove_socket = true;
     if (epoll_ctl(epoll_fd, EPOLL_CTL_DEL, fd_.GetFd(), NULL) == -1) {
-      int saved_errno = errno;
       throw lib::exception::ResponseStatusException(
-          lib::utils::MapErrnoToHttpStatus(saved_errno));
+          lib::http::kInternalServerError);
     }
 
     int write_fd = input_write_fd_.GetFd();
@@ -84,11 +89,8 @@ void CgiSocket::HandleEpollIn(int epoll_fd, SocketResult& result) {
         owner_->OnCgiExecutionError(epoll_fd);
       }
     }
-  } else if (n == -1 && errno != EAGAIN) {
-    if (owner_) {
-      owner_->OnCgiExecutionError(epoll_fd);
-    }
-    result.remove_socket = true;
+  } else if (n == -1) {
+    // EAGAIN: next epoll_wait will notify again
   }
 }
 
@@ -109,11 +111,13 @@ void CgiSocket::HandleEpollOut(int epoll_fd, SocketResult& result) {
       epoll_ctl(epoll_fd, EPOLL_CTL_DEL, input_write_fd_.GetFd(), NULL);
       input_write_fd_.Reset();
     }
-  } else if (n == -1 && errno != EAGAIN) {
+  } else if (n == 0) {
     if (owner_) {
       owner_->OnCgiExecutionError(epoll_fd);
     }
     result.remove_socket = true;
+  } else if (n == -1) {
+    // EAGAIN: next epoll_wait will notify again
   }
 }
 
