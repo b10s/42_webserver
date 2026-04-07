@@ -225,6 +225,9 @@ ExecResult CgiExecutor::Run() {
     input_read.Reset();
     output_write.Reset();
 
+    std::string dir = script_path_.substr(0, script_path_.rfind('/'));
+    if (!dir.empty()) chdir(dir.c_str());
+
     char* argv[] = {const_cast<char*>(script_path_.c_str()), NULL};
     execve(script_path_.c_str(), argv, envp.data());
     exit(1);
