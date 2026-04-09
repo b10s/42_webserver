@@ -371,30 +371,35 @@ HttpResponse RequestHandler::BuildErrorResponse(lib::http::Status status) {
       lib::type::Optional<std::string> custom_error_path =
           conf_.GetErrorPage(status);
       if (custom_error_path.HasValue()) {
-        const std::string body =
-            lib::utils::ReadFileToStringOrThrow(custom_error_path.Value());
-        res.SetBody(body);
-        return res;
-      }
-      if (!location_match_.loc || !custom_error_path.HasValue() ||
-          custom_error_path.Value()[0] != '/') {
-        // nothing more to try
-      } else {
-        std::string alt = location_match_.loc->GetRoot();
-        if (!alt.empty() && alt[alt.size() - 1] == '/')
-          alt.resize(alt.size() - 1);
-        std::string candidate =
-            alt +
-            custom_error_path.Value();  // location_root + "/errors/404.html"
-        std::cerr << "[DEBUG] trying alternative error page path: '"
-                  << candidate << "'" << std::endl;
+        // try configured custom error page path as is first
         try {
-          std::string body = lib::utils::ReadFileToStringOrThrow(candidate);
+          const std::string body =
+              lib::utils::ReadFileToStringOrThrow(custom_error_path.Value());
           res.SetBody(body);
           return res;
         } catch (const std::exception& e) {
-          std::cerr << "[DEBUG] failed to read alternative error page at '"
-                    << candidate << "': " << e.what() << std::endl;
+          std::cerr << "[DEBUG] failed to read custom error page at '"
+                    << custom_error_path.Value() << "': " << e.what()
+                    << std::endl;
+        }
+        // try alternative error page path
+        // if path starts with '/', treat it as relative to location root
+        if (location_match_.loc && !custom_error_path.Value().empty() &&
+            custom_error_path.Value()[0] == '/') {
+          std::string alt = location_match_.loc->GetRoot();
+          if (!alt.empty() && alt[alt.size() - 1] == '/')
+            alt.resize(alt.size() - 1);
+          std::string candidate =
+              alt +
+              custom_error_path.Value();  // location_root + "/errors/404.html"
+          try {
+            std::string body = lib::utils::ReadFileToStringOrThrow(candidate);
+            res.SetBody(body);
+            return res;
+          } catch (const std::exception& e) {
+            std::cerr << "[DEBUG] failed to read alternative error page at '"
+                      << candidate << "': " << e.what() << std::endl;
+          }
         }
       }
     }
