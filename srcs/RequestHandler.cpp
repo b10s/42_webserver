@@ -33,12 +33,8 @@ ExecResult RequestHandler::Run() {
     lib::http::Method method = req_.GetMethod();
     if (location_match_.loc->HasAllowedMethods()) {
       if (!location_match_.loc->IsMethodAllowed(method)) {
-        HttpResponse res;
-        res.SetStatus(lib::http::kMethodNotAllowed);  // 405
+        HttpResponse res = BuildErrorResponse(lib::http::kMethodNotAllowed);
         res.AddHeader("Allow", location_match_.loc->GetAllowedMethodsString());
-        res.AddHeader("Connection", "close");
-        res.AddHeader("Content-Type", "text/html");
-        res.EnsureDefaultErrorContent();
         return ExecResult(res);
       }
     }
@@ -54,13 +50,9 @@ ExecResult RequestHandler::Run() {
     }
     return result_;
   } catch (const lib::exception::ResponseStatusException& e) {
-    HttpResponse res(e.GetStatus());
-    res.SetBody(lib::http::StatusToString(e.GetStatus()));
-    return ExecResult(res);
+    return ExecResult(BuildErrorResponse(e.GetStatus()));
   } catch (const std::exception& e) {
-    HttpResponse res(lib::http::kInternalServerError);
-    res.SetBody("Internal Server Error");
-    return ExecResult(res);
+    return ExecResult(BuildErrorResponse(lib::http::kInternalServerError));
   }
 }
 
@@ -367,4 +359,52 @@ std::string RequestHandler::GenerateDirectoryListing(
        << "</html>";
 
   return html.str();
+}
+
+HttpResponse RequestHandler::BuildErrorResponse(lib::http::Status status) {
+  HttpResponse res(status);
+  res.AddHeader("Content-Type", "text/html");
+  res.AddHeader("Connection", "close");
+
+  try {
+    if (conf_.HasErrorPage(status)) {
+      const std::string& custom_error_path = conf_.GetErrorPage(status);
+      std::cerr << "[DEBUG] loading custom error page for status " << status
+                << " from path: " << custom_error_path << std::endl;
+      try {  // try direct path first
+        std::string body =
+            lib::utils::ReadFileToStringOrThrow(custom_error_path);
+        res.SetBody(body);
+        return res;
+      } catch (const std::exception& e) {
+        std::cerr << "[DEBUG] failed to read error page at '"
+                  << custom_error_path << "': " << e.what() << std::endl;
+      }
+      if (!location_match_.loc || custom_error_path.empty() ||
+          custom_error_path[0] != '/') {
+        // nothing more to try
+      } else {
+        std::string alt = location_match_.loc->GetRoot();
+        if (!alt.empty() && alt[alt.size() - 1] == '/')
+          alt.resize(alt.size() - 1);
+        std::string candidate =
+            alt + custom_error_path;  // location_root + "/errors/404.html"
+        std::cerr << "[DEBUG] trying alternative error page path: '"
+                  << candidate << "'" << std::endl;
+        try {
+          std::string body = lib::utils::ReadFileToStringOrThrow(candidate);
+          res.SetBody(body);
+          return res;
+        } catch (const std::exception& e) {
+          std::cerr << "[DEBUG] failed to read alternative error page at '"
+                    << candidate << "': " << e.what() << std::endl;
+        }
+      }
+    }
+  } catch (...) {
+    // fall back to default error page
+    // if any error occurs while reading custom error page
+  }
+  res.EnsureDefaultErrorContent();
+  return res;
 }

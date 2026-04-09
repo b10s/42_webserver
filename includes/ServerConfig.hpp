@@ -64,16 +64,17 @@ class ServerConfig {
     return errors_;
   }
 
-  std::string GetErrorPagesString() const {
-    std::string result;
-    for (std::map<lib::http::Status, std::string>::const_iterator it =
-             errors_.begin();
-         it != errors_.end(); ++it) {
-      std::ostringstream oss;
-      oss << it->first;
-      result += "    " + oss.str() + " -> " + it->second + "\n";
+  bool HasErrorPage(lib::http::Status status) const {
+    return errors_.find(status) != errors_.end();
+  }
+
+  const std::string& GetErrorPage(lib::http::Status status) const {
+    std::map<lib::http::Status, std::string>::const_iterator it =
+        errors_.find(status);
+    if (it == errors_.end()) {
+      throw std::runtime_error("Error page not found");
     }
-    return result;
+    return it->second;
   }
 
   /*

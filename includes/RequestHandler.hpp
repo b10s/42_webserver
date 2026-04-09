@@ -64,6 +64,7 @@ class RequestHandler {
   void HandleDelete();
   std::string GenerateDirectoryListing(const std::string &path,
                                        const std::string &req_uri) const;
+  HttpResponse BuildErrorResponse(lib::http::Status status);
 };
 
 #endif
