@@ -68,13 +68,14 @@ class ServerConfig {
     return errors_.find(status) != errors_.end();
   }
 
-  const std::string& GetErrorPage(lib::http::Status status) const {
+  lib::type::Optional<std::string> GetErrorPage(
+      lib::http::Status status) const {
     std::map<lib::http::Status, std::string>::const_iterator it =
         errors_.find(status);
     if (it == errors_.end()) {
-      throw std::runtime_error("Error page not found");
+      return lib::type::Optional<std::string>();
     }
-    return it->second;
+    return lib::type::Optional<std::string>(it->second);
   }
 
   /*

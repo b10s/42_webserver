@@ -368,27 +368,24 @@ HttpResponse RequestHandler::BuildErrorResponse(lib::http::Status status) {
 
   try {
     if (conf_.HasErrorPage(status)) {
-      const std::string& custom_error_path = conf_.GetErrorPage(status);
-      std::cerr << "[DEBUG] loading custom error page for status " << status
-                << " from path: " << custom_error_path << std::endl;
-      try {  // try direct path first
-        std::string body =
-            lib::utils::ReadFileToStringOrThrow(custom_error_path);
+      lib::type::Optional<std::string> custom_error_path =
+          conf_.GetErrorPage(status);
+      if (custom_error_path.HasValue()) {
+        const std::string body =
+            lib::utils::ReadFileToStringOrThrow(custom_error_path.Value());
         res.SetBody(body);
         return res;
-      } catch (const std::exception& e) {
-        std::cerr << "[DEBUG] failed to read error page at '"
-                  << custom_error_path << "': " << e.what() << std::endl;
       }
-      if (!location_match_.loc || custom_error_path.empty() ||
-          custom_error_path[0] != '/') {
+      if (!location_match_.loc || !custom_error_path.HasValue() ||
+          custom_error_path.Value()[0] != '/') {
         // nothing more to try
       } else {
         std::string alt = location_match_.loc->GetRoot();
         if (!alt.empty() && alt[alt.size() - 1] == '/')
           alt.resize(alt.size() - 1);
         std::string candidate =
-            alt + custom_error_path;  // location_root + "/errors/404.html"
+            alt +
+            custom_error_path.Value();  // location_root + "/errors/404.html"
         std::cerr << "[DEBUG] trying alternative error page path: '"
                   << candidate << "'" << std::endl;
         try {
@@ -401,9 +398,11 @@ HttpResponse RequestHandler::BuildErrorResponse(lib::http::Status status) {
         }
       }
     }
-  } catch (...) {
+  } catch (const std::exception& e) {
     // fall back to default error page
     // if any error occurs while reading custom error page
+    std::cerr << "[DEBUG] failed to read custom error page: " << e.what()
+              << std::endl;
   }
   res.EnsureDefaultErrorContent();
   return res;
