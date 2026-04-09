@@ -16,6 +16,7 @@
 #include "LocationMatch.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 
 class ServerConfig {
  private:
