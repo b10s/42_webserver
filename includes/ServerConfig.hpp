@@ -16,6 +16,7 @@
 #include "LocationMatch.hpp"
 #include "lib/exception/ResponseStatusException.hpp"
 #include "lib/http/Status.hpp"
+#include "lib/type/Optional.hpp"
 
 class ServerConfig {
  private:
@@ -64,16 +65,18 @@ class ServerConfig {
     return errors_;
   }
 
-  std::string GetErrorPagesString() const {
-    std::string result;
-    for (std::map<lib::http::Status, std::string>::const_iterator it =
-             errors_.begin();
-         it != errors_.end(); ++it) {
-      std::ostringstream oss;
-      oss << it->first;
-      result += "    " + oss.str() + " -> " + it->second + "\n";
+  bool HasErrorPage(lib::http::Status status) const {
+    return errors_.find(status) != errors_.end();
+  }
+
+  lib::type::Optional<std::string> GetErrorPage(
+      lib::http::Status status) const {
+    std::map<lib::http::Status, std::string>::const_iterator it =
+        errors_.find(status);
+    if (it == errors_.end()) {
+      return lib::type::Optional<std::string>();
     }
-    return result;
+    return lib::type::Optional<std::string>(it->second);
   }
 
   /*
