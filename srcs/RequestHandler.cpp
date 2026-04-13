@@ -58,7 +58,9 @@ ExecResult RequestHandler::Run() {
 
 void RequestHandler::PrepareRoutingContext() {
   const std::string req_uri = req_.GetUri();
-  location_match_ = conf_.FindLocationForUri(req_uri);
+  const std::string normalized_uri =
+      FileValidator::NormalizePathBySegments(req_uri);
+  location_match_ = conf_.FindLocationForUri(normalized_uri);
   filesystem_path_ = ResolveFilesystemPath();
 }
 
