@@ -155,6 +155,11 @@ void Webserv::CheckTimeout() {
       int fd = socket->GetFd();
       bool should_delete = socket->HandleTimeout(epoll_fd_.GetFd());
       if (should_delete) {
+        epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, fd, NULL);
+        int write_fd = socket->GetWriteFd();
+        if (write_fd != -1) {
+          epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, write_fd, NULL);
+        }
         delete socket;
         sockets_.erase(it++);
       } else {
