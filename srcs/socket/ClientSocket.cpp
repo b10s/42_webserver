@@ -65,10 +65,21 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
       HandleEpollOut();
     }
   } catch (const lib::exception::ResponseStatusException& e) {  // 413/400/500
-    res_ = HttpResponse(e.GetStatus());
-    res_.AddHeader("Connection", "close");
-    res_.AddHeader("Content-Type", "text/html");
-    res_.EnsureDefaultErrorContent();
+    HttpResponse res(e.GetStatus());
+    res.AddHeader("Connection", "close");
+    res.AddHeader("Content-Type", "text/html");
+    lib::type::Optional<std::string> path = config_.GetErrorPage(e.GetStatus());
+    if (path.HasValue()) {
+      try {
+        std::string body = lib::utils::ReadFileToStringOrThrow(path.Value());
+        res.SetBody(body);
+      } catch (...) {
+        res.EnsureDefaultErrorContent();
+      }
+    } else {
+      res.EnsureDefaultErrorContent();
+    }
+    res_ = res;
     write_buffer_ = res_.ToHttpString();
     epoll_event ev;
     ev.events = EPOLLOUT;

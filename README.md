@@ -3,14 +3,38 @@
 [![cpp-linter](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml)
 
 ## Description
-- an HTTP server in C++ 98.
-- Event-driven server using epoll
-- Single event loop handling:
+
+This project implements an HTTP server in C++98. It receives requests from clients (such as browsers) and returns appropriate responses. It supports methods such as GET, POST, and DELETE, serves static files, executes CGI scripts, and returns proper HTTP status codes and headers.
+
+The server uses an event-driven architecture based on `epoll` to efficiently handle multiple connections concurrently. `epoll` monitors multiple file descriptors and notifies the server when they are ready for I/O operations, allowing non-blocking and scalable request handling.
+
+### Core Architecture
+
+- **Single event loop** handling:
   - client connections
   - request parsing
   - response sending
-- Non-blocking I/O
-- CGI handled via fork + execve
+
+- **Non-blocking I/O**:
+  - I/O operations are performed only when `epoll` signals readiness
+  - Read/write operations continue until `EAGAIN` or `EWOULDBLOCK`, then control returns to the event loop
+
+- **Main loop design**:
+  - `epoll` is placed in the main loop to continuously monitor all file descriptors for both read and write events without blocking
+
+### CGI
+
+- CGI is handled using `fork()` and `execve()`
+
+### Error Handling
+
+All I/O operations (`read`, `recv`, `write`, `send`) properly check return values:
+
+- `> 0`: success  
+- `0`: connection closed  
+- `-1`: error (handled appropriately, e.g., closing the connection)
+
+Control flow is driven primarily by syscall return values. When an operation fails, the implementation may also consult `errno` to distinguish error conditions (for example, retryable non-blocking cases versus other failures) and to map filesystem or syscall errors to appropriate HTTP status codes. 
 
 ### How it works
 1. epoll_wait monitors all file descriptors
@@ -20,7 +44,7 @@
    - send response buffer
 4. CGI:
    - fork + execve
-   - communicate via pipe/socketpair
+   - communicate via pipes
 
 ## Instructions
 
@@ -98,6 +122,7 @@ The server supports:
 ## Testing with curl
 Open different terminal and run following curl commands to test the server in a dev container:
 
+### Basic tests
 ```bash
 # Confirm it listens
 lsof -nP -iTCP -sTCP:LISTEN | grep webserv
@@ -122,18 +147,16 @@ printf "PUT / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc -v 127.0.0.1 <PORT>
 # Slow client / partial request should not hang
 # send headers slowly
 { printf "GET / HTTP/1.1\r\nHost: localhost\r\n"; sleep 5; printf "\r\n"; } | nc -v 127.0.0.1 <PORT>
-# Client disconnect during response
-( printf "GET /bigfile HTTP/1.1\r\nHost: localhost\r\n\r\n"; sleep 0.1 ) | nc -v 127.0.0.1 <PORT> >/dev/null
 
 # GET / POST / DELETE work
 # GET a file
 curl -v http://127.0.0.1:<PORT>/index.html
-curl -I http://127.0.0.1:<PORT>/index.html   # headers only
 # GET a directory (index vs autoindex)
 curl -v http://127.0.0.1:<PORT>/
-# curl -v http://127.0.0.1:8080/dirlist
+# Autoindex listing
+curl -v http://127.0.0.1:8080/dirlist
 
-# chuncked transfer encoding
+# chunked transfer encoding
 (
 printf "POST /upload/test.txt HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n"
 sleep 1
@@ -141,51 +164,140 @@ printf "6\r\n World\r\n0\r\n\r\n"
 ) | nc -v 127.0.0.1 8080
 
 # POST upload (file)
-curl -X POST --data-binary @README.md http://localhost:8080/upload/readme.txt
+curl -X POST --data-binary @cat.jpg http://localhost:8080/upload/cat.jpg
 
 # DELETE a resource
-curl -X DELETE -v http://localhost:8080/upload/readme.txt
+curl -X DELETE -v http://localhost:8080/upload/cat.jpg
 # Expect: 200 + file removed.
+```
 
-# Accurate status codes” + default error pages
-# 404 (and custom error page if configured)
-curl -v http://127.0.0.1:8080/this_does_not_exist
-# Expect: 404 and your default/custom error page body.
-# 405 (method not allowed for a route)
-curl -v -X DELETE http://127.0.0.1:<PORT>/
-# Expect: 405
-# 413 (client_max_body_size)
-# generate 2MB body (change size to exceed your configured limit)
-python3 - <<'PY'
-print("A"*2_000_000)
-PY | curl -v -X POST http://127.0.0.1:8080/upload \
-      -H "Content-Type: text/plain" \
-      --data-binary @-
-# Expect: 413 when above limit.
+### Verifying Accurate Status Codes and Default Error Pages
 
-# Redirection works”
+#### 200 OK
+Test a valid static file:
+```bash
+curl -i http://127.0.0.1:8080/static/a.txt
+```
+Expected result:
+* `200 OK`
+* File content is returned
+
+#### 201 Created
+Test file upload via POST:
+```bash
+curl -i -X POST http://127.0.0.1:8080/upload/test.txt \
+  -H "Content-Type: text/plain" \
+  --data "hello world"
+```
+Expected result:
+* `201 Created`
+* `Location` header is set (if implemented)
+* File is created on the server
+
+#### 301 / 302 Redirect
+Test redirection:
+```bash
+curl -i http://127.0.0.1:8080/redirect
+```
+Expected result:
+* `301 Moved Permanently` or `302 Found`
+* `Location` header is present
+Follow redirect:
+```bash
+curl -L http://127.0.0.1:8080/redirect
+```
+
+#### 400 Bad Request
+Send an invalid HTTP request:
+```bash
+printf "GET / HTTP/1.1\r\n\r\n" | nc 127.0.0.1 8080
+```
+Expected result:
+* `400 Bad Request`
+* Server does not crash
+
+#### 403 Forbidden
+Test a directory with no index file and autoindex disabled:
+```bash
+curl -i http://127.0.0.1:8080/static/
+```
+Expected result:
+* `403 Forbidden`
+
+#### 404 Not Found
+
+Test a non-existent path:
+```bash
+curl -i http://127.0.0.1:8080/this_does_not_exist
+```
+Expected result:
+* `404 Not Found`
+* Default or custom error page is returned
+
+#### 405 Method Not Allowed
+Test a disallowed method:
+```bash
+curl -i -X DELETE http://127.0.0.1:8080/
+```
+Expected result:
+* `405 Method Not Allowed`
+* `Allow` header should be present
+
+#### 411 Length Required
+Send a POST request without `Content-Length`:
+```bash
+printf "POST /upload HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc 127.0.0.1 8080
+```
+* `411 Length Required` would normally be appropriate, 
+but the tester expects POST requests without body headers to be treated as having a content length of 0. 
+Therefore, we handle them accordingly.
+
+#### 413 Payload Too Large
+Send a request body exceeding `client_max_body_size`:
+```bash
+python3 - <<'PY' | curl -i -X POST http://127.0.0.1:8080/upload \
+  -H "Content-Type: text/plain" \
+  --data-binary @-
+print("A" * 2000000)
+PY
+```
+Expected result:
+* `413 Payload Too Large`
+
+#### Directory Redirect (Trailing Slash)
+Test missing trailing slash:
+```bash
+curl -i http://127.0.0.1:8080/dirlist
+```
+Expected result:
+* `301 Moved Permanently`
+* Redirects to `/dirlist/`
+
+### Redirection works
+```bash
 curl -v http://127.0.0.1:8080/redirect
-# Expect: 301/302 + Location header
-# Follow redirect:
-curl -v -L http://127.0.0.1:8080/redirect
+```
+Expected result:
+* 301/302 + Location header
+Follow redirect:
+* curl -v -L http://127.0.0.1:8080/redirect
 
-# CGI (GET, POST, error handling, timeout)
+### CGI (GET, POST, error handling, timeout)
 curl localhost:8080/cgi/hello.py
 curl localhost:8080/cgi/hello_post.py -d "test data"
 curl localhost:8080/cgi/endless.py -d "test data"
 
-# Siege stress test + availability
-# Install and run:
+### Siege stress test + availability
+#### Install and run:
 sudo apt install siege
-# create file for test
+#### create file for test
 echo "Hello World" > demo/static_sites/demo_site/empty.html
-# basic benchmark mode (-b), 50 clients, delay 1s, 10 repetitions
+#### basic benchmark mode (-b), 50 clients, delay 1s, 10 repetitions
 siege -b -c50 -d1 -r10 http://127.0.0.1:8080/empty.html
-# longer run
+#### longer run
 siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
-# Check memory doesn’t grow indefinitely:
+#### Check memory doesn’t grow indefinitely:
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
-```
 
 ## Limitations
 
