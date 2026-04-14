@@ -186,6 +186,121 @@ PY | curl -v -X POST http://127.0.0.1:8080/upload \
       -H "Content-Type: text/plain" \
       --data-binary @-
 # Expect: 413 when above limit.
+# 403 Forbidden
+curl http://localhost:8080/static/ -i
+# if autoindex is off and no index file in the location, return 403
+
+
+### Verifying Accurate Status Codes and Default Error Pages
+
+#### 200 OK
+Test a valid static file:
+```bash
+curl -i http://127.0.0.1:8080/static/a.txt
+````
+Expected result:
+* `200 OK`
+* File content is returned
+
+#### 201 Created
+Test file upload via POST:
+```bash
+curl -i -X POST http://127.0.0.1:8080/upload/test.txt \
+  -H "Content-Type: text/plain" \
+  --data "hello world"
+```
+Expected result:
+* `201 Created`
+* `Location` header is set (if implemented)
+* File is created on the server
+
+#### 301 / 302 Redirect
+Test redirection:
+```bash
+curl -i http://127.0.0.1:8080/redirect
+```
+Expected result:
+* `301 Moved Permanently` or `302 Found`
+* `Location` header is present
+Follow redirect:
+```bash
+curl -L http://127.0.0.1:8080/redirect
+```
+
+#### 400 Bad Request
+Send an invalid HTTP request:
+```bash
+printf "INVALID / HTTP/1.1\r\n\r\n" | nc 127.0.0.1 8080
+```
+Expected result:
+* `400 Bad Request`
+* Server does not crash
+
+#### 403 Forbidden
+Test a directory with no index file and autoindex disabled:
+```bash
+curl -i http://127.0.0.1:8080/static/
+```
+Expected result:
+* `403 Forbidden`
+
+#### 404 Not Found
+
+Test a non-existent path:
+```bash
+curl -i http://127.0.0.1:8080/this_does_not_exist
+```
+Expected result:
+* `404 Not Found`
+* Default or custom error page is returned
+
+#### 405 Method Not Allowed
+Test a disallowed method:
+```bash
+curl -i -X DELETE http://127.0.0.1:8080/
+```
+Expected result:
+* `405 Method Not Allowed`
+* `Allow` header should be present
+
+#### 411 Length Required
+Send a POST request without `Content-Length`:
+```bash
+printf "POST / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc 127.0.0.1 8080
+```
+Expected result:
+* `411 Length Required`
+
+#### 413 Payload Too Large
+Send a request body exceeding `client_max_body_size`:
+```bash
+python3 - <<'PY' | curl -i -X POST http://127.0.0.1:8080/upload \
+  -H "Content-Type: text/plain" \
+  --data-binary @-
+print("A" * 2000000)
+PY
+```
+Expected result:
+* `413 Payload Too Large`
+
+#### Directory Redirect (Trailing Slash)
+Test missing trailing slash:
+```bash
+curl -i http://127.0.0.1:8080/dirlist
+```
+Expected result:
+* `301 Moved Permanently`
+* Redirects to `/dirlist/`
+
+#### Chunked Transfer (advanced)
+Test chunked request handling:
+```bash
+printf "POST /upload/chunked.txt HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n" | nc 127.0.0.1 8080
+```
+Expected result:
+* Request is processed correctly
+* Server does not crash
+
 
 # Redirection works”
 curl -v http://127.0.0.1:8080/redirect
