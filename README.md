@@ -3,14 +3,38 @@
 [![cpp-linter](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml/badge.svg)](https://github.com/b10s/42_webserver/actions/workflows/cpp-linter.yml)
 
 ## Description
-- an HTTP server in C++ 98.
-- Event-driven server using epoll
-- Single event loop handling:
+
+This project implements an HTTP server in C++98. It receives requests from clients (such as browsers) and returns appropriate responses. It supports methods such as GET, POST, and DELETE, serves static files, executes CGI scripts, and returns proper HTTP status codes and headers.
+
+The server uses an event-driven architecture based on `epoll` to efficiently handle multiple connections concurrently. `epoll` monitors multiple file descriptors and notifies the server when they are ready for I/O operations, allowing non-blocking and scalable request handling.
+
+### Core Architecture
+
+- **Single event loop** handling:
   - client connections
   - request parsing
   - response sending
-- Non-blocking I/O
-- CGI handled via fork + execve
+
+- **Non-blocking I/O**:
+  - I/O operations are performed only when `epoll` signals readiness
+  - Read/write operations continue until `EAGAIN` or `EWOULDBLOCK`, then control returns to the event loop
+
+- **Main loop design**:
+  - `epoll` is placed in the main loop to continuously monitor all file descriptors for both read and write events without blocking
+
+### CGI
+
+- CGI is handled using `fork()` and `execve()`
+
+### Error Handling
+
+All I/O operations (`read`, `recv`, `write`, `send`) properly check return values:
+
+- `> 0`: success  
+- `0`: connection closed  
+- `-1`: error (handled appropriately, e.g., closing the connection)
+
+The implementation does not rely on `errno` for control flow. It is only used for logging or debugging purposes. Control flow decisions are based strictly on return values. 
 
 ### How it works
 1. epoll_wait monitors all file descriptors
