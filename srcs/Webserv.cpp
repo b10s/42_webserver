@@ -63,11 +63,16 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   epoll_event events[kMaxEvents];
   while (true) {
-    CheckTimeout();
+    CheckTimeout();  // timed out sockets will be registered for deletion
     int nfds =
         epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, kEpollWaitTimeout);
     if (nfds == -1) {
       std::cerr << "epoll_wait() failed. " << strerror(errno) << std::endl;
+      for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+           it != pending_deletes_.end(); ++it) {
+        delete *it;
+      }
+      pending_deletes_.clear();
       continue;
     }
 
@@ -89,6 +94,7 @@ void Webserv::Run() {
                     << std::endl;
           sockets_.erase(result.new_socket->GetFd());
           delete result.new_socket;
+          result.new_socket = NULL;
         } else {
           int write_fd = result.new_socket->GetWriteFd();
           if (write_fd != -1) {
@@ -99,6 +105,12 @@ void Webserv::Run() {
                           &write_ev) == -1) {
               std::cerr << "epoll_ctl() failed for write fd. "
                         << strerror(errno) << std::endl;
+              epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL,
+                        result.new_socket->GetFd(),
+                        NULL);  // remove the new socket since we failed to add
+                                // its write fd
+              sockets_.erase(result.new_socket->GetFd());
+              delete result.new_socket;
             }
           }
         }
@@ -113,6 +125,11 @@ void Webserv::Run() {
       sockets_.erase((*dit)->GetFd());
       delete *dit;
     }
+    for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+         it != pending_deletes_.end(); ++it) {
+      delete *it;
+    }
+    pending_deletes_.clear();
   }
 }
 
@@ -155,8 +172,24 @@ void Webserv::CheckTimeout() {
       int fd = socket->GetFd();
       bool should_delete = socket->HandleTimeout(epoll_fd_.GetFd());
       if (should_delete) {
-        delete socket;
+        // remove fd(s) from epoll so epoll won't return events for them
+        // anymore
+        if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, fd, NULL) == -1) {
+          std::cerr << "epoll_ctl() failed to remove timed out socket. "
+                    << strerror(errno) << std::endl;
+        }
+        int write_fd = socket->GetWriteFd();
+        if (write_fd != -1) {
+          if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, write_fd, NULL) ==
+              -1) {
+            std::cerr << "epoll_ctl() failed to remove timed out socket's "
+                         "write fd. "
+                      << strerror(errno) << std::endl;
+          }
+        }
         sockets_.erase(it++);
+        pending_deletes_.push_back(
+            socket);  // defer deletion to avoid use-after-free
       } else {
         ++it;
       }
@@ -175,4 +208,13 @@ void Webserv::ClearResources() {
   }
   std::cerr << "All sockets cleaned up." << std::endl;
   sockets_.clear();
+
+  // ensure any deferred deletes are also freed to avoid memory leaks
+  if (!pending_deletes_.empty()) {
+    for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+         it != pending_deletes_.end(); ++it) {
+      delete *it;
+    }
+    pending_deletes_.clear();
+  }
 }
