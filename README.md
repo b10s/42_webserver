@@ -210,7 +210,7 @@ curl -L http://127.0.0.1:8080/redirect
 #### 400 Bad Request
 Send an invalid HTTP request:
 ```bash
-printf "INVALID / HTTP/1.1\r\n\r\n" | nc 127.0.0.1 8080
+printf "GET / HTTP/1.1\r\n\r\n" | nc 127.0.0.1 8080
 ```
 Expected result:
 * `400 Bad Request`
@@ -246,10 +246,11 @@ Expected result:
 #### 411 Length Required
 Send a POST request without `Content-Length`:
 ```bash
-printf "POST / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc 127.0.0.1 8080
+printf "POST /upload HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc 127.0.0.1 8080
 ```
-Expected result:
-* `411 Length Required`
+* `411 Length Required` would normally be appropriate, 
+but the tester expects POST requests without body headers to be treated as having a content length of 0. 
+Therefore, we handle them accordingly.
 
 #### 413 Payload Too Large
 Send a request body exceeding `client_max_body_size`:
