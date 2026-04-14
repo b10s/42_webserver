@@ -187,7 +187,6 @@ void Webserv::CheckTimeout() {
                       << strerror(errno) << std::endl;
           }
         }
-        // delete socket;
         sockets_.erase(it++);
         pending_deletes_.push_back(
             socket);  // defer deletion to avoid use-after-free
