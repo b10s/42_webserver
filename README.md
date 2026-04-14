@@ -122,6 +122,7 @@ The server supports:
 ## Testing with curl
 Open different terminal and run following curl commands to test the server in a dev container:
 
+### Basic tests
 ```bash
 # Confirm it listens
 lsof -nP -iTCP -sTCP:LISTEN | grep webserv
@@ -146,16 +147,14 @@ printf "PUT / HTTP/1.1\r\nHost: localhost\r\n\r\n" | nc -v 127.0.0.1 <PORT>
 # Slow client / partial request should not hang
 # send headers slowly
 { printf "GET / HTTP/1.1\r\nHost: localhost\r\n"; sleep 5; printf "\r\n"; } | nc -v 127.0.0.1 <PORT>
-# Client disconnect during response
-( printf "GET /bigfile HTTP/1.1\r\nHost: localhost\r\n\r\n"; sleep 0.1 ) | nc -v 127.0.0.1 <PORT> >/dev/null
 
 # GET / POST / DELETE work
 # GET a file
 curl -v http://127.0.0.1:<PORT>/index.html
-curl -I http://127.0.0.1:<PORT>/index.html   # headers only
 # GET a directory (index vs autoindex)
 curl -v http://127.0.0.1:<PORT>/
-# curl -v http://127.0.0.1:8080/dirlist
+# Autoindex listing
+curl -v http://127.0.0.1:8080/dirlist
 
 # chuncked transfer encoding
 (
@@ -165,10 +164,10 @@ printf "6\r\n World\r\n0\r\n\r\n"
 ) | nc -v 127.0.0.1 8080
 
 # POST upload (file)
-curl -X POST --data-binary @README.md http://localhost:8080/upload/readme.txt
+curl -X POST --data-binary @cat.jpg http://localhost:8080/upload/cat.jpg
 
 # DELETE a resource
-curl -X DELETE -v http://localhost:8080/upload/readme.txt
+curl -X DELETE -v http://localhost:8080/upload/cat.jpg
 # Expect: 200 + file removed.
 
 # Accurate status codes” + default error pages
@@ -186,10 +185,7 @@ PY | curl -v -X POST http://127.0.0.1:8080/upload \
       -H "Content-Type: text/plain" \
       --data-binary @-
 # Expect: 413 when above limit.
-# 403 Forbidden
-curl http://localhost:8080/static/ -i
-# if autoindex is off and no index file in the location, return 403
-
+```
 
 ### Verifying Accurate Status Codes and Default Error Pages
 
@@ -292,37 +288,30 @@ Expected result:
 * `301 Moved Permanently`
 * Redirects to `/dirlist/`
 
-#### Chunked Transfer (advanced)
-Test chunked request handling:
+### Redirection works
 ```bash
-printf "POST /upload/chunked.txt HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n4\r\ntest\r\n0\r\n\r\n" | nc 127.0.0.1 8080
-```
-Expected result:
-* Request is processed correctly
-* Server does not crash
-
-
-# Redirection works”
 curl -v http://127.0.0.1:8080/redirect
-# Expect: 301/302 + Location header
-# Follow redirect:
-curl -v -L http://127.0.0.1:8080/redirect
+```
+Expect result : 
+* 301/302 + Location header
+Follow redirect:
+* curl -v -L http://127.0.0.1:8080/redirect
 
-# CGI (GET, POST, error handling, timeout)
+### CGI (GET, POST, error handling, timeout)
 curl localhost:8080/cgi/hello.py
 curl localhost:8080/cgi/hello_post.py -d "test data"
 curl localhost:8080/cgi/endless.py -d "test data"
 
-# Siege stress test + availability
-# Install and run:
+### Siege stress test + availability
+#### Install and run:
 sudo apt install siege
-# create file for test
+#### create file for test
 echo "Hello World" > demo/static_sites/demo_site/empty.html
-# basic benchmark mode (-b), 50 clients, delay 1s, 10 repetitions
+#### basic benchmark mode (-b), 50 clients, delay 1s, 10 repetitions
 siege -b -c50 -d1 -r10 http://127.0.0.1:8080/empty.html
-# longer run
+#### longer run
 siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
-# Check memory doesn’t grow indefinitely:
+#### Check memory doesn’t grow indefinitely:
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
 ```
 
