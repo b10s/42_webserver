@@ -44,7 +44,7 @@ Control flow is driven primarily by syscall return values. When an operation fai
    - send response buffer
 4. CGI:
    - fork + execve
-   - communicate via pipe/socketpair
+   - communicate via pipe/socket
 
 ## Instructions
 
