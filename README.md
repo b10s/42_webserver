@@ -169,22 +169,6 @@ curl -X POST --data-binary @cat.jpg http://localhost:8080/upload/cat.jpg
 # DELETE a resource
 curl -X DELETE -v http://localhost:8080/upload/cat.jpg
 # Expect: 200 + file removed.
-
-# Accurate status codes” + default error pages
-# 404 (and custom error page if configured)
-curl -v http://127.0.0.1:8080/this_does_not_exist
-# Expect: 404 and your default/custom error page body.
-# 405 (method not allowed for a route)
-curl -v -X DELETE http://127.0.0.1:<PORT>/
-# Expect: 405
-# 413 (client_max_body_size)
-# generate 2MB body (change size to exceed your configured limit)
-python3 - <<'PY'
-print("A"*2_000_000)
-PY | curl -v -X POST http://127.0.0.1:8080/upload \
-      -H "Content-Type: text/plain" \
-      --data-binary @-
-# Expect: 413 when above limit.
 ```
 
 ### Verifying Accurate Status Codes and Default Error Pages
@@ -313,7 +297,6 @@ siege -b -c50 -d1 -r10 http://127.0.0.1:8080/empty.html
 siege -b -c50 -d1 -t30S http://127.0.0.1:8080/empty.html
 #### Check memory doesn’t grow indefinitely:
 watch -n 1 "ps -o pid,rss,vsz,command -p \$(pgrep webserv)"
-```
 
 ## Limitations
 
