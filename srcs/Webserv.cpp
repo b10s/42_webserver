@@ -63,11 +63,16 @@ Webserv::Webserv(const std::string& config_file) {
 void Webserv::Run() {
   epoll_event events[kMaxEvents];
   while (true) {
-    CheckTimeout();
+    CheckTimeout(); // timed out sockets will be registered for deletion
     int nfds =
         epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, kEpollWaitTimeout);
     if (nfds == -1) {
       std::cerr << "epoll_wait() failed. " << strerror(errno) << std::endl;
+      for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+           it != pending_deletes_.end(); ++it) {
+        delete *it;
+      }
+      pending_deletes_.clear();
       continue;
     }
 
@@ -89,6 +94,7 @@ void Webserv::Run() {
                     << std::endl;
           sockets_.erase(result.new_socket->GetFd());
           delete result.new_socket;
+          result.new_socket = NULL;
         } else {
           int write_fd = result.new_socket->GetWriteFd();
           if (write_fd != -1) {
@@ -99,6 +105,10 @@ void Webserv::Run() {
                           &write_ev) == -1) {
               std::cerr << "epoll_ctl() failed for write fd. "
                         << strerror(errno) << std::endl;
+              epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, result.new_socket->GetFd(),
+                        NULL);  // remove the new socket since we failed to add its write fd
+              sockets_.erase(result.new_socket->GetFd());
+              delete result.new_socket;
             }
           }
         }
@@ -113,19 +123,13 @@ void Webserv::Run() {
       sockets_.erase((*dit)->GetFd());
       delete *dit;
     }
-    int nfds =
-        epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, kEpollWaitTimeout);
-    if (nfds == -1) {
-      if (!pending_deletes_.empty()) {
-        for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
-             it != pending_deletes_.end(); ++it) {
-          delete *it;
-        }
-        pending_deletes_.clear();
-      }
-      continue;
+    for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+         it != pending_deletes_.end(); ++it) {
+      delete *it;
     }
+    pending_deletes_.clear();
   }
+}
 
   void Webserv::InitServersFromConfigs(
       const std::vector<ServerConfig>& configs) {
