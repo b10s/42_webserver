@@ -197,7 +197,7 @@ curl http://localhost:8080/static/ -i
 Test a valid static file:
 ```bash
 curl -i http://127.0.0.1:8080/static/a.txt
-````
+```
 Expected result:
 * `200 OK`
 * File content is returned
