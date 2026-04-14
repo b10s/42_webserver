@@ -113,7 +113,101 @@ void Webserv::Run() {
       sockets_.erase((*dit)->GetFd());
       delete *dit;
     }
+    int nfds =
+        epoll_wait(epoll_fd_.GetFd(), events, kMaxEvents, kEpollWaitTimeout);
+    if (nfds == -1) {
+      if (!pending_deletes_.empty()) {
+        for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
+             it != pending_deletes_.end(); ++it) {
+          delete *it;
+        }
+        pending_deletes_.clear();
+      }
+      continue;
+    }
+  }
 
+  void Webserv::InitServersFromConfigs(
+      const std::vector<ServerConfig>& configs) {
+    port_to_server_configs_.clear();
+    for (std::vector<ServerConfig>::const_iterator server = configs.begin();
+         server != configs.end(); ++server) {
+      const unsigned short& port = server->GetPort();
+      if (port_to_server_configs_.find(port) != port_to_server_configs_.end()) {
+        std::cerr << "Warning: Multiple server blocks for port " << port
+                  << ", using first one only" << std::endl;
+        continue;
+      }
+      port_to_server_configs_[port] = *server;
+    }
+  }
+
+  const std::map<unsigned short, ServerConfig>& Webserv::GetPortConfigs()
+      const {
+    return port_to_server_configs_;
+  }
+
+  const ServerConfig* Webserv::FindServerConfigByPort(
+      const unsigned short& port) const {
+    std::map<unsigned short, ServerConfig>::const_iterator it =
+        port_to_server_configs_.find(port);
+    if (it != port_to_server_configs_.end()) {
+      return &it->second;
+    }
+    return NULL;
+  }
+
+  void Webserv::CheckTimeout() {
+    time_t now = std::time(NULL);
+    time_t threshold = now - kRequestTimeout;
+
+    for (std::map<int, ASocket*>::iterator it = sockets_.begin();
+         it != sockets_.end();) {
+      if (it->second->IsTimeout(threshold)) {
+        ASocket* socket = it->second;
+        int fd = socket->GetFd();
+        bool should_delete = socket->HandleTimeout(epoll_fd_.GetFd());
+        if (should_delete) {
+          // remove fd(s) from epoll so epoll won't return events for them
+          // anymore
+          if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, fd, NULL) == -1) {
+            std::cerr << "epoll_ctl() failed to remove timed out socket. "
+                      << strerror(errno) << std::endl;
+          }
+          int write_fd = socket->GetWriteFd();
+          if (write_fd != -1) {
+            if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, write_fd, NULL) ==
+                -1) {
+              std::cerr << "epoll_ctl() failed to remove timed out socket's "
+                           "write fd. "
+                        << strerror(errno) << std::endl;
+            }
+          }
+          // delete socket;
+          sockets_.erase(it++);
+          pending_deletes_.push_back(
+              socket);  // defer deletion to avoid use-after-free
+        } else {
+          ++it;
+        }
+        std::cerr << "Connection timed out. fd: " << fd << std::endl;
+      } else {
+        ++it;
+      }
+    }
+  }
+
+  void Webserv::ClearResources() {
+    for (std::map<int, ASocket*>::iterator it = sockets_.begin();
+         it != sockets_.end(); ++it) {
+      std::cerr << "Cleaning up socket fd: " << it->second->GetFd()
+                << std::endl;
+      delete it->second;
+    }
+    std::cerr << "All sockets cleaned up." << std::endl;
+    sockets_.clear();
+
+    // ensure any deferred deletes are also freed to avoid memory leaks
     if (!pending_deletes_.empty()) {
       for (std::vector<ASocket*>::iterator it = pending_deletes_.begin();
            it != pending_deletes_.end(); ++it) {
@@ -122,81 +216,3 @@ void Webserv::Run() {
       pending_deletes_.clear();
     }
   }
-}
-
-void Webserv::InitServersFromConfigs(const std::vector<ServerConfig>& configs) {
-  port_to_server_configs_.clear();
-  for (std::vector<ServerConfig>::const_iterator server = configs.begin();
-       server != configs.end(); ++server) {
-    const unsigned short& port = server->GetPort();
-    if (port_to_server_configs_.find(port) != port_to_server_configs_.end()) {
-      std::cerr << "Warning: Multiple server blocks for port " << port
-                << ", using first one only" << std::endl;
-      continue;
-    }
-    port_to_server_configs_[port] = *server;
-  }
-}
-
-const std::map<unsigned short, ServerConfig>& Webserv::GetPortConfigs() const {
-  return port_to_server_configs_;
-}
-
-const ServerConfig* Webserv::FindServerConfigByPort(
-    const unsigned short& port) const {
-  std::map<unsigned short, ServerConfig>::const_iterator it =
-      port_to_server_configs_.find(port);
-  if (it != port_to_server_configs_.end()) {
-    return &it->second;
-  }
-  return NULL;
-}
-
-void Webserv::CheckTimeout() {
-  time_t now = std::time(NULL);
-  time_t threshold = now - kRequestTimeout;
-
-  for (std::map<int, ASocket*>::iterator it = sockets_.begin();
-       it != sockets_.end();) {
-    if (it->second->IsTimeout(threshold)) {
-      ASocket* socket = it->second;
-      int fd = socket->GetFd();
-      bool should_delete = socket->HandleTimeout(epoll_fd_.GetFd());
-      if (should_delete) {
-        // remove fd(s) from epoll so epoll won't return events for them anymore
-        if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, fd, NULL) == -1) {
-          std::cerr << "epoll_ctl() failed to remove timed out socket. "
-                    << strerror(errno) << std::endl;
-        }
-        int write_fd = socket->GetWriteFd();
-        if (write_fd != -1) {
-          if (epoll_ctl(epoll_fd_.GetFd(), EPOLL_CTL_DEL, write_fd, NULL) ==
-              -1) {
-            std::cerr
-                << "epoll_ctl() failed to remove timed out socket's write fd. "
-                << strerror(errno) << std::endl;
-          }
-        }
-        // delete socket;
-        sockets_.erase(it++);
-        pending_deletes_.push_back(
-            socket);  // defer deletion to avoid use-after-free
-      } else {
-        ++it;
-      }
-      std::cerr << "Connection timed out. fd: " << fd << std::endl;
-    } else {
-      ++it;
-    }
-  }
-}
-
-void Webserv::ClearResources() {
-  for (std::map<int, ASocket*>::iterator it = sockets_.begin();
-       it != sockets_.end(); ++it) {
-    std::cerr << "Cleaning up socket fd: " << it->second->GetFd() << std::endl;
-    delete it->second;
-  }
-  std::cerr << "All sockets cleaned up." << std::endl;
-  sockets_.clear();
-}
