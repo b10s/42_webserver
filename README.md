@@ -277,7 +277,7 @@ Expected result:
 ```bash
 curl -v http://127.0.0.1:8080/redirect
 ```
-Expect result : 
+Expected result:
 * 301/302 + Location header
 Follow redirect:
 * curl -v -L http://127.0.0.1:8080/redirect
