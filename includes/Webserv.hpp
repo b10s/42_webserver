@@ -14,8 +14,7 @@ class Webserv {
   std::map<unsigned short, ServerConfig> port_to_server_configs_;
   lib::type::Fd epoll_fd_;
   std::map<int, ASocket*> sockets_;
-  std::vector<ASocket*>
-      pending_deletes_;  // deferred deletions to avoid use-after-free
+  std::vector<ASocket*> pending_deletes_;  // deferred deletions to avoid use-after-free
   void ClearResources();
 
   static const int kMaxEvents = 10;
