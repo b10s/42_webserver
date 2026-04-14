@@ -34,7 +34,7 @@ All I/O operations (`read`, `recv`, `write`, `send`) properly check return value
 - `0`: connection closed  
 - `-1`: error (handled appropriately, e.g., closing the connection)
 
-The implementation does not rely on `errno` for control flow. It is only used for logging or debugging purposes. Control flow decisions are based strictly on return values. 
+Control flow is driven primarily by syscall return values. When an operation fails, the implementation may also consult `errno` to distinguish error conditions (for example, retryable non-blocking cases versus other failures) and to map filesystem or syscall errors to appropriate HTTP status codes. 
 
 ### How it works
 1. epoll_wait monitors all file descriptors
