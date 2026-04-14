@@ -414,3 +414,4 @@ HttpResponse RequestHandler::BuildErrorResponse(lib::http::Status status) {
   res.EnsureDefaultErrorContent();
   return res;
 }
+
