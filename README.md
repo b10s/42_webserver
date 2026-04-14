@@ -156,7 +156,7 @@ curl -v http://127.0.0.1:<PORT>/
 # Autoindex listing
 curl -v http://127.0.0.1:8080/dirlist
 
-# chuncked transfer encoding
+# chunked transfer encoding
 (
 printf "POST /upload/test.txt HTTP/1.1\r\nHost: localhost\r\nTransfer-Encoding: chunked\r\n\r\n5\r\nHello\r\n"
 sleep 1
