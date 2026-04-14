@@ -68,15 +68,10 @@ SocketResult ClientSocket::HandleEvent(int epoll_fd, uint32_t events) {
     HttpResponse res(e.GetStatus());
     res.AddHeader("Connection", "close");
     res.AddHeader("Content-Type", "text/html");
-    lib::type::Optional<std::string> path =
-        config_.GetErrorPage(e.GetStatus());
-    std::cerr << "[DEBUG] ResponseStatusException caught in ClientSocket: status="
-              << e.GetStatus() << " error_page="
-              << (path.HasValue() ? path.Value() : "none") << std::endl;
+    lib::type::Optional<std::string> path = config_.GetErrorPage(e.GetStatus());
     if (path.HasValue()) {
       try {
-        std::string body =
-            lib::utils::ReadFileToStringOrThrow(path.Value());
+        std::string body = lib::utils::ReadFileToStringOrThrow(path.Value());
         res.SetBody(body);
       } catch (...) {
         res.EnsureDefaultErrorContent();
